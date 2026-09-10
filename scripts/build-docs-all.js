@@ -23,6 +23,14 @@ console.log(' Chronicle Full Publisher (Web App + Desktop Downloads)');
 console.log(' Target: /docs (Ready for GitHub Pages Upload)');
 console.log('====================================================\n');
 
+const nodeMajor = parseInt(process.versions.node.split('.')[0], 10);
+if (nodeMajor < 18) {
+  console.error(`\n❌ ERROR: Chronicle build requires Node.js 18+ or 20+ (current version: v${process.versions.node}).`);
+  console.error(`Please switch to Node 20 or 22:`);
+  console.error(`  Run: nvm use 22   (or nvm alias default 22)\n`);
+  process.exit(1);
+}
+
 const isWindows = process.platform === 'win32';
 const isMac = process.platform === 'darwin';
 

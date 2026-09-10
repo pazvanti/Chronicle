@@ -1,8 +1,16 @@
 {
-  "buildDate": "2026-09-10T08:23:45.469Z",
-  "platform": "windows",
+  "buildDate": "2026-09-10T13:12:24.078Z",
+  "platform": "macos",
   "targetMode": "release",
   "distributables": [
+    {
+      "name": "Chronicle.dmg",
+      "platform": "macos",
+      "sizeBytes": 13909083,
+      "sizeMB": 13.26,
+      "type": "standalone-image",
+      "description": "macOS Standalone Disk Image (Intel & Apple Silicon)"
+    },
     {
       "name": "Chronicle.exe",
       "platform": "windows",

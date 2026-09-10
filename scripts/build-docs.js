@@ -23,6 +23,14 @@ console.log(' Chronicle GitHub Pages Publisher');
 console.log(' Target: /docs (Presentation Site + In-Browser App)');
 console.log('====================================================\n');
 
+const nodeMajor = parseInt(process.versions.node.split('.')[0], 10);
+if (nodeMajor < 18) {
+  console.error(`\n❌ ERROR: Chronicle build requires Node.js 18+ or 20+ (current version: v${process.versions.node}).`);
+  console.error(`Please switch to Node 20 or 22:`);
+  console.error(`  Run: nvm use 22   (or nvm alias default 22)\n`);
+  process.exit(1);
+}
+
 // 1. Build the web app into docs/app/
 console.log('==> Step 1/3: Compiling web application into docs/app/ ...');
 const viteDocsConfig = path.resolve(projectRoot, 'vite.docs.config.ts');
