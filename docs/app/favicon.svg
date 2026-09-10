@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <!-- Background subtle dark pill / tile -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#030712" />
+    </linearGradient>
+
+    <!-- Cyan to Electric Blue Gradient for Left Wing -->
+    <linearGradient id="cyan-wing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+
+    <!-- Luminous Cyan Page Highlight -->
+    <linearGradient id="cyan-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="50%" stop-color="#7dd3fc" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Purple to Violet Gradient for Right 'C' Wing -->
+    <linearGradient id="purple-wing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8" />
+      <stop offset="45%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+
+    <!-- Outer Dimensional Framing -->
+    <linearGradient id="outer-frame" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.9" />
+      <stop offset="60%" stop-color="#6366f1" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#9333ea" stop-opacity="0.6" />
+    </linearGradient>
+
+    <!-- Center Spine Accent -->
+    <linearGradient id="spine-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Dark container squircle for crisp contrast in browser tabs -->
+  <rect width="64" height="64" rx="14" fill="url(#bg-grad)" />
+  <rect width="64" height="64" rx="14" stroke="#38bdf8" stroke-opacity="0.3" stroke-width="1.5" />
+
+  <!-- Outer Layer (Hexagonal Silhouette forming the outer 'C') -->
+  <path d="M42 12 L50 17 V24 L42 19 L32 24 L22 19 L14 24 V40 L22 45 L32 40 L42 45 V52 L32 47 L22 52 L6 42 V22 L22 12 L32 17 Z" fill="url(#outer-frame)" />
+
+  <!-- Middle Spine Stepped Shell -->
+  <path d="M44 20 L48 23 V29 L44 26 L32 32 L20 26 L16 28 V40 L20 42 L32 36 L44 42 V48 L32 42 L20 48 L10 43 V25 L20 20 L32 26 Z" fill="url(#purple-wing)" opacity="0.85" />
+
+  <!-- Left Open Book Page (Cyan) -->
+  <path d="M18 19 L32 26 V49 L18 42 Z" fill="url(#cyan-wing)" />
+  <!-- Left Page Sheen -->
+  <path d="M18 19 L32 26 V37 L18 30 Z" fill="url(#cyan-highlight)" />
+
+  <!-- Right Open Page Folding into 'C' Contour -->
+  <path d="M32 26 L48 18 V30 L39 25 C34 28 34 35 39 38 L48 33 V46 L32 49 Z" fill="url(#purple-wing)" />
+
+  <!-- Spine Ribbon & Jewel -->
+  <polygon points="32,26 35,30 32,34 29,30" fill="url(#spine-grad)" />
+  <circle cx="32" cy="26" r="2.5" fill="#ffffff" />
+</svg>

@@ -1,0 +1,322 @@
+/* ==========================================================================
+   Glass - Dark Theme (Cinematic Translucent Frosted Glass & Cyan Glow)
+   ========================================================================== */
+
+[data-theme="glass-dark"] {
+  --bg-app: #050811;
+  --bg-sidebar: rgba(6, 12, 22, 0.50);
+  --bg-surface: rgba(12, 22, 36, 0.48);
+  --bg-surface-elevated: rgba(16, 28, 46, 0.65);
+  --bg-surface-hover: rgba(24, 40, 64, 0.65);
+  --bg-input: rgba(4, 9, 18, 0.55);
+  
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --border-medium: rgba(56, 189, 248, 0.25);
+  --border-focus: #06b6d4;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #070c14;
+
+  --accent-primary: #06b6d4;
+  --accent-primary-hover: #0891b2;
+  --accent-primary-glow: rgba(6, 182, 212, 0.35);
+  
+  --accent-secondary: #38bdf8;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-danger: #ef4444;
+  --accent-cyan: #22d3ee;
+
+  /* Shadows with specular glow */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  --shadow-glow: 0 0 28px rgba(6, 182, 212, 0.32);
+
+  /* Heavy Glassmorphism & Overlays */
+  --glass-bg: rgba(11, 19, 32, 0.78);
+  --glass-backdrop: blur(24px);
+  --overlay-bg: rgba(4, 8, 15, 0.78);
+
+  /* Scrollbars & Interactions */
+  --scrollbar-thumb: rgba(56, 189, 248, 0.20);
+  --scrollbar-thumb-hover: rgba(56, 189, 248, 0.38);
+  --hover-subtle: rgba(56, 189, 248, 0.08);
+  --active-subtle: rgba(56, 189, 248, 0.16);
+  --kbd-bg: rgba(6, 182, 212, 0.10);
+  --kbd-border: rgba(56, 189, 248, 0.25);
+  --kbd-text: #38bdf8;
+}
+
+/* ==========================================================================
+   Glass - Dark Component Refinements (Cinematic Glassmorphism)
+   ========================================================================== */
+
+/* Clean Obsidian Dark Canvas with Subtle Ambient Radial Glow for UI Chrome */
+[data-theme="glass-dark"] body,
+[data-theme="glass-dark"] #root,
+[data-theme="glass-dark"] .app-container {
+  background-color: #070b14 !important;
+  background-image: radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08), transparent 55%), #070b14 !important;
+}
+
+/* Floating Frosted Glass Header */
+[data-theme="glass-dark"] .app-header {
+  background: rgba(9, 15, 25, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.16) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Frosted Floating Capsule Navigation */
+[data-theme="glass-dark"] .segmented-nav-control,
+[data-theme="glass-dark"] .view-tabs {
+  background: rgba(4, 8, 16, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.16) !important;
+  border-radius: 9999px !important;
+  padding: 3px !important;
+}
+
+[data-theme="glass-dark"] .segmented-pill,
+[data-theme="glass-dark"] .view-tab-btn {
+  border-radius: 9999px !important;
+  font-size: 0.76rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  color: #94a3b8 !important;
+  transition: all 0.15s ease !important;
+}
+
+[data-theme="glass-dark"] .segmented-pill:hover,
+[data-theme="glass-dark"] .view-tab-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="glass-dark"] .segmented-pill.active,
+[data-theme="glass-dark"] .view-tab-btn.active {
+  background: rgba(6, 182, 212, 0.20) !important;
+  color: #22d3ee !important;
+  border: 1px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  font-weight: 600 !important;
+}
+
+/* Frosted Glass Sidebar */
+[data-theme="glass-dark"] .sidebar-container,
+[data-theme="glass-dark"] .app-sidebar {
+  background: rgba(8, 13, 22, 0.88) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(56, 189, 248, 0.14) !important;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-theme="glass-dark"] .sidebar-header,
+[data-theme="glass-dark"] .sidebar-footer {
+  background: rgba(8, 13, 22, 0.6) !important;
+}
+
+[data-theme="glass-dark"] .chapter-item {
+  border-radius: 8px !important;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+[data-theme="glass-dark"] .chapter-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="glass-dark"] .chapter-item.active {
+  background: rgba(6, 182, 212, 0.14) !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(6, 182, 212, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Frosted Glass Sub-Toolbar */
+[data-theme="glass-dark"] .sub-toolbar {
+  background: rgba(9, 15, 25, 0.88) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.12) !important;
+}
+
+/* Frosted Glass Welcome Cards */
+[data-theme="glass-dark"] .welcome-screen-container {
+  background: radial-gradient(circle at 50% 30%, rgba(6, 182, 212, 0.1) 0%, transparent 60%), #070b14 !important;
+}
+
+[data-theme="glass-dark"] .welcome-card {
+  background: rgba(13, 22, 36, 0.72) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.18) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="glass-dark"] .welcome-card:hover {
+  background: rgba(18, 30, 50, 0.85) !important;
+  border-color: rgba(6, 182, 212, 0.5) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-3px) !important;
+}
+
+[data-theme="glass-dark"] .card-icon-bubble {
+  background: rgba(6, 182, 212, 0.15) !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  border-radius: 9999px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 14px rgba(6, 182, 212, 0.25) !important;
+}
+
+/* Frosted Segmented Controls in Reader */
+[data-theme="glass-dark"] .reader-theme-segmented {
+  background: rgba(4, 8, 16, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.16) !important;
+  border-radius: 9999px !important;
+  padding: 2px !important;
+}
+
+[data-theme="glass-dark"] .theme-segment-btn {
+  border-radius: 9999px !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="glass-dark"] .theme-segment-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="glass-dark"] .theme-segment-btn.active {
+  background: rgba(6, 182, 212, 0.25) !important;
+  border: 1px solid rgba(6, 182, 212, 0.5) !important;
+  color: #22d3ee !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="glass-dark"] .reader-font-stepper,
+[data-theme="glass-dark"] .canvas-theme-selector {
+  background: rgba(4, 8, 16, 0.6) !important;
+  border: 1px solid rgba(56, 189, 248, 0.14) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Modals, Dialogs & Dropdowns */
+[data-theme="glass-dark"] .modal-card,
+[data-theme="glass-dark"] .intro-modal-card,
+[data-theme="glass-dark"] .popover-menu-card,
+[data-theme="glass-dark"] .header-dropdown-menu,
+[data-theme="glass-dark"] .chapter-context-menu {
+  background: rgba(10, 17, 28, 0.90) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 25px rgba(6, 182, 212, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Buttons */
+[data-theme="glass-dark"] .btn-primary {
+  background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 12px rgba(6, 182, 212, 0.35) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="glass-dark"] .btn-primary:hover {
+  background: linear-gradient(135deg, #22d3ee, #06b6d4) !important;
+  box-shadow: 0 4px 18px rgba(6, 182, 212, 0.5) !important;
+  transform: translateY(-1px) !important;
+}
+
+[data-theme="glass-dark"] .btn-secondary {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="glass-dark"] .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="glass-dark"] .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* Status Bar */
+[data-theme="glass-dark"] .app-status-bar {
+  background: rgba(8, 14, 24, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-top: 1px solid rgba(56, 189, 248, 0.12) !important;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Form Controls */
+[data-theme="glass-dark"] .form-input,
+[data-theme="glass-dark"] .form-textarea,
+[data-theme="glass-dark"] .form-select {
+  background: rgba(5, 9, 16, 0.65) !important;
+  border: 1px solid rgba(56, 189, 248, 0.16) !important;
+  border-radius: 8px !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="glass-dark"] .form-input:focus,
+[data-theme="glass-dark"] .form-textarea:focus,
+[data-theme="glass-dark"] .form-select:focus {
+  border-color: #06b6d4 !important;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2) !important;
+}
+
+[data-theme="glass-dark"] .brand-badge,
+[data-theme="glass-dark"] .document-title-pill {
+  background: rgba(10, 18, 30, 0.6) !important;
+  border: 1px solid rgba(56, 189, 248, 0.14) !important;
+}
+
+[data-theme="glass-dark"] .brand-badge:hover,
+[data-theme="glass-dark"] .document-title-pill:hover {
+  border-color: #06b6d4 !important;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.25) !important;
+}
+
+[data-theme="glass-dark"] .status-dot.dot-ready,
+[data-theme="glass-dark"] .document-status-dot.dot-clean {
+  background: #06b6d4 !important;
+  box-shadow: 0 0 10px #06b6d4 !important;
+}
+
+[data-theme="glass-dark"] .timeline-track-canvas {
+  background: rgba(10, 18, 30, 0.6) !important;
+  border: 1px solid rgba(56, 189, 248, 0.14) !important;
+}
+
+[data-theme="glass-dark"] .timeline-segment-card {
+  background: rgba(14, 25, 42, 0.75) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.18) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Glass Dark specific highlight contrast rule */
+[data-theme="glass-dark"] .author-comment-highlight {
+  color: #09090b !important;
+  caret-color: #000000 !important;
+  font-weight: 500;
+}

@@ -1,0 +1,37 @@
+<svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="chr-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="chr-violet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8" />
+      <stop offset="45%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="chr-hl" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="50%" stop-color="#7dd3fc" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.1" />
+    </linearGradient>
+    <linearGradient id="chr-out" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" stop-opacity="0.9" />
+      <stop offset="60%" stop-color="#6366f1" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.5" />
+    </linearGradient>
+  </defs>
+  <!-- Outer Geometric Hex-Ribbon -->
+  <path d="M32 8L40 12V18L32 14L24 18L16 14L8 18V30L16 34L24 30L32 34V40L24 36L16 40L4 34V14L16 8L24 12L32 8Z" fill="url(#chr-out)" />
+  <!-- Middle Stepped Frame -->
+  <path d="M34 14L38 16V22L34 20L24 25L14 20L10 22V32L14 34L24 29L34 34V40L24 35L14 40L6 36V18L14 14L24 19L34 14Z" fill="url(#chr-violet)" opacity="0.85" />
+  <!-- Left Page -->
+  <path d="M12 12L24 18V38L12 32V12Z" fill="url(#chr-cyan)" />
+  <!-- Left Page Highlight Sheen -->
+  <path d="M12 12L24 18V28L12 22V12Z" fill="url(#chr-hl)" />
+  <!-- Right Page / 'C' Monogram -->
+  <path d="M24 18L38 12V24L30 20C26 23 26 27 30 30L38 26V38L24 38V18Z" fill="url(#chr-violet)" />
+  <!-- Center Notch Jewel -->
+  <path d="M24 18L26.5 22L24 25L21.5 22L24 18Z" fill="#ffffff" opacity="0.95" />
+  <circle cx="24" cy="18" r="1.5" fill="#ffffff" />
+</svg>

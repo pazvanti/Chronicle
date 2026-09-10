@@ -1,0 +1,342 @@
+/* ==========================================================================
+   Glass - Light Theme (Luminous Translucent Frosted Glass & Azure Glow)
+   ========================================================================== */
+
+[data-theme="glass-light"] {
+  --bg-app: #f0f7ff;
+  --bg-sidebar: rgba(255, 255, 255, 0.65);
+  --bg-surface: rgba(255, 255, 255, 0.70);
+  --bg-surface-elevated: rgba(255, 255, 255, 0.85);
+  --bg-surface-hover: rgba(240, 249, 255, 0.90);
+  --bg-input: rgba(255, 255, 255, 0.80);
+  
+  --border-subtle: rgba(14, 165, 233, 0.14);
+  --border-medium: rgba(14, 165, 233, 0.26);
+  --border-focus: #0284c7;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  --accent-primary: #0284c7;
+  --accent-primary-hover: #0369a1;
+  --accent-primary-glow: rgba(2, 132, 199, 0.25);
+  
+  --accent-secondary: #0ea5e9;
+  --accent-success: #059669;
+  --accent-warning: #d97706;
+  --accent-danger: #dc2626;
+  --accent-cyan: #0284c7;
+
+  /* Shadows with pearlescent specular highlights */
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --shadow-md: 0 8px 24px -4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --shadow-lg: 0 20px 40px -10px rgba(15, 23, 42, 0.12), inset 0 1px 1px #ffffff;
+  --shadow-glow: 0 0 24px rgba(2, 132, 199, 0.25);
+
+  /* Heavy Glassmorphism & Overlays */
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-backdrop: blur(24px);
+  --overlay-bg: rgba(15, 23, 42, 0.45);
+
+  /* Scrollbars & Interactions */
+  --scrollbar-thumb: rgba(2, 132, 199, 0.18);
+  --scrollbar-thumb-hover: rgba(2, 132, 199, 0.35);
+  --hover-subtle: rgba(2, 132, 199, 0.06);
+  --active-subtle: rgba(2, 132, 199, 0.12);
+  --kbd-bg: rgba(2, 132, 199, 0.08);
+  --kbd-border: rgba(14, 165, 233, 0.25);
+  --kbd-text: #0284c7;
+}
+
+/* ==========================================================================
+   Glass - Light Component Refinements (Luminous Glassmorphism)
+   ========================================================================== */
+
+/* Luminous Pearlescent Canvas with Azure Radial Ambient Mesh */
+[data-theme="glass-light"] body,
+[data-theme="glass-light"] #root,
+[data-theme="glass-light"] .app-container {
+  background-color: #f0f7ff !important;
+  background-image: 
+    radial-gradient(circle at 15% 10%, rgba(14, 165, 233, 0.10), transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(99, 102, 241, 0.07), transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(56, 189, 248, 0.08), transparent 55%),
+    #f0f7ff !important;
+}
+
+/* Floating Frosted Glass Header */
+[data-theme="glass-light"] .app-header {
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(14, 165, 233, 0.16) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Frosted Floating Capsule Navigation */
+[data-theme="glass-light"] .segmented-nav-control,
+[data-theme="glass-light"] .view-tabs {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(14, 165, 233, 0.20) !important;
+  border-radius: 9999px !important;
+  padding: 3px !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 6px rgba(14, 165, 233, 0.06) !important;
+}
+
+[data-theme="glass-light"] .segmented-pill,
+[data-theme="glass-light"] .view-tab-btn {
+  border-radius: 9999px !important;
+  font-size: 0.76rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  color: #475569 !important;
+  transition: all 0.15s ease !important;
+}
+
+[data-theme="glass-light"] .segmented-pill:hover,
+[data-theme="glass-light"] .view-tab-btn:hover {
+  color: #0f172a !important;
+  background: rgba(2, 132, 199, 0.06) !important;
+}
+
+[data-theme="glass-light"] .segmented-pill.active,
+[data-theme="glass-light"] .view-tab-btn.active {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #0284c7 !important;
+  border: 1px solid rgba(14, 165, 233, 0.35) !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15), inset 0 1px 0 #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Frosted Glass Sidebar */
+[data-theme="glass-light"] .sidebar-container,
+[data-theme="glass-light"] .app-sidebar {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(14, 165, 233, 0.15) !important;
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme="glass-light"] .sidebar-header,
+[data-theme="glass-light"] .sidebar-footer {
+  background: rgba(255, 255, 255, 0.50) !important;
+}
+
+[data-theme="glass-light"] .chapter-item {
+  border-radius: 8px !important;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
+  color: #334155 !important;
+}
+
+[data-theme="glass-light"] .chapter-item:hover {
+  background: rgba(2, 132, 199, 0.06) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="glass-light"] .chapter-item.active {
+  background: rgba(2, 132, 199, 0.10) !important;
+  border: 1px solid rgba(2, 132, 199, 0.28) !important;
+  color: #0284c7 !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Frosted Glass Sub-Toolbar */
+[data-theme="glass-light"] .sub-toolbar {
+  background: rgba(255, 255, 255, 0.76) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(14, 165, 233, 0.14) !important;
+}
+
+/* Frosted Glass Welcome Cards */
+[data-theme="glass-light"] .welcome-screen-container {
+  background: 
+    radial-gradient(circle at 50% 25%, rgba(14, 165, 233, 0.12) 0%, transparent 65%),
+    #f0f7ff !important;
+}
+
+[data-theme="glass-light"] .welcome-card {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.90) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="glass-light"] .welcome-card:hover {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(2, 132, 199, 0.45) !important;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10), 0 0 24px rgba(2, 132, 199, 0.18), inset 0 1px 0 #ffffff !important;
+  transform: translateY(-3px) !important;
+}
+
+[data-theme="glass-light"] .card-icon-bubble {
+  background: rgba(2, 132, 199, 0.10) !important;
+  border: 1px solid rgba(2, 132, 199, 0.25) !important;
+  border-radius: 9999px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 0 14px rgba(2, 132, 199, 0.14) !important;
+}
+
+/* Frosted Segmented Controls in Reader */
+[data-theme="glass-light"] .reader-theme-segmented {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(14, 165, 233, 0.18) !important;
+  border-radius: 9999px !important;
+  padding: 2px !important;
+}
+
+[data-theme="glass-light"] .theme-segment-btn {
+  border-radius: 9999px !important;
+  color: #475569 !important;
+}
+
+[data-theme="glass-light"] .theme-segment-btn:hover {
+  color: #0f172a !important;
+  background: rgba(2, 132, 199, 0.06) !important;
+}
+
+[data-theme="glass-light"] .theme-segment-btn.active {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(2, 132, 199, 0.40) !important;
+  color: #0284c7 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.16), inset 0 1px 0 #ffffff !important;
+}
+
+[data-theme="glass-light"] .reader-font-stepper,
+[data-theme="glass-light"] .canvas-theme-selector {
+  background: rgba(255, 255, 255, 0.70) !important;
+  border: 1px solid rgba(14, 165, 233, 0.18) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Modals, Dialogs & Dropdowns */
+[data-theme="glass-light"] .modal-card,
+[data-theme="glass-light"] .intro-modal-card,
+[data-theme="glass-light"] .popover-menu-card,
+[data-theme="glass-light"] .header-dropdown-menu,
+[data-theme="glass-light"] .chapter-context-menu {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14), 0 0 24px rgba(2, 132, 199, 0.10), inset 0 1px 0 #ffffff !important;
+}
+
+/* Buttons */
+[data-theme="glass-light"] .btn-primary {
+  background: linear-gradient(135deg, #0284c7, #0ea5e9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.40) !important;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="glass-light"] .btn-primary:hover {
+  background: linear-gradient(135deg, #0369a1, #0284c7) !important;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.40) !important;
+  transform: translateY(-1px) !important;
+}
+
+[data-theme="glass-light"] .btn-secondary {
+  background: rgba(255, 255, 255, 0.70) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(14, 165, 233, 0.20) !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), inset 0 1px 0 #ffffff !important;
+}
+
+[data-theme="glass-light"] .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.90) !important;
+  border-color: rgba(2, 132, 199, 0.35) !important;
+  color: #0284c7 !important;
+}
+
+[data-theme="glass-light"] .btn-ghost:hover {
+  background: rgba(2, 132, 199, 0.08) !important;
+  color: #0284c7 !important;
+}
+
+/* Status Bar */
+[data-theme="glass-light"] .app-status-bar {
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-top: 1px solid rgba(14, 165, 233, 0.15) !important;
+  box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Form Controls */
+[data-theme="glass-light"] .form-input,
+[data-theme="glass-light"] .form-textarea,
+[data-theme="glass-light"] .form-select {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(14, 165, 233, 0.22) !important;
+  border-radius: 8px !important;
+  color: #0f172a !important;
+}
+
+[data-theme="glass-light"] .form-input:focus,
+[data-theme="glass-light"] .form-textarea:focus,
+[data-theme="glass-light"] .form-select:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.20) !important;
+}
+
+[data-theme="glass-light"] .brand-badge,
+[data-theme="glass-light"] .document-title-pill {
+  background: rgba(255, 255, 255, 0.70) !important;
+  border: 1px solid rgba(14, 165, 233, 0.20) !important;
+}
+
+[data-theme="glass-light"] .brand-badge:hover,
+[data-theme="glass-light"] .document-title-pill:hover {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.20) !important;
+}
+
+[data-theme="glass-light"] .status-dot.dot-ready,
+[data-theme="glass-light"] .document-status-dot.dot-clean {
+  background: #0284c7 !important;
+  box-shadow: 0 0 10px #0284c7 !important;
+}
+
+[data-theme="glass-light"] .timeline-track-canvas {
+  background: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(14, 165, 233, 0.16) !important;
+}
+
+[data-theme="glass-light"] .timeline-segment-card {
+  background: rgba(255, 255, 255, 0.80) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
+}
+
+[data-theme="glass-light"] .comments-sidebar-drawer {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(24px) !important;
+  border-left: 1px solid rgba(14, 165, 233, 0.16) !important;
+}
+
+[data-theme="glass-light"] .comment-card {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(14, 165, 233, 0.16) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme="glass-light"] .comment-card:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(2, 132, 199, 0.35) !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.12) !important;
+}

@@ -1,0 +1,1754 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Primary SEO Metadata -->
+  <title>Chronicle — The Best Tool for Writers | All-in-One Authoring &amp; Publishing Studio</title>
+  <meta name="title" content="Chronicle — The Best Tool for Writers | All-in-One Authoring &amp; Publishing Studio" />
+  <meta name="description"
+    content="Chronicle is the definitive all-in-one writing, worldbuilding, and publishing suite for novelists. Distraction-free chapter authoring, dual-view comments, story timelines, book cover designer, offline Kokoro AI neural audio, and print Vector PDF &amp; EPUB 3 export." />
+  <meta name="keywords"
+    content="best tool for writers, novel writing software, book formatting, authoring studio, story timeline, author comments, epub editor, vector pdf typesetter, shunn manuscript format, offline ai tts, book cover designer, scrivener alternative, vellum alternative" />
+  <meta name="author" content="Petre Popescu" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://pazvanti.github.io/Chronicle/" />
+  <meta name="theme-color" content="#0a0c10" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pazvanti.github.io/Chronicle/" />
+  <meta property="og:site_name" content="Chronicle Studio" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title"
+    content="Chronicle — The Best Tool for Writers | All-in-One Authoring &amp; Publishing Studio" />
+  <meta property="og:description"
+    content="Write distraction-free with dual-view comments, construct multi-day narrative timelines, design custom book covers, listen to offline Kokoro AI neural voices, and typeset print-ready Vector PDFs, EPUB 3, and Shunn manuscripts." />
+  <meta property="og:image" content="assets/screenshot-editor.png" />
+  <meta property="og:image:width" content="1280" />
+  <meta property="og:image:height" content="800" />
+  <meta property="og:image:alt" content="Chronicle Novelist Studio Interface" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://pazvanti.github.io/Chronicle/" />
+  <meta name="twitter:title"
+    content="Chronicle — The Best Tool for Writers | All-in-One Authoring &amp; Publishing Studio" />
+  <meta name="twitter:description"
+    content="Write distraction-free with dual-view comments, construct multi-day narrative timelines, design custom book covers, listen to offline Kokoro AI neural voices, and typeset print-ready Vector PDFs, EPUB 3, and Shunn manuscripts." />
+  <meta name="twitter:image" content="assets/screenshot-editor.png" />
+  <meta name="twitter:image:alt" content="Chronicle Novelist Studio Interface" />
+
+  <!-- Favicon & Touch Icons -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="icon" type="image/png" href="assets/chronicle-logo.png" />
+
+  <!-- Schema.org JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "@id": "#software",
+          "name": "Chronicle",
+          "headline": "The Definitive Authoring & Publishing Studio for Writers & Novelists",
+          "description": "Unified open-source authoring, worldbuilding, and multi-format publishing suite for novelists and storytellers.",
+          "applicationCategory": "AuthoringApplication",
+          "operatingSystem": "Web, Windows, macOS",
+          "url": "https://pazvanti.github.io/Chronicle/",
+          "codeRepository": "https://github.com/pazvanti/Chronicle",
+          "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Petre Popescu"
+          },
+          "featureList": [
+            "Distraction-Free Chapter Authoring with Dual-View Comments",
+            "Visual Narrative Timelines with Collision Avoidance",
+            "Offline Kokoro AI Neural Voices (WebGPU/WASM)",
+            "Built-In Graphic Book Cover Designer",
+            "Deep Worldbuilding Codex for Characters & Locations",
+            "Print-Ready Vector PDF, Standard EPUB 3, and Shunn DOCX Exporters",
+            "Signature Quad-Theme Design System (ModernX & Luminous Glass)"
+          ],
+          "image": "assets/screenshot-editor.png"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "#website",
+          "name": "Chronicle Studio",
+          "url": "https://pazvanti.github.io/Chronicle/",
+          "description": "Chronicle — The premier open-source desktop and in-browser writing studio for authors and novelists.",
+          "author": {
+            "@type": "Person",
+            "name": "Petre Popescu"
+          }
+        }
+      ]
+    }
+    </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- Ambient Luminous Background Orbs -->
+  <div class="ambient-glow" aria-hidden="true">
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    <div class="glow-orb glow-orb-3"></div>
+  </div>
+  <div class="bg-grid-overlay" aria-hidden="true"></div>
+
+  <!-- Navigation Header -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <a href="#" class="brand-link" title="Chronicle Home">
+        <div class="brand-icon">
+          <img src="assets/chronicle-logo.svg" alt="Chronicle Logo" width="30" height="30" />
+        </div>
+        <span>Chronicle</span>
+      </a>
+
+      <ul class="nav-menu">
+        <li><a href="#showcase" class="nav-link">Tour</a></li>
+        <li><a href="#features" class="nav-link">Features</a></li>
+        <li><a href="#comparison" class="nav-link">Comparison</a></li>
+        <li><a href="#faq" class="nav-link">FAQ</a></li>
+        <li><a href="#download" class="nav-link">Download</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="https://github.com/pazvanti/Chronicle" target="_blank" rel="noopener noreferrer" class="btn btn-ghost"
+          title="View Source on GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+            </path>
+          </svg>
+          <span>GitHub</span>
+        </a>
+        <a href="#download" class="btn btn-secondary">Download</a>
+        <a href="app/index.html" class="btn btn-primary" title="Launch the full web application in your browser">
+          <span>Launch Online</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-pill">
+        <span>✨ The Definitive All-in-One Studio for Writers &amp; Novelists</span>
+        <span>•</span>
+        <span>100% Free &amp; Offline-First</span>
+      </div>
+
+      <h1 class="hero-title">
+        The Best Tool for Writers.<br />
+        <span class="text-gradient">From First Spark to Published Masterpiece.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Chronicle replaces cluttered paid subscriptions with a unified, distraction-free authoring powerhouse. Plot
+        multi-strand timelines, build living codexes, annotate with dual-view author comments, design custom book
+        covers, and typeset publication-ready Vector PDFs, Shunn manuscripts, and EPUB 3 books—all in one private,
+        local-first studio.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="app/index.html" class="btn btn-primary btn-lg" title="Open Chronicle in browser">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span>Launch Online Studio</span>
+        </a>
+        <a href="#download" class="btn btn-secondary btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Download Desktop App</span>
+        </a>
+      </div>
+
+      <div class="hero-highlights">
+        <div class="highlight-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>100% Local-First &amp; Zero Telemetry</span>
+        </div>
+        <div class="highlight-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Replaces 4+ Paid Subscriptions</span>
+        </div>
+        <div class="highlight-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Zero Cloud Lock-in (Open ZIP Format)</span>
+        </div>
+        <div class="highlight-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Print Vector PDF, Shunn &amp; EPUB 3</span>
+        </div>
+      </div>
+
+      <!-- Hero Mockup Window -->
+      <div class="hero-mockup-wrapper">
+        <div class="mockup-aura" aria-hidden="true"></div>
+
+        <!-- Floating Badges -->
+        <div class="floating-badge badge-top-left">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>Dual-View Author Comments</span>
+        </div>
+
+        <div class="floating-badge badge-top-right">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+            <path
+              d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z">
+            </path>
+          </svg>
+          <span>Kokoro AI Offline Neural Voices</span>
+        </div>
+
+        <div class="floating-badge badge-bottom-left">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Interactive Story Timelines</span>
+        </div>
+
+        <div class="floating-badge badge-bottom-right">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+          </svg>
+          <span>Built-In Cover Designer</span>
+        </div>
+
+        <div class="mockup-window">
+          <div class="mockup-window-header">
+            <div class="mockup-dots">
+              <div class="mockup-dot dot-red"></div>
+              <div class="mockup-dot dot-yellow"></div>
+              <div class="mockup-dot dot-green"></div>
+            </div>
+            <div class="mockup-title">Chronicle Studio — Alice's Adventures in Wonderland.chronicle</div>
+            <div style="width: 48px;"></div>
+          </div>
+          <img src="assets/screenshot-editor.png" alt="Chronicle Studio Writer Interface" class="mockup-image"
+            width="1280" height="800" fetchpriority="high" />
+        </div>
+      </div>
+
+      <!-- Metrics / Authority Power Strip -->
+      <div class="metrics-strip">
+        <div class="metric-card">
+          <div class="metric-num">100%</div>
+          <div class="metric-label">Local-First &amp; Private (Zero Telemetry)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-num">3-in-1</div>
+          <div class="metric-label">Studio Suite: Writer, Worldbuilder &amp; Typesetter</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-num">$0</div>
+          <div class="metric-label">Free &amp; Open Source (GNU AGPLv3)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-num">4 Formats</div>
+          <div class="metric-label">Print Vector PDF, Shunn DOCX, EPUB 3 &amp; Project</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Showcase Tour Section -->
+  <section id="showcase" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Interactive Product Tour</span>
+        <h2 class="section-title">Built for Every Phase of the Novelist's Craft</h2>
+        <p class="section-desc">
+          Explore the specialized studios engineered into Chronicle to support you from initial brainstorm to final
+          published book.
+        </p>
+      </div>
+
+      <!-- Showcase Navigation Tabs -->
+      <div class="showcase-tabs-nav">
+        <button class="tab-btn active" data-tab="tab-writer">
+          <span>✍️ Writer Studio</span>
+        </button>
+        <button class="tab-btn" data-tab="tab-timeline">
+          <span>🕒 Timeline Studio</span>
+        </button>
+        <button class="tab-btn" data-tab="tab-reader">
+          <span>📖 Reading &amp; TTS</span>
+        </button>
+        <button class="tab-btn" data-tab="tab-codex">
+          <span>🗺️ World Codex</span>
+        </button>
+        <button class="tab-btn" data-tab="tab-publishing">
+          <span>📚 Publishing Hub</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: Writer Studio -->
+      <div id="tab-writer" class="showcase-content-panel active">
+        <div class="showcase-grid">
+          <div class="showcase-text">
+            <h3>Distraction-Free Chapter Authoring &amp; Dual-View Comments</h3>
+            <p>
+              A focused WYSIWYG canvas engineered specifically for novelists. Organize chapters with zero-jitter
+              navigation, annotate text with a 6-color author highlight palette, split chapters in one click, and clean
+              up dialogue with the smart typography engine.
+            </p>
+            <ul class="showcase-features-list">
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Dual-View Author Comments:</strong> Highlight text to drop inline feedback with a 6-color
+                  palette. Jump to highlights instantly and toggle annotations on/off.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Smart Typographic Engine:</strong> Converts straight quotes to curly book quotes, fixes
+                  em-dashes, ellipses, dialogue spacing, and clears double spaces.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Zero-Leak Export Guarantee:</strong> Draft comments and marks are automatically stripped
+                  before EPUB/PDF export so published books stay pristine.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Instant Chapter Splitting:</strong> Split manuscripts at cursor or heading index;
+                  reorganize with keyboard shortcuts (Ctrl+\).</span>
+              </li>
+            </ul>
+            <a href="app/index.html?view=editor&welcome=false" class="btn btn-secondary">
+              <span>Open Writer Studio</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          </div>
+          <div class="showcase-image-wrap">
+            <div class="interactive-screenshot-container" data-tab-index="0" data-tab-name="Writer Studio"
+              data-tag="Workspace" data-src="assets/screenshot-editor.png"
+              data-try-url="app/index.html?view=editor&welcome=false">
+              <div class="screenshot-window-header">
+                <div class="window-dots">
+                  <span class="window-dot dot-red"></span>
+                  <span class="window-dot dot-yellow"></span>
+                  <span class="window-dot dot-green"></span>
+                </div>
+                <span class="window-filename">Writer Studio — Alice's Adventures in Wonderland.chronicle</span>
+                <button class="expand-btn" aria-label="Expand screenshot">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                  </svg>
+                  <span>Zoom</span>
+                </button>
+              </div>
+              <div class="screenshot-screen-wrap">
+                <img src="assets/screenshot-editor.png"
+                  alt="Chronicle Writer Studio — Distraction-free WYSIWYG Chapter Authoring"
+                  class="interactive-screenshot-img" width="1280" height="800" loading="lazy" />
+                <div class="screenshot-glare" aria-hidden="true"></div>
+
+                <!-- Hotspots -->
+                <div class="hotspot tooltip-bottom tooltip-right" style="top: 24%; left: 14%;">
+                  <button class="hotspot-pin" aria-label="Feature: Manuscript Navigator">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Navigator</span>
+                    <h4>Chapter Organizer</h4>
+                    <p>Browse, reorder, and split chapters with instant word count metrics.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot" style="top: 48%; left: 52%;">
+                  <button class="hotspot-pin" aria-label="Feature: Focus Editor">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Editor</span>
+                    <h4>Distraction-Free Canvas</h4>
+                    <p>WYSIWYG formatting, customizable margins, and typography presets.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot" style="top: 91%; left: 45%;">
+                  <button class="hotspot-pin" aria-label="Feature: Live Analytics">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Status Bar</span>
+                    <h4>Live Word &amp; Reading Pace</h4>
+                    <p>Real-time word counts, chapter tallies, and estimated reading durations.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Timeline Studio -->
+      <div id="tab-timeline" class="showcase-content-panel">
+        <div class="showcase-grid">
+          <div class="showcase-text">
+            <h3>Visual Narrative Timelines</h3>
+            <p>
+              Map out chronologies, story arcs, and operational beats on interactive time rulers with multi-segment
+              tracks and fluid drag-and-drop mechanics.
+            </p>
+            <ul class="showcase-features-list">
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Multi-Timescale Support:</strong> Switch between 24 Hours, Days, Weeks, Months, or
+                  Years.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Collision Avoidance:</strong> Overlapping story beats automatically stack into clean
+                  sub-lanes.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Character &amp; Location Links:</strong> Connect timeline events directly to dossiers in
+                  your codex.</span>
+              </li>
+            </ul>
+            <a href="app/index.html?view=timeline&welcome=false" class="btn btn-secondary">
+              <span>Open Timeline Studio</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          </div>
+          <div class="showcase-image-wrap">
+            <div class="interactive-screenshot-container" data-tab-index="1" data-tab-name="Timeline Studio"
+              data-tag="Chronology" data-src="assets/screenshot-timeline.png"
+              data-try-url="app/index.html?view=timeline&welcome=false">
+              <div class="screenshot-window-header">
+                <div class="window-dots">
+                  <span class="window-dot dot-red"></span>
+                  <span class="window-dot dot-yellow"></span>
+                  <span class="window-dot dot-green"></span>
+                </div>
+                <span class="window-filename">Timeline Studio — Narrative Chronology &amp; Story Arcs</span>
+                <button class="expand-btn" aria-label="Expand screenshot">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                  </svg>
+                  <span>Zoom</span>
+                </button>
+              </div>
+              <div class="screenshot-screen-wrap">
+                <img src="assets/screenshot-timeline.png"
+                  alt="Chronicle Timeline Studio — Visual Narrative Timelines & Chronology"
+                  class="interactive-screenshot-img" width="1280" height="800" loading="lazy" />
+                <div class="screenshot-glare" aria-hidden="true"></div>
+
+                <!-- Hotspots -->
+                <div class="hotspot tooltip-bottom" style="top: 14%; left: 35%;">
+                  <button class="hotspot-pin" aria-label="Feature: Timescales">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Timescales</span>
+                    <h4>Flexible Time Rulers</h4>
+                    <p>Switch smoothly between hours, days, chapters, or multi-year epics.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot tooltip-left" style="top: 48%; left: 60%;">
+                  <button class="hotspot-pin" aria-label="Feature: Story Beats">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Beats</span>
+                    <h4>Interactive Story Cards</h4>
+                    <p>Drag, resize, and link narrative beats directly to characters and lore.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot tooltip-right" style="top: 74%; left: 32%;">
+                  <button class="hotspot-pin" aria-label="Feature: Sub-Lanes">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Collision Lanes</span>
+                    <h4>Parallel Subplots</h4>
+                    <p>Smart collision algorithms stack parallel events cleanly into lanes.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Reading & TTS -->
+      <div id="tab-reader" class="showcase-content-panel">
+        <div class="showcase-grid">
+          <div class="showcase-text">
+            <h3>Immersive Reading &amp; Offline Kokoro Neural Audio</h3>
+            <p>
+              Experience your book exactly as your readers will. Switch between 4 curated paper tones, adjust typography
+              sizing, and listen to chapters read aloud with human-grade neural voice synthesis that runs 100% locally
+              on your computer.
+            </p>
+            <ul class="showcase-features-list">
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Offline Kokoro AI Voices:</strong> Ultra-realistic human cadence running on-device via
+                  WebGPU/WASM. Zero cloud fees, zero latency, and total manuscript privacy.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Curated Paper Tones:</strong> Light, Warm Sepia, Dark Night, and Pure OLED Obsidian to
+                  eliminate eye fatigue.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Audio Player Controls &amp; Export:</strong> Interactive scrub bar, variable speeds (0.5x
+                  to 2.0x), sentence tracking, and audiobook narration export.</span>
+              </li>
+            </ul>
+            <a href="app/index.html?view=reader&welcome=false" class="btn btn-secondary">
+              <span>Open Reading Mode</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          </div>
+          <div class="showcase-image-wrap">
+            <div class="interactive-screenshot-container" data-tab-index="2" data-tab-name="Reading &amp; TTS Studio"
+              data-tag="Immersion" data-src="assets/screenshot-reader.png"
+              data-try-url="app/index.html?view=reader&welcome=false">
+              <div class="screenshot-window-header">
+                <div class="window-dots">
+                  <span class="window-dot dot-red"></span>
+                  <span class="window-dot dot-yellow"></span>
+                  <span class="window-dot dot-green"></span>
+                </div>
+                <span class="window-filename">Reading Mode — Reader Experience &amp; Neural Audio</span>
+                <button class="expand-btn" aria-label="Expand screenshot">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                  </svg>
+                  <span>Zoom</span>
+                </button>
+              </div>
+              <div class="screenshot-screen-wrap">
+                <img src="assets/screenshot-reader.png"
+                  alt="Chronicle Reader Mode — Paper Tones & Kokoro AI Neural Audio Playback"
+                  class="interactive-screenshot-img" width="1280" height="800" loading="lazy" />
+                <div class="screenshot-glare" aria-hidden="true"></div>
+
+                <!-- Hotspots -->
+                <div class="hotspot tooltip-bottom" style="top: 14%; left: 45%;">
+                  <button class="hotspot-pin" aria-label="Feature: Paper Themes">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Themes</span>
+                    <h4>Curated Paper Palettes</h4>
+                    <p>Warm Sepia, Obsidian OLED, Crisp Light, and Midnight Blue.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot" style="top: 86%; left: 52%;">
+                  <button class="hotspot-pin" aria-label="Feature: Kokoro Audio">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Neural Audio</span>
+                    <h4>Kokoro AI Audio Engine</h4>
+                    <p>Scrub bar, narration speed, and high-fidelity local neural voices.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot tooltip-bottom tooltip-left" style="top: 14%; left: 80%;">
+                  <button class="hotspot-pin" aria-label="Feature: Typography">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Typography</span>
+                    <h4>Custom Font Scaling</h4>
+                    <p>Tailor line heights, letter spacing, and book typefaces with one click.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: World Codex -->
+      <div id="tab-codex" class="showcase-content-panel">
+        <div class="showcase-grid">
+          <div class="showcase-text">
+            <h3>Worldbuilding Codex: Locations &amp; Characters</h3>
+            <p>
+              Keep complex lore organized. Create rich character profiles with psychological archetypes and traits, plus
+              detailed location cards complete with sensory palettes and landmarks.
+            </p>
+            <ul class="showcase-features-list">
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Location Sensory Palettes:</strong> Document sights, scents, sounds, and atmosphere
+                  summaries.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Exploration Tracking:</strong> Check off points of interest and landmarks as your
+                  characters visit them.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Character Relationship Matrix:</strong> Map protagonist, antagonist, and supporting
+                  roles.</span>
+              </li>
+            </ul>
+            <a href="app/index.html" class="btn btn-secondary">
+              <span>Open World Codex</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          </div>
+          <div class="showcase-image-wrap">
+            <div class="interactive-screenshot-container" data-tab-index="3" data-tab-name="World Codex Studio"
+              data-tag="Worldbuilding" data-src="assets/screenshot-codex.png" data-try-url="app/index.html">
+              <div class="screenshot-window-header">
+                <div class="window-dots">
+                  <span class="window-dot dot-red"></span>
+                  <span class="window-dot dot-yellow"></span>
+                  <span class="window-dot dot-green"></span>
+                </div>
+                <span class="window-filename">World Codex — Characters, Lore &amp; Locations</span>
+                <button class="expand-btn" aria-label="Expand screenshot">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                  </svg>
+                  <span>Zoom</span>
+                </button>
+              </div>
+              <div class="screenshot-screen-wrap">
+                <img src="assets/screenshot-codex.png"
+                  alt="Chronicle World Codex — Character Dossiers, Psychology & World Lore"
+                  class="interactive-screenshot-img" width="1280" height="800" loading="lazy" />
+                <div class="screenshot-glare" aria-hidden="true"></div>
+
+                <!-- Hotspots -->
+                <div class="hotspot tooltip-right" style="top: 38%; left: 32%;">
+                  <button class="hotspot-pin" aria-label="Feature: Location Dossier">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Sensory Palette</span>
+                    <h4>Atmosphere &amp; Sights</h4>
+                    <p>Document sight, smell, weather, sounds, and visit checklists.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot tooltip-left" style="top: 56%; left: 70%;">
+                  <button class="hotspot-pin" aria-label="Feature: Character Dossier">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Dossier</span>
+                    <h4>Character Psychology</h4>
+                    <p>Track traits, internal motives, arc trajectories, and relationship ties.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot tooltip-bottom tooltip-right" style="top: 14%; left: 20%;">
+                  <button class="hotspot-pin" aria-label="Feature: Instant Lore Filter">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Taxonomy</span>
+                    <h4>Instant Entity Search</h4>
+                    <p>Filter factions, items, heroes, and places in milliseconds.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Publishing Hub -->
+      <div id="tab-publishing" class="showcase-content-panel">
+        <div class="showcase-grid">
+          <div class="showcase-text">
+            <h3>Multi-Format Publishing Hub &amp; Cover Designer</h3>
+            <p>
+              Turn raw drafts into publication-ready books without needing InDesign, Vellum, or expensive formatters.
+              Design custom covers and export straight to physical print and e-readers.
+            </p>
+            <ul class="showcase-features-list">
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Built-In Book Cover Designer:</strong> Curated typography presets, rich gradient palettes,
+                  genre SVG emblems, decorative frames, and high-resolution export.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Print-Ready Vector PDF:</strong> Custom trims (6x9, 5.5x8.5, A5), running headers, author
+                  folios, ornamental dividers, and scalable drop caps.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Industry Shunn Manuscript (.docx):</strong> The gold-standard submission format required
+                  by literary agents, editors, and publishers.</span>
+              </li>
+              <li class="showcase-feature-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span><strong>Standard Validated EPUB 3:</strong> Clean, compliant e-book structure compatible with
+                  Kindle, Apple Books, Kobo, and Google Play.</span>
+              </li>
+            </ul>
+            <a href="app/index.html" class="btn btn-secondary">
+              <span>Open Publishing Hub</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          </div>
+          <div class="showcase-image-wrap">
+            <div class="interactive-screenshot-container" data-tab-index="4" data-tab-name="Publishing Hub"
+              data-tag="Typesetting" data-src="assets/screenshot-styles.png" data-try-url="app/index.html">
+              <div class="screenshot-window-header">
+                <div class="window-dots">
+                  <span class="window-dot dot-red"></span>
+                  <span class="window-dot dot-yellow"></span>
+                  <span class="window-dot dot-green"></span>
+                </div>
+                <span class="window-filename">Publishing Hub — Formats &amp; Typesetting</span>
+                <button class="expand-btn" aria-label="Expand screenshot">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                  </svg>
+                  <span>Zoom</span>
+                </button>
+              </div>
+              <div class="screenshot-screen-wrap">
+                <img src="assets/screenshot-styles.png"
+                  alt="Chronicle Publishing Hub — Print Vector PDF, Standard EPUB 3 & Shunn DOCX"
+                  class="interactive-screenshot-img" width="1280" height="800" loading="lazy" />
+                <div class="screenshot-glare" aria-hidden="true"></div>
+
+                <!-- Hotspots -->
+                <div class="hotspot tooltip-right" style="top: 32%; left: 24%;">
+                  <button class="hotspot-pin" aria-label="Feature: Page Geometry">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Vector PDF</span>
+                    <h4>Print Page Geometry</h4>
+                    <p>Set standard book trims (6x9, 5.5x8.5, A5), gutters, and running heads.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot tooltip-bottom" style="top: 14%; left: 52%;">
+                  <button class="hotspot-pin" aria-label="Feature: Multi-Export">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Formats</span>
+                    <h4>Universal Exporters</h4>
+                    <p>Print-Ready PDF, Industry Shunn .docx, and standard EPUB 3.</p>
+                  </div>
+                </div>
+
+                <div class="hotspot tooltip-left" style="top: 60%; left: 74%;">
+                  <button class="hotspot-pin" aria-label="Feature: Live Layout Preview">
+                    <span class="pin-ring"></span>
+                    <span class="pin-core"></span>
+                  </button>
+                  <div class="hotspot-tooltip">
+                    <span class="tooltip-badge">Typesetting</span>
+                    <h4>Live Proof Preview</h4>
+                    <p>Inspect drop caps, ornaments, folios, and breaks in real time.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bento Grid Features Section -->
+  <section id="features" class="section" style="background: rgba(13, 16, 24, 0.4);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Core Architecture</span>
+        <h2 class="section-title">Engineered for Long-Form Literature</h2>
+        <p class="section-desc">
+          A local-first, modular platform built for deep author focus, boundless worldbuilding, and total creative
+          ownership.
+        </p>
+      </div>
+
+      <div class="bento-grid">
+        <!-- Card 1: Narrative Timeline -->
+        <div class="bento-card bento-card-span-2">
+          <div class="bento-icon icon-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <h3 class="bento-title">Narrative Timeline Creator Studio</h3>
+          <p class="bento-desc">
+            Plot complex story chronologies with precision time rulers. Track events across multi-day segments,
+            subplots, or character POV tracks. Collision avoidance automatically stacks overlapping beats into sub-lanes
+            so every turning point remains crystal-clear.
+          </p>
+        </div>
+
+        <!-- Card 2: Dual-View Author Comments -->
+        <div class="bento-card">
+          <div class="bento-icon icon-cyan">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h3 class="bento-title">Dual-View Author Comments</h3>
+          <p class="bento-desc">
+            Annotate manuscripts with a curated 6-color highlight palette. Jump to notes with smooth pulsing animations,
+            toggle highlights on or off, and rest easy knowing draft notes are automatically stripped from published
+            editions.
+          </p>
+        </div>
+
+        <!-- Card 3: Built-In Book Cover Designer -->
+        <div class="bento-card">
+          <div class="bento-icon icon-amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+          </div>
+          <h3 class="bento-title">Built-In Book Cover Designer</h3>
+          <p class="bento-desc">
+            Design eye-catching book covers directly in the studio. Choose from curated gradient canvases, genre SVG
+            emblems (fantasy, sci-fi, thriller), elegant typography pairings, and decorative borders.
+          </p>
+        </div>
+
+        <!-- Card 4: Vector PDF Typesetter -->
+        <div class="bento-card bento-card-span-2">
+          <div class="bento-icon icon-blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </div>
+          <h3 class="bento-title">Vector PDF Typesetter with Drop Caps</h3>
+          <p class="bento-desc">
+            Export high-resolution, vector-accurate PDFs designed for physical printing. Includes customizable headers,
+            author folios, page numbering, ornamental section dividers, and drop caps that scale seamlessly to any
+            industry trim size (6x9, 5.5x8.5, A5).
+          </p>
+        </div>
+
+        <!-- Card 5: Shunn Format -->
+        <div class="bento-card">
+          <div class="bento-icon icon-indigo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+            </svg>
+          </div>
+          <h3 class="bento-title">Shunn Manuscript (.docx)</h3>
+          <p class="bento-desc">
+            Generate submission-ready Word documents adhering to the industry-standard William Shunn format (running
+            headers, word counts, courier type, sluglines, and proper contact blocks).
+          </p>
+        </div>
+
+        <!-- Card 6: Kokoro AI Neural Voices -->
+        <div class="bento-card">
+          <div class="bento-icon icon-rose">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+              <path
+                d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z">
+              </path>
+            </svg>
+          </div>
+          <h3 class="bento-title">Offline Kokoro AI Voices</h3>
+          <p class="bento-desc">
+            Listen to your chapters read aloud with ultra-realistic human cadence. Powered by Kokoro AI running 100% on
+            your device via WebGPU/WASM without sending manuscript text to any remote server.
+          </p>
+        </div>
+
+        <!-- Card 7: Worldbuilding Codex -->
+        <div class="bento-card">
+          <div class="bento-icon icon-teal">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+          </div>
+          <h3 class="bento-title">Deep Worldbuilding Codex</h3>
+          <p class="bento-desc">
+            Flesh out character psychology, archetypes, internal conflicts, and relationships. Record sensory palettes
+            for locations (sight, sound, scents, atmosphere) and check off landmarks during story exploration.
+          </p>
+        </div>
+
+        <!-- Card 8: Signature Quad-Theme System -->
+        <div class="bento-card bento-card-span-2">
+          <div class="bento-icon icon-pink">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 2v2"></path>
+              <path d="M12 20v2"></path>
+              <path d="m4.93 4.93 1.41 1.41"></path>
+              <path d="m17.66 17.66 1.41 1.41"></path>
+              <path d="M2 12h2"></path>
+              <path d="M20 12h2"></path>
+              <path d="m6.34 17.66-1.41 1.41"></path>
+              <path d="m19.07 4.93-1.41 1.41"></path>
+            </svg>
+          </div>
+          <h3 class="bento-title">Signature Quad-Theme Design System</h3>
+          <p class="bento-desc">
+            Immerse yourself in 4 handcrafted aesthetics: ModernX Dark (obsidian graphite), ModernX Light (porcelain
+            slate), Glass Dark (frosted cyan glow), and Glass Light (luminous pearlescent frost). Engineered with
+            zero-jitter layout stability and distraction-free ergonomics.
+          </p>
+        </div>
+
+        <!-- Card 9: WebDAV Cloud Freedom -->
+        <div class="bento-card">
+          <div class="bento-icon icon-emerald">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+          </div>
+          <h3 class="bento-title">WebDAV Cloud Freedom</h3>
+          <p class="bento-desc">
+            Synchronize manuscripts seamlessly across your workstations with self-hosted Nextcloud, ownCloud, Fastmail,
+            or any standard WebDAV cloud server in the desktop app.
+          </p>
+        </div>
+
+        <!-- Card 10: Smart Typography Engine -->
+        <div class="bento-card">
+          <div class="bento-icon icon-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z">
+              </path>
+            </svg>
+          </div>
+          <h3 class="bento-title">Smart Typography Engine</h3>
+          <p class="bento-desc">
+            One-click automated cleanup. Formats straight quotes into curly book quotes, cleans up em-dashes, ellipses,
+            dialogue punctuation spacing, and eliminates accidental double spaces across chapters.
+          </p>
+        </div>
+
+        <!-- Card 11: Transparent Open Formats -->
+        <div class="bento-card">
+          <div class="bento-icon icon-amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+              </path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <h3 class="bento-title">Transparent Open Formats</h3>
+          <p class="bento-desc">
+            Your stories are never held hostage in proprietary binaries. A <code>.chronicle</code> project is a
+            standard, unencrypted ZIP archive containing clean XHTML chapters, raw styles, and plain JSON metadata.
+          </p>
+        </div>
+
+        <!-- Card 12: Raw Code & EPUB Inspector -->
+        <div class="bento-card bento-card-tablet-span-2">
+          <div class="bento-icon icon-cyan">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+          </div>
+          <h3 class="bento-title">Raw Code &amp; EPUB Inspector</h3>
+          <p class="bento-desc">
+            Direct source code editing for typography purists. Inspect and fine-tune raw XHTML, edit CSS stylesheets
+            with live syntax highlighting, and inspect the package manifest (OPF) and spine hierarchy.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Section -->
+  <section id="comparison" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Uncompromising Freedom</span>
+        <h2 class="section-title">Why Serious Writers Choose Chronicle</h2>
+        <p class="section-desc">
+          See how Chronicle compares directly against legacy desktop tools and expensive recurring cloud subscriptions.
+        </p>
+      </div>
+
+      <div class="comparison-wrap">
+        <div class="comparison-table-scroll">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th style="width: 28%;">Capability &amp; Workflow</th>
+                <th class="col-chronicle" style="width: 24%;">Chronicle</th>
+                <th style="width: 16%;">Scrivener</th>
+                <th style="width: 16%;">Vellum</th>
+                <th style="width: 16%;">World Anvil</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Pricing &amp; License</span>
+                  <span class="comp-feature-sub">Cost to own and use indefinitely</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <strong>100% Free &amp; Open Source (GNU AGPLv3)</strong>
+                  </span>
+                </td>
+                <td><span class="comp-cross">$60+ per OS license</span></td>
+                <td><span class="comp-cross">$250 (Mac-only)</span></td>
+                <td><span class="comp-cross">$105/year subscription</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Distraction-Free Authoring Canvas</span>
+                  <span class="comp-feature-sub">WYSIWYG chapter editor &amp; binder</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Modern, zero-jitter
+                  </span>
+                </td>
+                <td><span class="comp-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> Complex binder</span></td>
+                <td><span class="comp-partial">Basic preview editor</span></td>
+                <td><span class="comp-cross">Online-only web forms</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Dual-View Author Comments</span>
+                  <span class="comp-feature-sub">6-color palette, auto-clean EPUB export</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Dual-view &amp; zero leak
+                  </span>
+                </td>
+                <td><span class="comp-partial">Sidebar footnotes only</span></td>
+                <td><span class="comp-cross">Not supported</span></td>
+                <td><span class="comp-partial">Disorganized wiki notes</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Narrative Timeline Creator</span>
+                  <span class="comp-feature-sub">Collision lanes &amp; multi-timescales</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Integrated visual studio
+                  </span>
+                </td>
+                <td><span class="comp-cross">Requires 3rd party tool</span></td>
+                <td><span class="comp-cross">Not supported</span></td>
+                <td><span class="comp-partial">Clunky timeline module</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Worldbuilding Codex</span>
+                  <span class="comp-feature-sub">Character psychology &amp; sensory locations</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Built-in deep dossiers
+                  </span>
+                </td>
+                <td><span class="comp-partial">Plain text folders</span></td>
+                <td><span class="comp-cross">Not supported</span></td>
+                <td><span class="comp-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> Supported (Online)</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Print-Ready Vector PDF Typesetter</span>
+                  <span class="comp-feature-sub">Drop caps, trims, running heads &amp; folios</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Full vector book proofs
+                  </span>
+                </td>
+                <td><span class="comp-partial">Complex compile rules</span></td>
+                <td><span class="comp-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> Excellent (Mac-only)</span></td>
+                <td><span class="comp-cross">Not supported</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">William Shunn Manuscript (.docx)</span>
+                  <span class="comp-feature-sub">Standard format for editors &amp; agents</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    One-click native export
+                  </span>
+                </td>
+                <td><span class="comp-partial">Requires custom preset</span></td>
+                <td><span class="comp-cross">Not supported</span></td>
+                <td><span class="comp-cross">Not supported</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Built-In Book Cover Designer</span>
+                  <span class="comp-feature-sub">Typography presets, SVG emblems &amp; frames</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Built-in Studio
+                  </span>
+                </td>
+                <td><span class="comp-cross">Requires Photoshop/Canva</span></td>
+                <td><span class="comp-partial">Static image import only</span></td>
+                <td><span class="comp-cross">Not supported</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Offline Kokoro AI Neural Audio</span>
+                  <span class="comp-feature-sub">Local neural proofreading &amp; narration</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    100% on-device (WebGPU)
+                  </span>
+                </td>
+                <td><span class="comp-cross">Robotic OS voice only</span></td>
+                <td><span class="comp-cross">Not supported</span></td>
+                <td><span class="comp-cross">Not supported</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Cross-Platform Availability</span>
+                  <span class="comp-feature-sub">Operating system flexibility</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Windows, Mac &amp; Web
+                  </span>
+                </td>
+                <td><span class="comp-partial">Separate Mac &amp; Win licenses</span></td>
+                <td><span class="comp-cross">macOS Only</span></td>
+                <td><span class="comp-partial">Web browser only</span></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span class="comp-feature-name">Privacy &amp; Data Ownership</span>
+                  <span class="comp-feature-sub">Local-first, zero tracking, open formats</span>
+                </td>
+                <td class="col-chronicle">
+                  <span class="comp-check">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    100% Local (Open ZIP archive)
+                  </span>
+                </td>
+                <td><span class="comp-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> Local files</span></td>
+                <td><span class="comp-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.8">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> Local files</span></td>
+                <td><span class="comp-cross">Cloud hosted, telemetry</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="section" style="background: rgba(13, 16, 24, 0.4);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Frequently Asked Questions</span>
+        <h2 class="section-title">Everything You Need to Know</h2>
+        <p class="section-desc">
+          Common questions from independent novelists, worldbuilders, and publishers about Chronicle.
+        </p>
+      </div>
+
+      <div class="faq-grid">
+        <!-- Question 1 -->
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            <span>Is Chronicle really 100% free and open-source? Are there any hidden costs?</span>
+            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Yes. Chronicle is completely free and open source, licensed under the GNU Affero General Public License v3
+              (AGPLv3). There are no subscriptions, no locked tiers, no ads, and no hidden fees ever. You retain 100%
+              ownership and intellectual property rights over every word and book you produce.
+            </p>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            <span>How does Chronicle compare to Scrivener, Vellum, and World Anvil?</span>
+            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Unlike Scrivener (which has a steep learning curve, dated interface, and proprietary sync), Vellum (which
+              costs $250 and is locked exclusively to macOS), and World Anvil (which charges ongoing monthly fees and
+              stores data on remote servers), Chronicle unifies all three essentials into one cohesive studio.
+            </p>
+            <p>
+              With Chronicle, you get focused writing with dual-view comments, interactive story timelines, character
+              dossiers, neural audio proofreading, and publication-grade Vector PDF/EPUB typesetting—in one private app
+              that runs on Windows, Mac, and web.
+            </p>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            <span>Can I export print-ready books for Amazon KDP, IngramSpark, and Barnes &amp; Noble?</span>
+            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Yes. Chronicle’s Vector PDF Typesetter generates high-resolution, vector-accurate PDFs adhering to
+              standard publishing trims (6"x9", 5.5"x8.5", A5, etc.) complete with proper page geometry, running
+              headers, author folios, ornamental dividers, and scalable drop caps.
+            </p>
+            <p>
+              Our EPUB 3 exporter generates clean, validated semantic markup with embedded fonts and SVG cover
+              manifests, ready for immediate upload to Kindle Direct Publishing (KDP), Apple Books, Kobo Writing Life,
+              and Google Play.
+            </p>
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            <span>Can I use the Shunn export to submit directly to literary agents and publishers?</span>
+            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Yes. Chronicle includes a native William Shunn manuscript exporter (.docx) engineered specifically for
+              submissions to traditional publishers, literary magazines, and agents. It automatically formats your story
+              with 1-inch margins, Courier typography, headers with your surname and title slug, word count
+              approximations, and standard contact blocks.
+            </p>
+          </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            <span>How does the offline Kokoro AI Neural Voice work? Does my manuscript leave my device?</span>
+            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Not a single byte of your story ever leaves your computer. The Kokoro AI neural speech engine is executed
+              directly on your hardware via WebAssembly (WASM) and WebGPU acceleration. It provides expressive, natural
+              human cadence for proofreading dialog and pacing—with zero latency, zero cloud costs, and complete
+              privacy.
+            </p>
+          </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            <span>Can I work completely offline and sync across multiple computers?</span>
+            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>
+              Chronicle is built local-first and works seamlessly without an internet connection. When you want
+              multi-device synchronization, the desktop app supports native WebDAV integration—letting you sync directly
+              to your private Nextcloud, ownCloud, Fastmail, or home NAS server without any third-party subscription or
+              cloud lock-in.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live App Launcher CTA Banner -->
+  <section class="section">
+    <div class="container">
+      <div class="launcher-banner">
+        <h2 class="launcher-banner-title">Launch Chronicle Right Now in Your Browser</h2>
+        <p class="launcher-banner-desc">
+          No installation, no login, and zero configuration required. The full web studio runs directly in modern
+          browsers with sample manuscripts, reading mode, and exporters ready to explore.
+        </p>
+        <a href="app/index.html" class="btn btn-primary btn-lg" style="box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span>Launch Web Studio</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section id="download" class="section" style="background: rgba(10, 12, 16, 0.7);">
+    <div class="container">
+      <div class="download-cta-card">
+        <span class="section-tag">Standalone Desktop Studio</span>
+        <h2 class="section-title" style="margin-top: 0.5rem;">Download Chronicle</h2>
+        <p class="section-desc" style="max-width: 640px; margin: 0 auto 2.5rem;">
+          Experience the complete distraction-free novel writing and publishing suite natively on your computer. No
+          installation wizard or administrator privileges required—simply download and run immediately.
+        </p>
+
+        <div class="download-cards-grid">
+          <!-- Windows Download Card/Button -->
+          <a href="downloads/Chronicle.exe" download="Chronicle.exe" class="download-platform-card"
+            id="btn-download-windows" title="Download Chronicle for Windows">
+            <div class="download-card-header">
+              <span class="platform-badge" id="badge-windows">Standalone Executable</span>
+            </div>
+            <div class="download-card-body">
+              <div class="platform-icon-box windows-icon">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.901-1.751" />
+                </svg>
+              </div>
+              <div class="platform-info">
+                <div class="platform-btn-title">Download for Windows</div>
+                <div class="platform-btn-sub">Chronicle.exe • Direct Run (No Install)</div>
+              </div>
+              <div class="platform-action-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </div>
+            </div>
+          </a>
+
+          <!-- macOS Download Card/Button -->
+          <a href="downloads/Chronicle.dmg" download="Chronicle.dmg" class="download-platform-card"
+            id="btn-download-mac" title="Download Chronicle for macOS">
+            <div class="download-card-header">
+              <span class="platform-badge" id="badge-mac">Apple Silicon</span>
+            </div>
+            <div class="download-card-body">
+              <div class="platform-icon-box mac-icon">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.47c.65-.79 1.1-1.89.98-2.99-.95.04-2.1.63-2.78 1.42-.59.68-1.11 1.79-.97 2.87 1.06.08 2.14-.53 2.77-1.3z" />
+                </svg>
+              </div>
+              <div class="platform-info">
+                <div class="platform-btn-title">Download for macOS</div>
+                <div class="platform-btn-sub">Chronicle.dmg • Standalone Image</div>
+              </div>
+              <div class="platform-action-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="download-guarantees">
+          <div class="guarantee-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>Zero installation or admin rights required</span>
+          </div>
+          <div class="guarantee-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 14 14"></polyline>
+            </svg>
+            <span>Instant startup • 100% offline &amp; private</span>
+          </div>
+          <div class="guarantee-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <span>Also runs in-browser: <a href="app/index.html"
+                style="color: var(--primary); text-decoration: underline;">Launch Web App</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div class="brand-icon" style="width: 28px; height: 28px;">
+              <img src="assets/chronicle-logo.svg" alt="Chronicle Logo" width="28" height="28" />
+            </div>
+            <span style="font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem;">Chronicle</span>
+          </div>
+          <p>
+            The unified open-source authoring, worldbuilding, and multi-format book publishing suite for novelists and
+            storytellers.
+          </p>
+          <div class="footer-pill-row">
+            <span class="footer-tag-pill">Free &amp; Open Source</span>
+            <span class="footer-tag-pill">Local-First</span>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h5>Navigation</h5>
+          <ul class="footer-links">
+            <li><a href="#showcase">Feature Tour</a></li>
+            <li><a href="#features">Core Features</a></li>
+            <li><a href="#comparison">Why Chronicle</a></li>
+            <li><a href="#faq">Author FAQ</a></li>
+            <li><a href="#download">Download Desktop</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Studio &amp; Code</h5>
+          <ul class="footer-links">
+            <li><a href="app/index.html">Launch Online Studio</a></li>
+            <li><a href="https://github.com/pazvanti/Chronicle" target="_blank" rel="noopener noreferrer">GitHub
+                Repository</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; <span id="current-year">2026</span> Petre Popescu</div>
+        <div class="footer-bottom-info">Released under the GNU Affero General Public License v3 (AGPLv3) • Built for
+          Novelists &amp; Storytellers</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Fullscreen Screenshot Lightbox Modal -->
+  <div id="screenshot-lightbox" class="lightbox-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-dialog">
+      <div class="lightbox-topbar">
+        <div class="lightbox-info">
+          <span id="lightbox-tab-tag" class="lightbox-tag">Studio View</span>
+          <h3 id="lightbox-title" class="lightbox-title">Writer Studio</h3>
+        </div>
+        <div class="lightbox-actions">
+          <a id="lightbox-try-btn" href="app/index.html" class="btn btn-sm btn-primary">
+            <span>Launch Online Studio</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </a>
+          <button id="lightbox-close" class="lightbox-close-btn" aria-label="Close Lightbox">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="lightbox-body">
+        <button id="lightbox-prev" class="lightbox-nav-btn prev" aria-label="Previous Screenshot">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <div class="lightbox-img-container">
+          <img id="lightbox-img" src="assets/screenshot-editor.png" alt="Studio Interface Preview" />
+        </div>
+        <button id="lightbox-next" class="lightbox-nav-btn next" aria-label="Next Screenshot">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="lightbox-footer">
+        <span id="lightbox-caption">Press Esc to exit • Use ← / → arrow keys to browse studios</span>
+        <span id="lightbox-counter" style="color: var(--text-muted); font-weight: 600;">1 / 5</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Script -->
+  <script src="main.js"></script>
+</body>
+
+</html>
