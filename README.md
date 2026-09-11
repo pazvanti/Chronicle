@@ -44,6 +44,7 @@ Writing a novel shouldn't require juggling four separate paid subscriptions. **C
 
 ### 🛡️ 100% Local-First & Private
 * **Zero Telemetry**: Chronicle collects no metrics, no trackers, and has no remote database.
+* **100% GenAI-Free. No LLMs. No text generation. Built exclusively for human writers.**
 * **No Cloud Lock-in**: Your work is saved in the open `.chronicle` format (a standard ZIP archive containing plain JSON and raw XHTML).
 * **Optional Private Sync**: Sync directly to your own self-hosted WebDAV server (Nextcloud, ownCloud, Fastmail) with end-to-end credential storage.
 

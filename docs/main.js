@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     {
       tabId: 'tab-reader',
       tag: 'Immersion Studio',
-      title: 'Reading Mode — Paper Tones & Neural Audio Narrator',
+      title: 'Reading Mode — Paper Tones & Audio Narrator',
       src: 'assets/screenshot-reader.png',
       tryUrl: 'app/index.html?view=reader&welcome=false'
     },
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     question.addEventListener('click', () => {
       const isActive = item.classList.contains('active');
-      
+
       // Close other open items for clean single-expand accordion UX
       faqItems.forEach(i => {
         i.classList.remove('active');
@@ -271,5 +271,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     })
-    .catch(() => {});
+    .catch(() => { });
 });

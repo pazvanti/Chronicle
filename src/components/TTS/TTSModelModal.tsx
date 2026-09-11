@@ -106,7 +106,7 @@ export const TTSModelModal: React.FC = () => {
                 In-Browser Audio Narrator
               </h3>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                Neural text-to-speech running 100% inside your web browser
+                text-to-speech running 100% inside your web browser
               </p>
             </div>
           </div>
@@ -161,7 +161,7 @@ export const TTSModelModal: React.FC = () => {
                   )}
                   <div>
                     <h5 style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {isNeuralModelLoaded ? 'In-Browser Neural Engine Active' : 'Browser High-Quality Natural Voice Active'}
+                      {isNeuralModelLoaded ? 'In-Browser Engine Active' : 'Browser High-Quality Natural Voice Active'}
                     </h5>
                     <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                       {isNeuralModelLoaded
@@ -177,7 +177,7 @@ export const TTSModelModal: React.FC = () => {
                     onClick={() => setActiveTab('models')}
                     style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}
                   >
-                    Load Neural Model
+                    Load Model
                   </button>
                 )}
               </div>
@@ -288,10 +288,10 @@ export const TTSModelModal: React.FC = () => {
                   onChange={e => selectSystemVoiceName(e.target.value || null)}
                   style={{ fontSize: '0.82rem', padding: '0.45rem 0.6rem' }}
                 >
-                  <option value="">✨ Auto (Prioritize High-Fidelity Natural Neural Voice)</option>
+                  <option value="">✨ Auto (Prioritize High-Fidelity Natural Voice)</option>
                   {availableSystemVoices.map(v => (
                     <option key={v.id} value={v.name}>
-                      {v.isNeural ? '⚡ [Neural Studio] ' : '• '}{v.name} ({v.lang})
+                      {v.is ? '⚡ [Studio] ' : '• '}{v.name} ({v.lang})
                     </option>
                   ))}
                 </select>
@@ -327,7 +327,7 @@ export const TTSModelModal: React.FC = () => {
           {activeTab === 'models' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-                Load the neural model directly inside your web browser. Weights are cached in your browser's local Cache Storage so they only need to be downloaded once, then run 100% offline.
+                Load the model directly inside your web browser. Weights are cached in your browser's local Cache Storage so they only need to be downloaded once, then run 100% offline.
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
@@ -447,7 +447,7 @@ export const TTSModelModal: React.FC = () => {
               <div style={{ padding: '0.85rem 1.1rem', borderRadius: 'var(--radius-md)', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--border-subtle)', display: 'flex', gap: '0.65rem' }}>
                 <Info size={18} color="var(--accent-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  This neural model executes locally using ONNX Runtime Web. It runs completely inside your browser tab without transmitting your book text to any server or third party.
+                  This model executes locally using ONNX Runtime Web. It runs completely inside your browser tab without transmitting your book text to any server or third party.
                 </p>
               </div>
             </div>
@@ -460,7 +460,7 @@ export const TTSModelModal: React.FC = () => {
             {isNeuralModelLoaded ? (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#34d399' }}>
                 <CheckCircle2 size={14} />
-                <span>Kokoro Neural Engine (Direct In-Browser)</span>
+                <span>Kokoro Engine (Direct In-Browser)</span>
               </span>
             ) : (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#818cf8' }}>

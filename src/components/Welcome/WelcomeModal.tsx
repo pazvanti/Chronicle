@@ -309,10 +309,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <div className="intro-feat-icon bubble-blue">
                     <Volume2 size={18} />
                   </div>
-                  <h4>Neural AI Voice Audition</h4>
+                  <h4>AI Voice Audition</h4>
                 </div>
                 <p>
-                  Audition chapters with local Kokoro & Qwen neural speech synthesis, featuring instant real-time volume and pace controls.
+                  Audition chapters with local Kokoro & Qwen speech synthesis, featuring instant real-time volume and pace controls.
                 </p>
               </div>
 

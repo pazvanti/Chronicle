@@ -107,7 +107,7 @@ export const TtsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isModelModalOpen, setIsModelModalOpen] = useState<boolean>(false);
   const [customVoicePrompt, setCustomVoicePrompt] = useState<string>('A wise, calm storyteller with a gentle tone');
 
-  // In-Browser Neural Model state
+  // In-Browser Model state
   const [isNeuralModelLoaded, setIsNeuralModelLoaded] = useState<boolean>(isInBrowserNeuralModelLoaded());
   const [selectedSystemVoiceName, setSelectedSystemVoiceNameState] = useState<string | null>(getStoredSystemVoiceName());
   const [availableSystemVoices, setAvailableSystemVoices] = useState<SystemVoiceInfo[]>([]);
@@ -117,7 +117,7 @@ export const TtsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (downloadedModels['kokoro-82m-v1.0-onnx'] && !isInBrowserNeuralModelLoaded()) {
       loadInBrowserNeuralModel()
         .then(() => setIsNeuralModelLoaded(true))
-        .catch(err => console.warn('Background neural model load error:', err));
+        .catch(err => console.warn('Background model load error:', err));
     }
   }, [downloadedModels]);
 

@@ -25,13 +25,13 @@ export interface QwenTtsVoice {
 export const QWEN_MODELS: QwenTtsModel[] = [
   {
     id: 'kokoro-82m-v1.0-onnx',
-    fullName: 'Kokoro-82M Neural Model (8-Bit Quantized ONNX)',
-    displayName: 'In-Browser Neural Model (Kokoro-82M)',
+    fullName: 'Kokoro-82M Model (8-Bit Quantized ONNX)',
+    displayName: 'In-Browser Model (Kokoro-82M)',
     parameters: '82 Million',
     sizeBytes: 86 * 1024 * 1024,
     sizeFormatted: '86 MB',
     vramRequirement: 'Runs 100% client-side via WebGPU / WebAssembly',
-    description: 'Studio-grade neural text-to-speech model running directly inside your browser. Once downloaded, it caches locally and runs completely offline with zero external servers or configuration needed.',
+    description: 'Studio-grade text-to-speech model running directly inside your browser. Once downloaded, it caches locally and runs completely offline with zero external servers or configuration needed.',
     isRecommended: true,
     supportsVoiceDesign: true,
   },
@@ -105,7 +105,7 @@ const LOCAL_STORAGE_KEY_SELECTED_MODEL = 'chronicle_selected_tts_model';
 const LOCAL_STORAGE_KEY_SELECTED_VOICE = 'chronicle_selected_tts_voice';
 const LOCAL_STORAGE_KEY_SELECTED_SYSTEM_VOICE = 'chronicle_tts_selected_system_voice';
 
-// In-Memory Kokoro Neural Instance
+// In-Memory Kokoro Instance
 let kokoroInstance: any = null;
 let isLoadingKokoro = false;
 
@@ -114,7 +114,7 @@ export function isInBrowserNeuralModelLoaded(): boolean {
 }
 
 /**
- * Loads the Kokoro neural TTS model directly into browser memory/Cache Storage.
+ * Loads the Kokoro TTS model directly into browser memory/Cache Storage.
  * Uses Transformers.js with WebGPU GPU shaders if available, with multi-threaded WASM SIMD fallback.
  */
 export async function loadInBrowserNeuralModel(
@@ -165,7 +165,7 @@ export async function loadInBrowserNeuralModel(
     // Try WebGPU first for 10x-20x GPU shader speedup
     if (hasWebGPU) {
       try {
-        console.log('⚡ Initializing Kokoro Neural TTS with WebGPU acceleration...');
+        console.log('⚡ Initializing Kokoro TTS with WebGPU acceleration...');
         kokoroInstance = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', {
           dtype: 'fp32',
           device: 'webgpu',
@@ -179,7 +179,7 @@ export async function loadInBrowserNeuralModel(
 
     // Fallback to quantized WASM SIMD (CPU multi-core)
     if (!kokoroInstance) {
-      console.log('🚀 Initializing Kokoro Neural TTS with multi-threaded WASM SIMD...');
+      console.log('🚀 Initializing Kokoro TTS with multi-threaded WASM SIMD...');
       kokoroInstance = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', {
         dtype: 'q8',
         device: 'wasm',
@@ -193,7 +193,7 @@ export async function loadInBrowserNeuralModel(
     return kokoroInstance;
   } catch (err) {
     isLoadingKokoro = false;
-    console.error('Failed to load in-browser neural model:', err);
+    console.error('Failed to load in-browser model:', err);
     throw err;
   }
 }
@@ -330,7 +330,7 @@ export function getAvailableSystemVoices(): SystemVoiceInfo[] {
   return voices
     .map(v => {
       const nameLower = v.name.toLowerCase();
-      const isNeural =
+      const is =
         nameLower.includes('natural') ||
         nameLower.includes('neural') ||
         nameLower.includes('online') ||
@@ -365,14 +365,14 @@ export function getAvailableSystemVoices(): SystemVoiceInfo[] {
       };
     })
     .sort((a, b) => {
-      if (a.isNeural && !b.isNeural) return -1;
-      if (!a.isNeural && b.isNeural) return 1;
+      if (a.is && !b.isNeural) return -1;
+      if (!a.is && b.isNeural) return 1;
       return a.name.localeCompare(b.name);
     });
 }
 
 /**
- * Finds the highest-fidelity natural neural voice matching the requested gender,
+ * Finds the highest-fidelity natural voice matching the requested gender,
  * strictly filtering out legacy robotic desktop voices (e.g. Microsoft David / Zira).
  */
 export function findBestVoice(gender: 'male' | 'female', preferredVoiceName?: string | null): SpeechSynthesisVoice | null {
@@ -385,7 +385,7 @@ export function findBestVoice(gender: 'male' | 'female', preferredVoiceName?: st
     if (matched) return matched;
   }
 
-  // High-priority Neural / Natural voices (Edge Natural / Google Deep Learning)
+  // High-priority / Natural voices (Edge Natural / Google Deep Learning)
   const neuralVoices = voices.filter(v => {
     const n = v.name.toLowerCase();
     return (
@@ -444,7 +444,7 @@ function fallbackToBrowserSpeech(
 ): SpeechSynthesisController {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     onError?.(new Error('Speech Synthesis not supported in this environment'));
-    return { cancel: () => {} };
+    return { cancel: () => { } };
   }
 
   const utterance = new SpeechSynthesisUtterance(text);
@@ -543,7 +543,7 @@ export async function generateNeuralAudioBlob(
 
     return rawAudio.toBlob();
   } catch (err) {
-    console.warn('Background neural pre-synthesis error:', err);
+    console.warn('Background pre-synthesis error:', err);
     return null;
   }
 }
@@ -551,7 +551,7 @@ export async function generateNeuralAudioBlob(
 /**
  * Synthesizes speech:
  * 1. If prefetchedBlob is provided, starts playing IMMEDIATELY with 0ms latency!
- * 2. If In-Browser Neural Model is loaded, executes 100% in-browser via WebGPU/WASM.
+ * 2. If In-Browser Model is loaded, executes 100% in-browser via WebGPU/WASM.
  * 3. If not yet loaded, falls back to High-Quality Browser Natural Voice with anti-robotic filter.
  */
 export function synthesizeSpeechChunk(
@@ -639,13 +639,13 @@ export function synthesizeSpeechChunk(
       },
       resume: () => {
         if (activeAudio && activeAudio.paused) {
-          activeAudio.play().catch(() => {});
+          activeAudio.play().catch(() => { });
         }
       },
     };
   }
 
-  // Case B: Genuine In-Browser Neural Model (on-demand generation)
+  // Case B: Genuine In-Browser Model (on-demand generation)
   if (kokoroInstance) {
     (async () => {
       try {
@@ -694,7 +694,7 @@ export function synthesizeSpeechChunk(
         await activeAudio.play();
       } catch (err) {
         if (!isCancelled) {
-          console.warn('In-browser neural synthesis error, falling back to browser voice:', err);
+          console.warn('In-browser synthesis error, falling back to browser voice:', err);
           fallbackToBrowserSpeech(text, voice, speedMultiplier, currentVolume, preferredVoiceName, onStart, onEnd, onError, onTimeUpdate);
         }
       }
@@ -722,7 +722,7 @@ export function synthesizeSpeechChunk(
       },
       resume: () => {
         if (activeAudio && activeAudio.paused) {
-          activeAudio.play().catch(() => {});
+          activeAudio.play().catch(() => { });
         }
       },
     };
