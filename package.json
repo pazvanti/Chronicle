@@ -9,6 +9,9 @@
     "url": "https://github.com/pazvanti/Chronicle.git"
   },
   "homepage": "https://pazvanti.github.io/Chronicle/",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

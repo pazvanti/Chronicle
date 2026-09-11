@@ -23,6 +23,14 @@ const isDebug = process.argv.includes('--debug');
 const shouldCopyToDocs = process.argv.includes('--copy-to-docs');
 const targetMode = isDebug ? 'debug' : 'release';
 
+const nodeMajor = parseInt(process.versions.node.split('.')[0], 10);
+if (nodeMajor < 18) {
+  console.error(`\n❌ ERROR: Chronicle build requires Node.js 18+ or 20+ (current version: v${process.versions.node}).`);
+  console.error(`Please switch to Node 20 or 22:`);
+  console.error(`  Run: nvm use 22   (or nvm alias default 22)\n`);
+  process.exit(1);
+}
+
 // 1. Platform Detection
 const platform = process.platform;
 const isWindows = platform === 'win32';
@@ -161,29 +169,46 @@ export function copyDistributablesToDocs() {
 
   // 2. macOS: Standalone disk image Chronicle.dmg
   if (isMac) {
-    const dmgCandidates = [
-      path.join(bundleDir, 'dmg', 'Chronicle.dmg'),
-      path.join(bundleDir, 'dmg', 'Chronicle_0.1.0_x64.dmg'),
-      path.join(bundleDir, 'Chronicle.dmg'),
-      path.join(targetDir, 'Chronicle.dmg'),
-    ];
-    for (const candidate of dmgCandidates) {
-      if (fs.existsSync(candidate)) {
-        const destPath = path.join(downloadsDir, 'Chronicle.dmg');
-        fs.copyFileSync(candidate, destPath);
-
-        const stats = fs.statSync(destPath);
-        copiedDistributables.push({
-          name: 'Chronicle.dmg',
-          platform: 'macos',
-          type: 'standalone-image',
-          destPath,
-          sizeBytes: stats.size,
-          sizeMB: (stats.size / (1024 * 1024)).toFixed(2),
-          description: 'macOS Standalone Disk Image (Intel & Apple Silicon)',
-        });
-        break;
+    let dmgFound = null;
+    const dmgDir = path.join(bundleDir, 'dmg');
+    if (fs.existsSync(dmgDir)) {
+      const files = fs.readdirSync(dmgDir);
+      const matched = files.find(f => f.endsWith('.dmg'));
+      if (matched) {
+        dmgFound = path.join(dmgDir, matched);
       }
+    }
+
+    if (!dmgFound) {
+      const dmgCandidates = [
+        path.join(bundleDir, 'dmg', 'Chronicle.dmg'),
+        path.join(bundleDir, 'Chronicle.dmg'),
+        path.join(targetDir, 'Chronicle.dmg'),
+      ];
+      for (const candidate of dmgCandidates) {
+        if (fs.existsSync(candidate)) {
+          dmgFound = candidate;
+          break;
+        }
+      }
+    }
+
+    if (dmgFound) {
+      const destPath = path.join(downloadsDir, 'Chronicle.dmg');
+      fs.copyFileSync(dmgFound, destPath);
+
+      const stats = fs.statSync(destPath);
+      copiedDistributables.push({
+        name: 'Chronicle.dmg',
+        platform: 'macos',
+        type: 'standalone-image',
+        destPath,
+        sizeBytes: stats.size,
+        sizeMB: (stats.size / (1024 * 1024)).toFixed(2),
+        description: 'macOS Standalone Disk Image (Intel & Apple Silicon)',
+      });
+    } else {
+      console.warn(`⚠️ No DMG file found in ${dmgDir} or bundle directory.`);
     }
   }
 
