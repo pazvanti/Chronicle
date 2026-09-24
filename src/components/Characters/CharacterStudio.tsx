@@ -18,6 +18,7 @@ import {
   Activity,
   Filter,
 } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 const ROLE_OPTIONS = [
   'Protagonist',
@@ -55,6 +56,7 @@ export const CharacterStudio: React.FC = () => {
     setActiveChapterId,
     setViewMode,
   } = useEpub();
+  const { t } = useTranslation();
 
   // Selection & active tabs
   const [selectedId, setSelectedId] = useState<string | null>(characters[0]?.id || null);
@@ -102,7 +104,7 @@ export const CharacterStudio: React.FC = () => {
   // Create new character action
   const handleCreateNew = () => {
     const newId = addCharacter({
-      name: `New Character ${characters.length + 1}`,
+      name: `${t('characters.addCharacter')} ${characters.length + 1}`,
       role: 'Supporting',
       color: PRESET_COLORS[characters.length % PRESET_COLORS.length],
     });
@@ -151,11 +153,11 @@ export const CharacterStudio: React.FC = () => {
           <button
             className="btn btn-sm btn-ghost return-writing-btn"
             onClick={() => setViewMode('editor')}
-            title="Return to Writing mode"
+            title={t('header.writeMode')}
           >
             <ArrowLeft size={14} />
             <Edit3 size={13} style={{ color: 'var(--accent-primary)' }} />
-            <span>Writing</span>
+            <span>{t('header.writeMode')}</span>
           </button>
 
           <div className="entity-studio-brand">
@@ -163,9 +165,9 @@ export const CharacterStudio: React.FC = () => {
               <Users size={16} />
             </div>
             <div>
-              <h2 className="entity-studio-title">Character Studio</h2>
+              <h2 className="entity-studio-title">{t('characters.title')}</h2>
               <span className="entity-studio-count">
-                {characters.length} {characters.length === 1 ? 'character' : 'characters'} in manuscript
+                {characters.length} {characters.length === 1 ? t('characters.countSingle') : t('characters.countPlural')}
               </span>
             </div>
           </div>
@@ -177,7 +179,7 @@ export const CharacterStudio: React.FC = () => {
             <Search size={14} className="entity-search-icon" />
             <input
               type="text"
-              placeholder="Search characters, traits, roles..."
+              placeholder={t('characters.searchPlaceholder')}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="entity-search-input"
@@ -197,7 +199,7 @@ export const CharacterStudio: React.FC = () => {
               onChange={e => setRoleFilter(e.target.value)}
               className="entity-select-control"
             >
-              <option value="all">All Roles</option>
+              <option value="all">{t('characters.filterAllRoles')}</option>
               {ROLE_OPTIONS.map(r => (
                 <option key={r} value={r}>
                   {r}
@@ -210,16 +212,16 @@ export const CharacterStudio: React.FC = () => {
           <button
             className="btn btn-sm btn-outline entity-action-btn"
             onClick={() => setViewMode('cast-grid')}
-            title="View in Presence Grid"
+            title={t('subNav.presenceGridTitle')}
           >
             <LayoutGrid size={13} />
-            <span>Presence Grid</span>
+            <span>{t('subNav.presenceGrid')}</span>
           </button>
 
           {/* New Character Button */}
           <button className="btn btn-sm btn-primary entity-action-btn" onClick={handleCreateNew}>
             <Plus size={14} />
-            <span>New Character</span>
+            <span>{t('characters.addCharacter')}</span>
           </button>
         </div>
       </div>
@@ -229,14 +231,14 @@ export const CharacterStudio: React.FC = () => {
         {/* Left Master Pane: Character Roster */}
         <aside className="entity-master-pane">
           <div className="entity-master-header">
-            <span className="master-header-label">Character Roster</span>
+            <span className="master-header-label">{t('subNav.characters')}</span>
             <span className="master-header-badge">{filteredCharacters.length}</span>
           </div>
 
           <div className="entity-card-list">
             {filteredCharacters.length === 0 ? (
               <div className="entity-list-empty">
-                <span>No characters found.</span>
+                <span>{t('characters.emptyTitle')}</span>
               </div>
             ) : (
               filteredCharacters.map(char => {
@@ -405,7 +407,7 @@ export const CharacterStudio: React.FC = () => {
                 onClick={() => setActiveTab('identity')}
               >
                 <Eye size={14} />
-                <span>Identity & Appearance</span>
+                <span>{t('characters.tabIdentity')}</span>
               </button>
 
               <button
@@ -413,7 +415,7 @@ export const CharacterStudio: React.FC = () => {
                 onClick={() => setActiveTab('traits')}
               >
                 <CheckSquare size={14} />
-                <span>Goals & Traits ({selectedCharacter.traits.length})</span>
+                <span>{t('characters.tabTraits')} ({selectedCharacter.traits.length})</span>
               </button>
 
               <button
@@ -421,7 +423,7 @@ export const CharacterStudio: React.FC = () => {
                 onClick={() => setActiveTab('arc')}
               >
                 <Target size={14} />
-                <span>Arc & Motivation</span>
+                <span>{t('characters.tabArc')}</span>
               </button>
 
               <button
@@ -429,7 +431,7 @@ export const CharacterStudio: React.FC = () => {
                 onClick={() => setActiveTab('footprint')}
               >
                 <Activity size={14} />
-                <span>Story Footprint</span>
+                <span>{t('characters.tabFootprint')}</span>
               </button>
 
               <button
@@ -437,7 +439,7 @@ export const CharacterStudio: React.FC = () => {
                 onClick={() => setActiveTab('notes')}
               >
                 <FileText size={14} />
-                <span>Author Scraps</span>
+                <span>{t('characters.tabNotes')}</span>
               </button>
             </nav>
 
@@ -448,37 +450,35 @@ export const CharacterStudio: React.FC = () => {
                 <div className="dossier-section animate-fadeIn">
                   <div className="form-group">
                     <label className="form-label">
-                      <span>Aliases & Nicknames</span>
+                      <span>{t('characters.aliasesLabel')}</span>
                       <span className="label-hint">
-                        (Used for automatic match detection in the Presence Grid & Chapters)
+                        ({t('characters.aliasesDesc')})
                       </span>
                     </label>
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="e.g. Pete, Detective Prescott, The Fox (separated by commas)"
+                      placeholder="Pete, Prescott..."
                       value={selectedCharacter.aliases || ''}
                       onChange={e => updateCharacter(selectedCharacter.id, { aliases: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">One-Line Summary / Elevator Hook</label>
+                    <label className="form-label">{t('characters.bioLabel')}</label>
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="A brilliant yet reckless detective haunted by his last unsolved case..."
                       value={selectedCharacter.oneLineSummary || ''}
                       onChange={e => updateCharacter(selectedCharacter.id, { oneLineSummary: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Physical Appearance & Notable Visual Features</label>
+                    <label className="form-label">{t('characters.tabIdentity')}</label>
                     <textarea
                       className="form-textarea"
                       rows={6}
-                      placeholder="Height, build, clothing style, distinctive scars, posture, gestures, eye color..."
                       value={selectedCharacter.appearance || ''}
                       onChange={e => updateCharacter(selectedCharacter.id, { appearance: e.target.value })}
                     />
@@ -492,9 +492,9 @@ export const CharacterStudio: React.FC = () => {
                   {/* Progress Meter */}
                   <div className="traits-meter-card">
                     <div className="meter-header">
-                      <span className="meter-title">Goals & Character Arc Milestones</span>
+                      <span className="meter-title">{t('characters.traitsTitle')}</span>
                       <span className="meter-stats">
-                        {completedTraits} of {totalTraits} completed ({traitsPercent}%)
+                        {completedTraits} / {totalTraits} ({traitsPercent}%)
                       </span>
                     </div>
                     <div className="meter-track">
@@ -524,7 +524,7 @@ export const CharacterStudio: React.FC = () => {
 
                     <input
                       type="text"
-                      placeholder="Add a new goal, flaw, habit or trait..."
+                      placeholder={t('characters.addTraitPlaceholder')}
                       value={newTraitText}
                       onChange={e => setNewTraitText(e.target.value)}
                       className="add-trait-input"
@@ -532,7 +532,7 @@ export const CharacterStudio: React.FC = () => {
 
                     <button type="submit" className="btn btn-sm btn-primary add-trait-btn">
                       <Plus size={14} />
-                      <span>Add</span>
+                      <span>{t('characters.addTraitBtn')}</span>
                     </button>
                   </form>
 
@@ -540,7 +540,7 @@ export const CharacterStudio: React.FC = () => {
                   <div className="traits-checklist-grid">
                     {selectedCharacter.traits.length === 0 ? (
                       <div className="traits-empty-hint">
-                        No goals or traits added yet. Use the bar above to track key character actions, arcs, and flaws.
+                        {t('characters.addTraitPlaceholder')}
                       </div>
                     ) : (
                       selectedCharacter.traits.map(trait => (
@@ -552,7 +552,7 @@ export const CharacterStudio: React.FC = () => {
                             type="button"
                             className="trait-toggle-check"
                             onClick={() => toggleCharacterTrait(selectedCharacter.id, trait.id)}
-                            title={trait.completed ? 'Mark as incomplete' : 'Mark as completed'}
+                            title={trait.completed ? t('common.done') : t('common.edit')}
                           >
                             {trait.completed ? (
                               <CheckSquare size={17} color={selectedCharacter.color || '#3b82f6'} />
@@ -571,7 +571,7 @@ export const CharacterStudio: React.FC = () => {
                             type="button"
                             className="trait-delete-btn"
                             onClick={() => removeCharacterTrait(selectedCharacter.id, trait.id)}
-                            title="Remove trait"
+                            title={t('common.delete')}
                           >
                             <Trash2 size={13} />
                           </button>
@@ -582,11 +582,10 @@ export const CharacterStudio: React.FC = () => {
 
                   {/* Personality Freeform */}
                   <div className="form-group" style={{ marginTop: '1.5rem' }}>
-                    <label className="form-label">Personality, Flaws & Voice Notes</label>
+                    <label className="form-label">{t('characters.tabTraits')}</label>
                     <textarea
                       className="form-textarea"
                       rows={4}
-                      placeholder="How they speak, core insecurities, moral compass, quirks, dialogue patterns..."
                       value={selectedCharacter.personality || ''}
                       onChange={e => updateCharacter(selectedCharacter.id, { personality: e.target.value })}
                     />
@@ -598,22 +597,20 @@ export const CharacterStudio: React.FC = () => {
               {activeTab === 'arc' && (
                 <div className="dossier-section animate-fadeIn">
                   <div className="form-group">
-                    <label className="form-label">Core Motivation & Prime Desire</label>
+                    <label className="form-label">{t('characters.arcTitle')}</label>
                     <textarea
                       className="form-textarea"
                       rows={3}
-                      placeholder="What is their burning obsession or primary story goal? What are the stakes if they fail?"
                       value={selectedCharacter.motivation || ''}
                       onChange={e => updateCharacter(selectedCharacter.id, { motivation: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Backstory, Origins & Formative Lore</label>
+                    <label className="form-label">{t('characters.arcBeginning')}</label>
                     <textarea
                       className="form-textarea"
                       rows={6}
-                      placeholder="Where did they come from? Key traumatic or defining life events, childhood secrets, relationships..."
                       value={selectedCharacter.backstory || ''}
                       onChange={e => updateCharacter(selectedCharacter.id, { backstory: e.target.value })}
                     />
@@ -626,14 +623,14 @@ export const CharacterStudio: React.FC = () => {
                 <div className="dossier-section animate-fadeIn">
                   <div className="footprint-overview-card">
                     <div className="footprint-stat">
-                      <span className="stat-label">Chapters Appeared</span>
+                      <span className="stat-label">{t('characters.chaptersAppeared')}</span>
                       <span className="stat-value">
                         {characterPresenceInfo ? characterPresenceInfo.chapters.length : '—'}
                       </span>
                     </div>
 
                     <div className="footprint-stat">
-                      <span className="stat-label">Total Textual Mentions</span>
+                      <span className="stat-label">{t('characters.totalMentions')}</span>
                       <span className="stat-value">
                         {characterPresenceInfo ? characterPresenceInfo.totalMentions : '—'}
                       </span>
@@ -645,21 +642,21 @@ export const CharacterStudio: React.FC = () => {
                         onClick={() => setViewMode('cast-grid')}
                       >
                         <LayoutGrid size={14} />
-                        <span>Open Presence Grid</span>
+                        <span>{t('subNav.presenceGrid')}</span>
                       </button>
 
                       <button
                         className="btn btn-sm btn-primary"
                         onClick={() => runCastPresenceAnalysis(true)}
                       >
-                        <span>Re-Scan Manuscript</span>
+                        <span>{t('characters.runAnalysis')}</span>
                       </button>
                     </div>
                   </div>
 
                   {characterPresenceInfo && characterPresenceInfo.chapters.length > 0 ? (
                     <div className="footprint-chapters-list">
-                      <h4 className="footprint-subheading">Chapter Appearances</h4>
+                      <h4 className="footprint-subheading">{t('characters.chaptersAppeared')}</h4>
                       {characterPresenceInfo.chapters.map(ch => {
                         const pres = castPresenceData?.presenceMap[`${selectedCharacter.id}::${ch.id}`];
                         return (
@@ -667,7 +664,7 @@ export const CharacterStudio: React.FC = () => {
                             <div className="footprint-ch-info">
                               <span className="footprint-ch-title">{ch.title}</span>
                               <span className="footprint-ch-mentions">
-                                {pres?.count || 0} {(pres?.count || 0) === 1 ? 'mention' : 'mentions'}
+                                {pres?.count || 0} {t('characters.totalMentions')}
                               </span>
                             </div>
 
@@ -685,7 +682,7 @@ export const CharacterStudio: React.FC = () => {
                               }}
                             >
                               <BookOpen size={12} />
-                              <span>Open in Editor</span>
+                              <span>{t('common.open')}</span>
                             </button>
                           </div>
                         );
@@ -693,8 +690,7 @@ export const CharacterStudio: React.FC = () => {
                     </div>
                   ) : (
                     <div className="footprint-empty-hint">
-                      No chapter mentions found for "{selectedCharacter.name}". Run the Presence Grid scanner
-                      or check that their name matches the manuscript text.
+                      {t('characters.noPresence')}
                     </div>
                   )}
                 </div>
@@ -704,11 +700,10 @@ export const CharacterStudio: React.FC = () => {
               {activeTab === 'notes' && (
                 <div className="dossier-section animate-fadeIn">
                   <div className="form-group">
-                    <label className="form-label">Freeform Character Notes, Ideas & Scraps</label>
+                    <label className="form-label">{t('characters.tabNotes')}</label>
                     <textarea
                       className="form-textarea"
                       rows={12}
-                      placeholder="Jot down future plot ideas, relationship dynamics, brainstorm dialogue exchanges, wardrobe notes..."
                       value={selectedCharacter.notes || ''}
                       onChange={e => updateCharacter(selectedCharacter.id, { notes: e.target.value })}
                     />
@@ -720,7 +715,7 @@ export const CharacterStudio: React.FC = () => {
         ) : (
           <div className="entity-detail-empty">
             <Users size={38} color="var(--text-muted)" />
-            <p>Select a character from the roster or create a new one to begin editing.</p>
+            <p>{t('characters.emptyDesc')}</p>
           </div>
         )}
       </div>

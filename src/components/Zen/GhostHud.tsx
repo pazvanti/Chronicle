@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { BookOpen, Sparkles, ChevronUp, Check, Search, X } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const GhostHud: React.FC = () => {
   const {
@@ -12,6 +13,7 @@ export const GhostHud: React.FC = () => {
     todayWordsCount,
     zenSettings,
   } = useEpub();
+  const { t } = useTranslation();
 
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [isChapterMenuOpen, setIsChapterMenuOpen] = useState<boolean>(false);
@@ -102,112 +104,105 @@ export const GhostHud: React.FC = () => {
     };
   }, [isZenMode, zenSettings.ghostHud]);
 
-  if (!isZenMode || !zenSettings.ghostHud) {
+  if (!isZenMode || !zenSettings.ghostHud || !book) {
     return null;
   }
 
   return (
     <div
-      className={`ghost-hud-container ${isVisible ? 'visible' : 'hidden'}`}
+      className={`ghost-hud-container ${isVisible ? 'visible' : 'hidden'} ${isHovering ? 'hovered' : 'translucent'}`}
       onMouseEnter={() => {
         setIsHovering(true);
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-        clearMenuCloseTimer();
       }}
       onMouseLeave={() => {
         setIsHovering(false);
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-        clearMenuCloseTimer();
-
+        hideTimerRef.current = setTimeout(() => {
+          setIsVisible(false);
+        }, 2000);
         if (isChapterMenuOpen) {
-          // Automatically close chapter pop-up after 5 seconds once mouse is no longer interacting with it
+          clearMenuCloseTimer();
           menuCloseTimerRef.current = setTimeout(() => {
             setIsChapterMenuOpen(false);
-            hideTimerRef.current = setTimeout(() => {
-              if (!isHoveringRef.current) {
-                setIsVisible(false);
-              }
-            }, 2000);
-          }, 5000);
-        } else {
-          hideTimerRef.current = setTimeout(() => {
-            if (!isHoveringRef.current) {
-              setIsVisible(false);
-            }
-          }, 2500);
+          }, 600);
         }
       }}
+      aria-label="Zen Mode Quick Status"
     >
-      {/* Translucent Chapter Selection Menu (floats upward from HUD) */}
-      {isChapterMenuOpen && book && book.chapters.length > 0 && (
+      {/* Chapter Dropdown Popover (Floating above HUD) */}
+      {isChapterMenuOpen && (
         <div
-          className="ghost-hud-chapter-menu"
-          role="dialog"
-          aria-label="Manuscript Chapters"
-          onClick={e => e.stopPropagation()}
+          className="ghost-chapter-popover"
+          onMouseEnter={clearMenuCloseTimer}
+          onMouseLeave={() => {
+            clearMenuCloseTimer();
+            menuCloseTimerRef.current = setTimeout(() => {
+              setIsChapterMenuOpen(false);
+            }, 600);
+          }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <div className="ghost-chapter-menu-header">
-            <div className="ghost-chapter-menu-header-title">
-              <BookOpen size={13} className="ghost-hud-icon" />
-              <span>Manuscript Chapters</span>
-            </div>
-            <span className="ghost-chapter-menu-count">{book.chapters.length}</span>
-          </div>
-
-          {book.chapters.length > 4 && (
-            <div className="ghost-chapter-search-wrap">
-              <Search size={12} className="ghost-search-icon" />
+          {/* Popover Header with Search */}
+          <div className="ghost-chapter-header">
+            <div className="ghost-chapter-search-box">
+              <Search size={13} className="ghost-chapter-search-icon" />
               <input
                 type="text"
                 className="ghost-chapter-search-input"
-                placeholder="Find chapter..."
+                placeholder={t('zen.searchChapters')}
                 value={chapterSearch}
-                onChange={e => setChapterSearch(e.target.value)}
+                onChange={(e) => setChapterSearch(e.target.value)}
                 autoFocus
               />
               {chapterSearch && (
                 <button
                   type="button"
-                  className="ghost-search-clear"
+                  className="ghost-chapter-search-clear"
                   onClick={() => setChapterSearch('')}
                 >
-                  <X size={11} />
+                  <X size={12} />
                 </button>
               )}
             </div>
-          )}
+          </div>
 
-          <div className="ghost-chapter-menu-list">
-            {filteredChapters.map((ch, index) => {
-              const isActive = ch.id === activeChapter?.id;
-              return (
-                <button
-                  key={ch.id}
-                  type="button"
-                  className={`ghost-chapter-menu-item ${isActive ? 'active' : ''}`}
-                  onClick={() => {
-                    setActiveChapterId(ch.id);
-                    setIsChapterMenuOpen(false);
-                    setChapterSearch('');
-                    clearMenuCloseTimer();
-                  }}
-                  title={ch.title || `Chapter ${index + 1}`}
-                >
-                  <div className="ghost-chapter-item-left">
-                    <span className="ghost-chapter-number">{index + 1}.</span>
-                    <span className="ghost-chapter-item-title">
-                      {ch.title || `Chapter ${index + 1}`}
-                    </span>
-                  </div>
-                  <div className="ghost-chapter-item-right">
-                    <span className="ghost-chapter-words">
-                      {ch.wordCount.toLocaleString()} w
-                    </span>
-                    {isActive && <Check size={12} className="ghost-chapter-active-check" />}
-                  </div>
-                </button>
-              );
-            })}
+          {/* Chapters Scrollable List */}
+          <div className="ghost-chapter-list">
+            {filteredChapters.length === 0 ? (
+              <div className="ghost-chapter-empty">
+                {t('zen.noChaptersFound')}
+              </div>
+            ) : (
+              filteredChapters.map((ch, index) => {
+                const isActive = ch.id === activeChapter?.id;
+                return (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    className={`ghost-chapter-item ${isActive ? 'active' : ''}`}
+                    onClick={() => {
+                      setActiveChapterId(ch.id);
+                      setIsChapterMenuOpen(false);
+                      setChapterSearch('');
+                    }}
+                  >
+                    <div className="ghost-chapter-item-left">
+                      <span className="ghost-chapter-number">{index + 1}.</span>
+                      <span className="ghost-chapter-item-title">
+                        {ch.title || `${t('statusBar.activeChapter')} ${index + 1}`}
+                      </span>
+                    </div>
+                    <div className="ghost-chapter-item-right">
+                      <span className="ghost-chapter-words">
+                        {ch.wordCount.toLocaleString()} w
+                      </span>
+                      {isActive && <Check size={12} className="ghost-chapter-active-check" />}
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
       )}
@@ -233,11 +228,11 @@ export const GhostHud: React.FC = () => {
               return next;
             });
           }}
-          title="Manuscript Chapters (Hover or click to switch without leaving Zen mode)"
+          title={t('zen.manuscript')}
         >
           <BookOpen size={14} className="ghost-hud-icon" />
           <span className="ghost-hud-text">
-            {activeChapter?.title || 'Manuscript'}
+            {activeChapter?.title || t('zen.manuscript')}
           </span>
           <ChevronUp
             size={12}
@@ -251,7 +246,7 @@ export const GhostHud: React.FC = () => {
         <div className="ghost-hud-section ghost-hud-words">
           <Sparkles size={13} className="ghost-hud-sparkle-icon" />
           <span>
-            {todayWordsCount > 0 ? `+${todayWordsCount.toLocaleString()} words today` : '+0 words today'}
+            {`+${todayWordsCount.toLocaleString()} ${t('zen.words')} ${t('zen.today')}`}
           </span>
         </div>
 
@@ -262,9 +257,9 @@ export const GhostHud: React.FC = () => {
           type="button"
           className="ghost-hud-exit-btn"
           onClick={() => setZenMode(false)}
-          title="Exit Zen Mode and return to Studio (Esc)"
+          title={t('zen.exitZen')}
         >
-          <span>Exit Zen</span>
+          <span>{t('zen.exitZen').split(' (')[0]}</span>
           <kbd className="ghost-kbd">Esc</kbd>
         </button>
       </div>

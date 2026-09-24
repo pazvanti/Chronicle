@@ -19,6 +19,7 @@ import {
   Trash2,
   HelpCircle,
 } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface WebDavConfigModalProps {
   onClose: () => void;
@@ -26,6 +27,7 @@ interface WebDavConfigModalProps {
 }
 
 export const WebDavConfigModal: React.FC<WebDavConfigModalProps> = ({ onClose, onSuccess }) => {
+  const { t } = useTranslation();
   const { webdavConfig, updateWebDavConfig, showNotification } = useEpub();
 
   useEscapeKey(onClose);
@@ -160,14 +162,14 @@ export const WebDavConfigModal: React.FC<WebDavConfigModalProps> = ({ onClose, o
             </div>
             <div>
               <h3 className="modal-title" style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>
-                Cloud Storage Settings (WebDAV)
+                {t('cloud.modalTitle')}
               </h3>
               <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                Sync manuscripts with Nextcloud, ownCloud, or generic WebDAV
+                {t('settings.webdavCloudDesc')}
               </p>
             </div>
           </div>
-          <button className="btn-icon btn-sm" onClick={onClose} title="Close (Esc)">
+          <button className="btn-icon btn-sm" onClick={onClose} title={t('common.close')}>
             <X size={16} />
           </button>
         </div>

@@ -34,6 +34,7 @@ import { TitleRenameModal } from './Header/TitleRenameModal';
 import { ChronicleLogo } from './Common/ChronicleLogo';
 import { isTauri } from '../services/cloud/webdavClient';
 import { CURRENT_VERSION } from '../services/update/updateChecker';
+import { useTranslation } from '../i18n/I18nContext';
 
 export const Header: React.FC = () => {
   const {
@@ -49,7 +50,6 @@ export const Header: React.FC = () => {
     toggleSidebar,
     storageTarget,
     localFilePath,
-    cloudFileName,
     isWebDavConnected,
     setIsCloudBrowserOpen,
     setIsSaveAsOpen,
@@ -73,6 +73,7 @@ export const Header: React.FC = () => {
     setIsSnapshotsModalOpen,
   } = useEpub();
   const { stopAudio } = useTts();
+  const { t } = useTranslation();
 
   const [isTypographyOpen, setIsTypographyOpen] = useState<boolean>(false);
   const [isRenameOpen, setIsRenameOpen] = useState<boolean>(false);
@@ -99,9 +100,9 @@ export const Header: React.FC = () => {
   };
 
   const primaryModes: { id: PrimaryAppMode; label: string; icon: React.ReactNode; tooltip: string }[] = [
-    { id: 'write', label: 'Write', icon: <Edit3 size={14} />, tooltip: 'Creative Writing Workspace (Editor, Reader, Inspector)' },
-    { id: 'knowledge-base', label: 'Knowledge Base', icon: <Compass size={14} />, tooltip: 'Worldbuilding & Narrative Intelligence (Timeline, Presence Grid, Characters, Locations)' },
-    { id: 'publish', label: 'Publish', icon: <BookOpen size={14} />, tooltip: 'Production & Publishing (Cover Studio, Styles & CSS, TOC, Metadata, Assets, Export)' },
+    { id: 'write', label: t('header.writeMode'), icon: <Edit3 size={14} />, tooltip: t('header.writeTooltip') },
+    { id: 'knowledge-base', label: t('header.knowledgeBaseMode'), icon: <Compass size={14} />, tooltip: t('header.knowledgeBaseTooltip') },
+    { id: 'publish', label: t('header.publishMode'), icon: <BookOpen size={14} />, tooltip: t('header.publishTooltip') },
   ];
 
   if (isZenMode) {
@@ -141,11 +142,11 @@ export const Header: React.FC = () => {
                 >
                   <span
                     className={`document-status-dot ${isDirty ? 'dot-dirty' : 'dot-clean'}`}
-                    title={isDirty ? 'Unsaved changes (Ctrl+S)' : 'All changes saved'}
+                    title={isDirty ? t('header.unsavedChanges') : t('header.allChangesSaved')}
                   />
                   <div className="document-title-content">
                     <span className="document-title-text" style={{ fontSize: '0.82rem' }}>
-                      {book.metadata.title || 'Untitled Manuscript'}
+                      {book.metadata.title || t('header.newManuscript')}
                     </span>
                   </div>
                 </div>
@@ -160,7 +161,7 @@ export const Header: React.FC = () => {
                       textOverflow: 'ellipsis',
                       maxWidth: '220px',
                     }}
-                    title={`Current Chapter: ${activeChapter.title}`}
+                    title={`${t('statusBar.activeChapter')}: ${activeChapter.title}`}
                   >
                     / {activeChapter.title}
                   </span>
@@ -175,11 +176,11 @@ export const Header: React.FC = () => {
               className={`btn btn-sm ${isDirty ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => saveProject()}
               disabled={isSaving}
-              title={isDirty ? 'Save Project (Ctrl+S)' : 'All changes saved'}
+              title={isDirty ? t('header.saveTooltip') : t('header.allChangesSaved')}
               style={{ padding: '0.3rem 0.65rem', fontSize: '0.78rem', gap: '0.4rem' }}
             >
               {isSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-              <span>{isSaving ? 'Saving...' : isDirty ? 'Save' : 'Saved'}</span>
+              <span>{isSaving ? t('common.saving') : isDirty ? t('common.save') : t('common.saved')}</span>
             </button>
 
             {/* Reading paper tone cycle */}
@@ -190,7 +191,7 @@ export const Header: React.FC = () => {
                 const nextIdx = (themes.indexOf(readerTheme) + 1) % themes.length;
                 setReaderTheme(themes[nextIdx]);
               }}
-              title={`Tone: ${readerTheme}. Click to cycle.`}
+              title={`${t('statusBar.cycleTheme')}: ${readerTheme}`}
               style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem', textTransform: 'capitalize' }}
             >
               {readerTheme === 'light' ? (
@@ -206,7 +207,7 @@ export const Header: React.FC = () => {
             <button
               className="btn-icon btn-sm"
               onClick={() => openSettings('appearance')}
-              title="Settings & Preferences (Ctrl+,)"
+              title={t('header.settingsTooltip')}
             >
               <Settings size={15} />
             </button>
@@ -215,7 +216,7 @@ export const Header: React.FC = () => {
             <button
               className="btn btn-sm btn-outline exit-minimalist-btn"
               onClick={() => setMinimalistMode(false)}
-              title="Exit Minimalist Mode and return to Studio (Alt+M)"
+              title={t('headerActions.exitMinimalist')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -227,7 +228,7 @@ export const Header: React.FC = () => {
               }}
             >
               <Layout size={13} style={{ color: 'var(--accent-primary)' }} />
-              <span>Exit Minimalist</span>
+              <span>{t('headerActions.exitMinimalist')}</span>
             </button>
           </div>
         </header>
@@ -238,14 +239,14 @@ export const Header: React.FC = () => {
             <button
               className={`btn-icon btn-sm sidebar-toggle-btn ${sidebarCollapsed ? 'sidebar-hidden' : ''}`}
               onClick={toggleSidebar}
-              title={sidebarCollapsed ? 'Show Sidebar (Ctrl+\\)' : 'Hide Sidebar (Ctrl+\\)'}
+              title={sidebarCollapsed ? t('header.showSidebar') : t('header.hideSidebar')}
             >
               <Sidebar size={15} />
             </button>
 
             <div
               className="brand-badge brand-badge-clickable"
-              title="Chronicle • Authoring Suite (Click to open Welcome Guide)"
+              title={t('headerActions.brandSubtitle')}
               onClick={() => setIsWelcomeModalOpen(true)}
               role="button"
               tabIndex={0}
@@ -262,11 +263,11 @@ export const Header: React.FC = () => {
                 <div
                   className="document-title-pill"
                   onClick={() => setIsRenameOpen(true)}
-                  title="Click to rename title and author"
+                  title={t('headerActions.renameTitleAuthor')}
                 >
                   <span
                     className={`document-status-dot ${isDirty ? 'dot-dirty' : 'dot-clean'}`}
-                    title={isDirty ? 'Unsaved changes (Press Ctrl+S)' : 'All changes saved'}
+                    title={isDirty ? t('header.unsavedChanges') : t('header.allChangesSaved')}
                   />
                   <div className="document-title-content">
                     <span className="document-title-text">
@@ -274,7 +275,7 @@ export const Header: React.FC = () => {
                     </span>
                     {book.metadata.creator && (
                       <span className="document-author-subtext">
-                        by {book.metadata.creator}
+                        {t('headerActions.byAuthor')} {book.metadata.creator}
                       </span>
                     )}
                   </div>
@@ -316,22 +317,22 @@ export const Header: React.FC = () => {
 
             <button
               className="btn btn-ghost btn-sm header-btn-collapsible"
-              onClick={() => createNewBook('New Manuscript', 'Author')}
-              title="Create a new blank book"
+              onClick={() => createNewBook()}
+              title={t('header.newManuscript')}
               disabled={isLoading}
             >
               <PlusCircle size={14} />
-              <span>New</span>
+              <span>{t('headerActions.newBook')}</span>
             </button>
 
             <button
               className="btn btn-ghost btn-sm header-btn-collapsible"
               onClick={handleOpenClick}
-              title="Open Chronicle, EPUB, or Markdown from computer (Ctrl+O)"
+              title={t('header.openManuscript')}
               disabled={isLoading}
             >
               <Upload size={14} />
-              <span>Open</span>
+              <span>{t('headerActions.openBook')}</span>
             </button>
 
             {/* WebDAV Cloud Storage Hub */}
@@ -343,7 +344,7 @@ export const Header: React.FC = () => {
                 style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
               >
                 <Cloud size={14} />
-                <span>Cloud</span>
+                <span>{t('headerActions.cloud')}</span>
               </button>
             ) : (
               <div className="header-btn-collapsible" style={{ position: 'relative' }}>
@@ -354,7 +355,7 @@ export const Header: React.FC = () => {
                   style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                 >
                   <Cloud size={14} style={{ color: isWebDavConnected ? '#3b82f6' : 'inherit' }} />
-                  <span>Cloud</span>
+                  <span>{t('headerActions.cloud')}</span>
                   {isWebDavConnected && (
                     <span
                       style={{
@@ -419,7 +420,7 @@ export const Header: React.FC = () => {
                         }}
                       >
                         <FolderTree size={14} color="#3b82f6" />
-                        <span>Open from Cloud...</span>
+                        <span>{t('headerActions.openFromCloud')}</span>
                       </button>
 
                       <button
@@ -445,7 +446,7 @@ export const Header: React.FC = () => {
                         }}
                       >
                         <Cloud size={14} color="var(--accent-primary)" />
-                        <span>Save As to Cloud...</span>
+                        <span>{t('headerActions.saveAsCloud')}</span>
                       </button>
 
                       <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '3px 0' }} />
@@ -472,7 +473,7 @@ export const Header: React.FC = () => {
                         }}
                       >
                         <Settings size={14} />
-                        <span>WebDAV Settings...</span>
+                        <span>{t('headerActions.webdavSettings')}</span>
                       </button>
                     </div>
                   </>
@@ -484,12 +485,12 @@ export const Header: React.FC = () => {
             <button
               className="btn btn-ghost btn-sm header-btn-collapsible"
               onClick={() => setIsTypographyOpen(true)}
-              title="Smart typography & punctuation cleanup"
+              title={t('header.typographyTooltip')}
               disabled={isLoading || !book}
               style={{ color: 'var(--accent-secondary)' }}
             >
               <Wand2 size={14} />
-              <span>Typography</span>
+              <span>{t('headerActions.typography')}</span>
             </button>
 
             {/* Story Snapshots (Time Machine) */}
@@ -516,14 +517,14 @@ export const Header: React.FC = () => {
                 onClick={() => saveProject()}
                 title={
                   isSaving
-                    ? 'Saving in progress...'
+                    ? t('common.saving')
                     : storageTarget === 'cloud'
-                      ? `Save and replace in WebDAV cloud (${cloudFileName || 'document'}) (Ctrl+S)`
+                      ? t('header.saveCloudTooltip')
                       : storageTarget === 'local'
                         ? localFilePath
-                          ? `Save and overwrite locally (${localFilePath.split(/[\\/]/).pop()}) (Ctrl+S)`
-                          : 'Save project locally (.chronicle) (Ctrl+S)'
-                        : 'Save project (Ctrl+S)'
+                          ? `${t('header.saveLocalTooltip')} (${localFilePath.split(/[\\/]/).pop()})`
+                          : t('header.saveLocalTooltip')
+                        : t('header.saveTooltip')
                 }
                 disabled={isSaving || !book}
                 style={{
@@ -545,18 +546,18 @@ export const Header: React.FC = () => {
                 <span>
                   {isSaving
                     ? storageTarget === 'cloud'
-                      ? 'Uploading...'
-                      : 'Saving...'
+                      ? t('statusBar.uploadingCloud')
+                      : t('common.saving')
                     : storageTarget === 'cloud'
-                      ? 'Save (Cloud)'
-                      : 'Save'}
+                      ? t('headerActions.quickSaveCloud')
+                      : t('common.save')}
                 </span>
               </button>
 
               <button
                 className="btn btn-primary btn-sm btn-split-arrow"
                 onClick={() => setIsSaveMenuOpen(!isSaveMenuOpen)}
-                title="Save options (Save As...)"
+                title={t('headerActions.saveAs')}
                 disabled={isSaving || !book}
                 style={{
                   borderTopLeftRadius: 0,
@@ -618,9 +619,9 @@ export const Header: React.FC = () => {
                     >
                       {storageTarget === 'cloud' ? <Cloud size={14} color="#3b82f6" /> : <Save size={14} color="var(--accent-primary)" />}
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600 }}>{storageTarget === 'cloud' ? 'Quick Save (Cloud)' : 'Quick Save'}</div>
+                        <div style={{ fontWeight: 600 }}>{storageTarget === 'cloud' ? t('headerActions.quickSaveCloud') : t('headerActions.quickSave')}</div>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                          {storageTarget === 'cloud' ? 'Uploads and updates remote file' : 'Saves current manuscript'}
+                          {storageTarget === 'cloud' ? t('header.saveCloudTooltip') : t('header.saveTooltip')}
                         </div>
                       </div>
                       <kbd className="kbd-shortcut" style={{ fontSize: '9px', padding: '1px 4px' }}>Ctrl+S</kbd>
@@ -682,9 +683,9 @@ export const Header: React.FC = () => {
                     >
                       <FolderArchive size={14} color="var(--accent-secondary)" />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600 }}>Save As...</div>
+                        <div style={{ fontWeight: 600 }}>{t('headerActions.saveAs')}</div>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                          Save as local file or to WebDAV cloud
+                          {t('headerActions.saveAsDesc')}
                         </div>
                       </div>
                     </button>
@@ -711,7 +712,7 @@ export const Header: React.FC = () => {
                       }}
                     >
                       <Settings size={14} />
-                      <span>Choose Save Destination...</span>
+                      <span>{t('headerActions.chooseDestination')}</span>
                     </button>
                   </div>
                 </>
@@ -722,11 +723,11 @@ export const Header: React.FC = () => {
             <button
               className="btn btn-ghost btn-sm header-btn-collapsible"
               onClick={() => openSettings('appearance')}
-              title={isUpdateAvailable ? `Update Available: ${latestRelease?.latestVersion || 'New version'} (Click to open Settings)` : 'Settings & Preferences (Ctrl+,)'}
+              title={isUpdateAvailable ? `${t('settings.updateAvailable')}: ${latestRelease?.latestVersion || ''}` : t('header.settingsTooltip')}
               style={{ position: 'relative' }}
             >
               <Settings size={14} />
-              <span>Settings</span>
+              <span>{t('headerActions.settingsPreferences')}</span>
               {isUpdateAvailable && (
                 <span
                   style={{
@@ -748,12 +749,12 @@ export const Header: React.FC = () => {
               <button
                 className={`btn btn-ghost btn-sm header-more-btn ${isMoreMenuOpen ? 'active' : ''}`}
                 onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-                title="More actions & tools"
+                title={t('headerActions.moreActions')}
                 aria-expanded={isMoreMenuOpen}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
               >
                 <MoreHorizontal size={15} />
-                <span>More</span>
+                <span>{t('headerActions.moreActions')}</span>
                 <ChevronDown
                   size={11}
                   style={{
@@ -785,13 +786,13 @@ export const Header: React.FC = () => {
                       gap: '2px',
                     }}
                   >
-                    <div className="dropdown-section-title">Manuscript & File</div>
+                    <div className="dropdown-section-title">{t('headerActions.manuscriptAndFile')}</div>
 
                     <button
                       className="dropdown-item"
                       onClick={() => {
                         setIsMoreMenuOpen(false);
-                        createNewBook('New Manuscript', 'Author');
+                        createNewBook();
                       }}
                       disabled={isLoading}
                       style={{
@@ -810,8 +811,8 @@ export const Header: React.FC = () => {
                     >
                       <PlusCircle size={15} color="var(--accent-primary)" />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600 }}>New Manuscript</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Create fresh empty book</div>
+                        <div style={{ fontWeight: 600 }}>{t('header.newManuscript')}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('welcome.startNewDesc')}</div>
                       </div>
                     </button>
 
@@ -838,8 +839,8 @@ export const Header: React.FC = () => {
                     >
                       <Upload size={15} color="#3b82f6" />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600 }}>Open File...</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>EPUB or Chronicle project</div>
+                        <div style={{ fontWeight: 600 }}>{t('header.openManuscript')}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('welcome.openDesc')}</div>
                       </div>
                       <kbd className="kbd-shortcut">Ctrl+O</kbd>
                     </button>
@@ -867,7 +868,7 @@ export const Header: React.FC = () => {
                       >
                         <Cloud size={15} color="#60a5fa" />
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600 }}>WebDAV Cloud</div>
+                          <div style={{ fontWeight: 600 }}>{t('headerActions.cloud')}</div>
                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Desktop App only</div>
                         </div>
                       </button>
@@ -895,7 +896,7 @@ export const Header: React.FC = () => {
                         <Cloud size={15} color={isWebDavConnected ? '#10b981' : '#60a5fa'} />
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span>WebDAV Cloud</span>
+                            <span>{t('headerActions.cloud')}</span>
                             {isWebDavConnected && (
                               <span
                                 style={{
@@ -909,13 +910,13 @@ export const Header: React.FC = () => {
                               />
                             )}
                           </div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Browse or sync remote files</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('headerActions.openFromCloud')}</div>
                         </div>
                       </button>
                     )}
 
                     <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '3px 0' }} />
-                    <div className="dropdown-section-title">Tools & Guides</div>
+                    <div className="dropdown-section-title">{t('headerActions.toolsAndGuides')}</div>
 
                     <button
                       className="dropdown-item"
@@ -940,8 +941,8 @@ export const Header: React.FC = () => {
                     >
                       <Wand2 size={15} color="var(--accent-secondary)" />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600 }}>Smart Typography</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Punctuation & quotes cleanup</div>
+                        <div style={{ fontWeight: 600 }}>{t('headerActions.smartTypography')}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('headerActions.smartTypographyDesc')}</div>
                       </div>
                     </button>
 
@@ -967,8 +968,8 @@ export const Header: React.FC = () => {
                     >
                       <Sparkles size={15} color="#c084fc" />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600 }}>Welcome Guide</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Tour and quick start</div>
+                        <div style={{ fontWeight: 600 }}>{t('headerActions.welcomeGuide')}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('headerActions.welcomeGuideDesc')}</div>
                       </div>
                     </button>
 
@@ -995,8 +996,8 @@ export const Header: React.FC = () => {
                     >
                       <Download size={15} color="#10b981" />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600 }}>Export Hub...</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Word, PDF, EPUB, Markdown</div>
+                        <div style={{ fontWeight: 600 }}>{t('headerActions.exportHub')}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('headerActions.exportHubDesc')}</div>
                       </div>
                     </button>
 
@@ -1024,8 +1025,8 @@ export const Header: React.FC = () => {
                     >
                       <Settings size={15} color="var(--text-secondary)" />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600 }}>Settings & Preferences</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Themes, display & behavior</div>
+                        <div style={{ fontWeight: 600 }}>{t('headerActions.settingsPreferences')}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('headerActions.settingsPreferencesDesc')}</div>
                       </div>
                       <kbd className="kbd-shortcut">Ctrl+,</kbd>
                     </button>

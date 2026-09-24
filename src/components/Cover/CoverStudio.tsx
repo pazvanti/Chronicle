@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { escapeXml } from '../../services/epub/htmlUtils';
+import { useTranslation } from '../../i18n/I18nContext';
 import {
   Upload,
   Sparkles,
@@ -50,6 +51,7 @@ const GRADIENT_PRESETS: GradientPreset[] = [
 
 export const CoverStudio: React.FC = () => {
   const { book, updateCoverImage, generateCustomCover, showNotification } = useEpub();
+  const { t } = useTranslation();
   const directFileInputRef = useRef<HTMLInputElement>(null);
   const bgImageInputRef = useRef<HTMLInputElement>(null);
 
@@ -112,7 +114,6 @@ export const CoverStudio: React.FC = () => {
   const [emblemScale, setEmblemScale] = useState<number>(3.2);
   const [emblemColor, setEmblemColor] = useState<string>('#818cf8');
   const [emblemGlow, setEmblemGlow] = useState<boolean>(true);
-
 
   // Handle Direct Cover File Upload (Raw untouched image)
   const handleDirectFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -300,25 +301,25 @@ export const CoverStudio: React.FC = () => {
       <stop offset="100%" stop-color="${bgGlowColor}" stop-opacity="0" />
     </radialGradient>
 
-    <!-- Filter for text shadow -->
+    <!-- Text Drop Shadow Filter -->
     <filter id="text-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.8"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.75" />
     </filter>
   </defs>
 
-  <!-- Base Gradient -->
-  <rect width="600" height="900" fill="url(#main-bg-grad)"/>
+  <!-- Background Base Layer -->
+  <rect width="600" height="900" fill="url(#main-bg-grad)" />
 
-  <!-- Background Image with Blend Overlay if active -->
+  <!-- Uploaded Background Image (If provided) -->
   ${
     bgType === 'image' && bgImageBase64
-      ? `<image href="${bgImageBase64}" width="600" height="900" preserveAspectRatio="xMidYMid slice" opacity="0.9"/>
-         <rect width="600" height="900" fill="url(#main-bg-grad)" opacity="${bgOverlayOpacity}" style="mix-blend-mode: multiply;"/>`
+      ? `<image href="${bgImageBase64}" width="600" height="900" preserveAspectRatio="xMidYMid slice" opacity="1"/>
+         <rect width="600" height="900" fill="url(#main-bg-grad)" opacity="${bgOverlayOpacity}" />`
       : ''
   }
 
-  <!-- Radial Glow -->
-  ${bgRadialGlow ? `<circle cx="300" cy="${emblemPosY}" r="260" fill="url(#center-glow)"/>` : ''}
+  <!-- Radial Atmosphere Glow -->
+  ${bgRadialGlow ? '<rect width="600" height="900" fill="url(#center-glow)" />' : ''}
 
   <!-- Decorative Frame -->
   ${frameMarkup}
@@ -327,7 +328,7 @@ export const CoverStudio: React.FC = () => {
   <text
     x="300"
     y="${authorPosY}"
-    font-family="'Outfit', -apple-system, sans-serif"
+    font-family="'Cinzel', 'Georgia', serif"
     font-size="${authorFontSize}"
     fill="${authorColor}"
     font-weight="600"
@@ -337,16 +338,15 @@ export const CoverStudio: React.FC = () => {
   >
     ${escapeXml(authorUppercase ? authorText.toUpperCase() : authorText)}
   </text>
-  <line x1="210" y1="${authorPosY + 22}" x2="390" y2="${authorPosY + 22}" stroke="${authorColor}" stroke-width="1.5" stroke-opacity="0.75"/>
 
-  <!-- Main Title -->
+  <!-- Main Book Title -->
   <text
     x="300"
     y="${titlePosY}"
     font-family="${titleFont}"
     font-size="${titleFontSize}"
     fill="${titleColorType === 'gradient' ? 'url(#title-grad)' : titleSolidColor}"
-    font-weight="bold"
+    font-weight="700"
     letter-spacing="${titleLetterSpacing}"
     text-anchor="middle"
     ${titleShadow ? 'filter="url(#text-glow)"' : ''}
@@ -444,7 +444,7 @@ export const CoverStudio: React.FC = () => {
 
   const handleApplyGeneratedCover = async () => {
     await generateCustomCover(generatedSvg);
-    showNotification('success', 'Custom cover applied to book metadata and manifest!');
+    showNotification('success', t('coverStudio.applyCoverToBook'));
   };
 
   const handleDownloadHighResPng = () => {
@@ -469,7 +469,7 @@ export const CoverStudio: React.FC = () => {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showNotification('success', 'Downloaded 1600×2400 high-res cover PNG!');
+      showNotification('success', t('coverStudio.downloadImage'));
     };
     img.src = url;
   };
@@ -485,13 +485,13 @@ export const CoverStudio: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showNotification('success', 'Cover downloaded as SVG vector file!');
+    showNotification('success', t('coverStudio.saveSvg'));
   };
 
   if (!book) {
     return (
       <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        No book loaded
+        {t('coverStudio.noBookLoaded')}
       </div>
     );
   }
@@ -502,10 +502,10 @@ export const CoverStudio: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700 }}>
-            Cover Studio
+            {t('coverStudio.title')}
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            Manage the EPUB cover artwork or design custom publication graphics
+            {t('coverStudio.subtitle')}
           </p>
         </div>
 
@@ -516,14 +516,14 @@ export const CoverStudio: React.FC = () => {
             onClick={() => setMainMode('current')}
           >
             <ImageIcon size={14} />
-            <span>Current Artwork & Direct Upload</span>
+            <span>{t('coverStudio.currentArtworkDirect')}</span>
           </button>
           <button
             className={`view-tab-btn ${mainMode === 'designer' ? 'active' : ''}`}
             onClick={() => setMainMode('designer')}
           >
             <Sparkles size={14} />
-            <span>Cover Designer Studio</span>
+            <span>{t('coverStudio.coverDesignerStudio')}</span>
           </button>
         </div>
       </div>
@@ -560,13 +560,13 @@ export const CoverStudio: React.FC = () => {
               ) : (
                 <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)' }}>
                   <ImageIcon size={48} style={{ opacity: 0.35, marginBottom: '0.6rem' }} />
-                  <p style={{ fontSize: '0.85rem' }}>No cover image assigned</p>
+                  <p style={{ fontSize: '0.85rem' }}>{t('coverStudio.noCoverAssigned')}</p>
                 </div>
               )}
             </div>
 
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-              {book.coverImageUrl ? 'Active Book Cover Image' : 'No Cover File in EPUB'}
+              {book.coverImageUrl ? t('coverStudio.activeCoverImage') : t('coverStudio.noCoverFile')}
             </div>
           </div>
 
@@ -596,10 +596,10 @@ export const CoverStudio: React.FC = () => {
               />
               <Upload size={38} color="var(--accent-primary)" style={{ margin: '0 auto 0.75rem' }} />
               <h3 style={{ fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Upload & Replace Cover Photo Directly
+                {t('coverStudio.uploadDirectTitle')}
               </h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '420px', margin: '0 auto 1rem' }}>
-                Drag and drop your cover image (JPG, PNG, WebP or SVG) to set it as the book's cover without adding any extra designs or frames.
+                {t('coverStudio.uploadDirectDesc')}
               </p>
               <button
                 type="button"
@@ -610,7 +610,7 @@ export const CoverStudio: React.FC = () => {
                 }}
               >
                 <Upload size={14} />
-                <span>Browse Image File</span>
+                <span>{t('coverStudio.browseImageFile')}</span>
               </button>
             </div>
 
@@ -618,7 +618,7 @@ export const CoverStudio: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div style={{ background: 'var(--bg-surface)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                 <h4 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                  Current Artwork Actions
+                  {t('coverStudio.currentArtworkActions')}
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <button
@@ -628,7 +628,7 @@ export const CoverStudio: React.FC = () => {
                     style={{ justifyContent: 'flex-start' }}
                   >
                     <Download size={14} />
-                    <span>Download Cover Image</span>
+                    <span>{t('coverStudio.downloadCoverImage')}</span>
                   </button>
                   <button
                     className="btn btn-secondary btn-sm"
@@ -637,7 +637,7 @@ export const CoverStudio: React.FC = () => {
                     style={{ justifyContent: 'flex-start' }}
                   >
                     <Sparkles size={14} />
-                    <span>Open in Cover Designer</span>
+                    <span>{t('coverStudio.openInCoverDesigner')}</span>
                   </button>
                 </div>
               </div>
@@ -645,12 +645,12 @@ export const CoverStudio: React.FC = () => {
               <div style={{ background: 'var(--bg-surface)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem', color: 'var(--accent-primary)', fontSize: '0.85rem', fontWeight: 600 }}>
                   <Info size={15} />
-                  <span>Cover Metadata</span>
+                  <span>{t('coverStudio.coverMetadata')}</span>
                 </div>
                 <ul style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', paddingLeft: '1.2rem', margin: 0, lineHeight: 1.6 }}>
-                  <li>Manifest ID: <code>{book.coverManifestId || 'None'}</code></li>
-                  <li>Media Type: <code>{book.coverMediaType || 'image/jpeg'}</code></li>
-                  <li>Auto-linked to EPUB 2 & EPUB 3 cover guides.</li>
+                  <li>{t('coverStudio.manifestId')} <code>{book.coverManifestId || 'None'}</code></li>
+                  <li>{t('coverStudio.mediaType')} <code>{book.coverMediaType || 'image/jpeg'}</code></li>
+                  <li>{t('coverStudio.autoLinkedGuides')}</li>
                 </ul>
               </div>
             </div>
@@ -687,7 +687,7 @@ export const CoverStudio: React.FC = () => {
               </div>
 
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-                2:3 Standard Book Geometry (Scales to 1600 × 2400 px)
+                {t('coverStudio.bookGeometry')}
               </div>
 
               {/* Action Buttons */}
@@ -703,7 +703,7 @@ export const CoverStudio: React.FC = () => {
                   }}
                 >
                   <Check size={16} />
-                  <span>Apply Cover to Book</span>
+                  <span>{t('coverStudio.applyCoverToBook')}</span>
                 </button>
 
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -714,7 +714,7 @@ export const CoverStudio: React.FC = () => {
                     title="Download High-Res 1600×2400 PNG"
                   >
                     <Download size={13} />
-                    <span>PNG (1600×2400)</span>
+                    <span>{t('coverStudio.downloadPng')}</span>
                   </button>
                   <button
                     className="btn btn-outline btn-sm"
@@ -723,7 +723,7 @@ export const CoverStudio: React.FC = () => {
                     title="Download SVG vector"
                   >
                     <Download size={13} />
-                    <span>Save SVG</span>
+                    <span>{t('coverStudio.saveSvg')}</span>
                   </button>
                 </div>
               </div>
@@ -739,7 +739,7 @@ export const CoverStudio: React.FC = () => {
                   onClick={() => setDesignerSubTab('text')}
                 >
                   <Type size={14} />
-                  <span>Typography</span>
+                  <span>{t('coverStudio.tabTypography')}</span>
                 </button>
                 <button
                   className={`view-tab-btn ${designerSubTab === 'bg' ? 'active' : ''}`}
@@ -747,7 +747,7 @@ export const CoverStudio: React.FC = () => {
                   onClick={() => setDesignerSubTab('bg')}
                 >
                   <Palette size={14} />
-                  <span>Background & Overlay</span>
+                  <span>{t('coverStudio.tabBackground')}</span>
                 </button>
                 <button
                   className={`view-tab-btn ${designerSubTab === 'emblem' ? 'active' : ''}`}
@@ -755,7 +755,7 @@ export const CoverStudio: React.FC = () => {
                   onClick={() => setDesignerSubTab('emblem')}
                 >
                   <Compass size={14} />
-                  <span>Emblems</span>
+                  <span>{t('coverStudio.tabEmblems')}</span>
                 </button>
                 <button
                   className={`view-tab-btn ${designerSubTab === 'frame' ? 'active' : ''}`}
@@ -763,7 +763,7 @@ export const CoverStudio: React.FC = () => {
                   onClick={() => setDesignerSubTab('frame')}
                 >
                   <Layout size={14} />
-                  <span>Frames</span>
+                  <span>{t('coverStudio.tabFrames')}</span>
                 </button>
               </div>
 
@@ -773,21 +773,21 @@ export const CoverStudio: React.FC = () => {
                   {/* Main Title Controls */}
                   <div style={{ background: 'var(--bg-input)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Main Title</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{t('coverStudio.mainTitle')}</span>
                       <div style={{ display: 'flex', gap: '0.4rem' }}>
                         <button
                           className={`btn btn-sm ${titleColorType === 'gradient' ? 'btn-primary' : 'btn-secondary'}`}
                           style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}
                           onClick={() => setTitleColorType('gradient')}
                         >
-                          Gradient
+                          {t('coverStudio.gradient')}
                         </button>
                         <button
                           className={`btn btn-sm ${titleColorType === 'solid' ? 'btn-primary' : 'btn-secondary'}`}
                           style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}
                           onClick={() => setTitleColorType('solid')}
                         >
-                          Solid
+                          {t('coverStudio.solid')}
                         </button>
                       </div>
                     </div>
@@ -798,12 +798,12 @@ export const CoverStudio: React.FC = () => {
                       style={{ marginBottom: '0.75rem' }}
                       value={titleText}
                       onChange={e => setTitleText(e.target.value)}
-                      placeholder="Enter book title"
+                      placeholder={t('coverStudio.enterBookTitle')}
                     />
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                       <div className="form-group">
-                        <label className="form-label" style={{ fontSize: '0.75rem' }}>Font Family</label>
+                        <label className="form-label" style={{ fontSize: '0.75rem' }}>{t('coverStudio.fontFamily')}</label>
                         <select
                           className="form-select"
                           value={titleFontFamily}
@@ -819,7 +819,7 @@ export const CoverStudio: React.FC = () => {
 
                       <div className="form-group">
                         <label className="form-label" style={{ fontSize: '0.75rem' }}>
-                          {titleColorType === 'gradient' ? 'Gradient Colors' : 'Solid Color'}
+                          {titleColorType === 'gradient' ? t('coverStudio.gradientColors') : t('coverStudio.solidColor')}
                         </label>
                         {titleColorType === 'gradient' ? (
                           <div style={{ display: 'flex', gap: '0.4rem' }}>
@@ -850,7 +850,7 @@ export const CoverStudio: React.FC = () => {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          <span>Size</span>
+                          <span>{t('coverStudio.size')}</span>
                           <span>{titleFontSize}px</span>
                         </div>
                         <input
@@ -865,7 +865,7 @@ export const CoverStudio: React.FC = () => {
 
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          <span>Position Y</span>
+                          <span>{t('coverStudio.positionY')}</span>
                           <span>{titlePosY}px</span>
                         </div>
                         <input
@@ -881,7 +881,7 @@ export const CoverStudio: React.FC = () => {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Letter Spacing:</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('coverStudio.letterSpacing')}</span>
                         <input
                           type="range"
                           min="0"
@@ -900,7 +900,7 @@ export const CoverStudio: React.FC = () => {
                           onChange={e => setTitleShadow(e.target.checked)}
                           style={{ accentColor: 'var(--accent-primary)' }}
                         />
-                        <span>Text Shadow / Glow</span>
+                        <span>{t('coverStudio.textShadowGlow')}</span>
                       </label>
                     </div>
                   </div>
@@ -909,7 +909,7 @@ export const CoverStudio: React.FC = () => {
                   <div style={{ background: 'var(--bg-input)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        Author Byline
+                        {t('coverStudio.authorByline')}
                       </span>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', cursor: 'pointer' }}>
                         <input
@@ -918,7 +918,7 @@ export const CoverStudio: React.FC = () => {
                           onChange={e => setAuthorUppercase(e.target.checked)}
                           style={{ accentColor: 'var(--accent-primary)' }}
                         />
-                        <span>ALL CAPS</span>
+                        <span>{t('coverStudio.allCaps')}</span>
                       </label>
                     </div>
 
@@ -928,12 +928,12 @@ export const CoverStudio: React.FC = () => {
                       style={{ marginBottom: '0.75rem' }}
                       value={authorText}
                       onChange={e => setAuthorText(e.target.value)}
-                      placeholder="Author Name"
+                      placeholder={t('coverStudio.authorNamePlaceholder')}
                     />
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.6rem', marginBottom: '0.6rem' }}>
                       <div>
-                        <label className="form-label" style={{ fontSize: '0.72rem' }}>Color</label>
+                        <label className="form-label" style={{ fontSize: '0.72rem' }}>{t('coverStudio.color')}</label>
                         <input
                           type="color"
                           value={authorColor}
@@ -944,7 +944,7 @@ export const CoverStudio: React.FC = () => {
 
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                          <span>Size</span>
+                          <span>{t('coverStudio.size')}</span>
                           <span>{authorFontSize}px</span>
                         </div>
                         <input
@@ -959,7 +959,7 @@ export const CoverStudio: React.FC = () => {
 
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                          <span>Pos Y</span>
+                          <span>{t('coverStudio.positionY')}</span>
                           <span>{authorPosY}px</span>
                         </div>
                         <input
@@ -974,7 +974,7 @@ export const CoverStudio: React.FC = () => {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Letter Spacing:</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('coverStudio.letterSpacing')}</span>
                       <input
                         type="range"
                         min="0"
@@ -991,7 +991,7 @@ export const CoverStudio: React.FC = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                     <div style={{ background: 'var(--bg-input)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Subtitle</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{t('coverStudio.subtitleField')}</span>
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{subtitleFontSize}px</span>
                       </div>
                       <input
@@ -1029,7 +1029,7 @@ export const CoverStudio: React.FC = () => {
 
                     <div style={{ background: 'var(--bg-input)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Bottom Tagline</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{t('coverStudio.bottomTagline')}</span>
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{taglineFontSize}px</span>
                       </div>
                       <input
@@ -1073,7 +1073,7 @@ export const CoverStudio: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   {/* Background Preset Palette */}
                   <div className="form-group">
-                    <label className="form-label">Gradient Presets:</label>
+                    <label className="form-label">{t('coverStudio.gradientPresets')}</label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
                       {GRADIENT_PRESETS.map(preset => (
                         <button
@@ -1107,11 +1107,11 @@ export const CoverStudio: React.FC = () => {
                   {/* Custom Gradient Controls */}
                   <div style={{ background: 'var(--bg-input)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.6rem' }}>
-                      Custom Gradient Colors & Lighting
+                      {t('coverStudio.customGradientLighting')}
                     </span>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                       <div>
-                        <label className="form-label" style={{ fontSize: '0.72rem' }}>Color 1 (Start)</label>
+                        <label className="form-label" style={{ fontSize: '0.72rem' }}>{t('coverStudio.colorStart')}</label>
                         <input
                           type="color"
                           value={bgGradColor1}
@@ -1120,7 +1120,7 @@ export const CoverStudio: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="form-label" style={{ fontSize: '0.72rem' }}>Color 2 (End)</label>
+                        <label className="form-label" style={{ fontSize: '0.72rem' }}>{t('coverStudio.colorEnd')}</label>
                         <input
                           type="color"
                           value={bgGradColor2}
@@ -1129,7 +1129,7 @@ export const CoverStudio: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="form-label" style={{ fontSize: '0.72rem' }}>Center Glow</label>
+                        <label className="form-label" style={{ fontSize: '0.72rem' }}>{t('coverStudio.centerGlow')}</label>
                         <input
                           type="color"
                           value={bgGlowColor}
@@ -1141,7 +1141,7 @@ export const CoverStudio: React.FC = () => {
 
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        <span>Gradient Angle</span>
+                        <span>{t('coverStudio.gradientAngle')}</span>
                         <span>{bgGradAngle}°</span>
                       </div>
                       <input
@@ -1161,7 +1161,7 @@ export const CoverStudio: React.FC = () => {
                           onChange={e => setBgRadialGlow(e.target.checked)}
                           style={{ accentColor: 'var(--accent-primary)' }}
                         />
-                        <span>Center Atmosphere Radial Lighting Glow</span>
+                        <span>{t('coverStudio.atmosphereLighting')}</span>
                       </label>
                     </div>
                   </div>
@@ -1169,7 +1169,7 @@ export const CoverStudio: React.FC = () => {
                   {/* Background Image Upload & Transparency Overlay */}
                   <div style={{ background: 'var(--bg-input)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Background Image & Overlay</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{t('coverStudio.bgImageOverlay')}</span>
                       {bgImageBase64 && (
                         <button
                           className="btn btn-outline btn-sm"
@@ -1180,7 +1180,7 @@ export const CoverStudio: React.FC = () => {
                           }}
                         >
                           <Trash2 size={12} />
-                          <span>Remove Image</span>
+                          <span>{t('coverStudio.removeImage')}</span>
                         </button>
                       )}
                     </div>
@@ -1201,12 +1201,12 @@ export const CoverStudio: React.FC = () => {
                         onClick={() => bgImageInputRef.current?.click()}
                       >
                         <Upload size={14} />
-                        <span>Upload Background Image (Photo / Art)</span>
+                        <span>{t('coverStudio.uploadBgImage')}</span>
                       </button>
                     ) : (
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-                          <span>Gradient Overlay Opacity (Blend Tint)</span>
+                          <span>{t('coverStudio.overlayOpacity')}</span>
                           <span>{Math.round(bgOverlayOpacity * 100)}%</span>
                         </div>
                         <input
@@ -1228,7 +1228,7 @@ export const CoverStudio: React.FC = () => {
               {designerSubTab === 'emblem' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   <div className="form-group">
-                    <label className="form-label">Choose Emblem Icon:</label>
+                    <label className="form-label">{t('coverStudio.chooseEmblemIcon')}</label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.4rem' }}>
                       {[
                         { id: 'compass', label: 'Compass', icon: <Compass size={16} /> },
@@ -1245,7 +1245,7 @@ export const CoverStudio: React.FC = () => {
                         { id: 'trees', label: 'Forest', icon: <Trees size={16} /> },
                         { id: 'mountain', label: 'Mountain', icon: <Mountain size={16} /> },
                         { id: 'eye', label: 'Eye', icon: <Eye size={16} /> },
-                        { id: 'none', label: 'None (Text Only)', icon: <Layout size={16} /> },
+                        { id: 'none', label: 'None', icon: <Layout size={16} /> },
                       ].map(item => (
                         <button
                           key={item.id}
@@ -1265,7 +1265,7 @@ export const CoverStudio: React.FC = () => {
                     <div style={{ background: 'var(--bg-input)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
                         <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                          Emblem Styling & Geometry
+                          {t('coverStudio.emblemStyling')}
                         </span>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', cursor: 'pointer' }}>
                           <input
@@ -1274,12 +1274,12 @@ export const CoverStudio: React.FC = () => {
                             onChange={e => setEmblemGlow(e.target.checked)}
                             style={{ accentColor: 'var(--accent-primary)' }}
                           />
-                          <span>Emblem Glow</span>
+                          <span>{t('coverStudio.emblemGlow')}</span>
                         </label>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
                         <div>
-                          <label className="form-label" style={{ fontSize: '0.72rem' }}>Emblem Color</label>
+                          <label className="form-label" style={{ fontSize: '0.72rem' }}>{t('coverStudio.emblemColor')}</label>
                           <input
                             type="color"
                             value={emblemColor}
@@ -1289,7 +1289,7 @@ export const CoverStudio: React.FC = () => {
                         </div>
                         <div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                            <span>Scale</span>
+                            <span>{t('coverStudio.scale')}</span>
                             <span>{emblemScale.toFixed(1)}x</span>
                           </div>
                           <input
@@ -1304,7 +1304,7 @@ export const CoverStudio: React.FC = () => {
                         </div>
                         <div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                            <span>Position Y</span>
+                            <span>{t('coverStudio.positionY')}</span>
                             <span>{emblemPosY}px</span>
                           </div>
                           <input
@@ -1326,14 +1326,14 @@ export const CoverStudio: React.FC = () => {
               {designerSubTab === 'frame' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   <div className="form-group">
-                    <label className="form-label">Frame & Border Style:</label>
+                    <label className="form-label">{t('coverStudio.frameBorderStyle')}</label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem' }}>
                       {[
                         { id: 'classic', label: 'Classic' },
                         { id: 'modern', label: 'Modern' },
                         { id: 'vintage', label: 'Vintage' },
                         { id: 'minimal', label: 'Minimal' },
-                        { id: 'none', label: 'No Border' },
+                        { id: 'none', label: 'None' },
                       ].map(style => (
                         <button
                           key={style.id}
@@ -1351,11 +1351,11 @@ export const CoverStudio: React.FC = () => {
                   {frameStyle !== 'none' && (
                     <div style={{ background: 'var(--bg-input)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.6rem' }}>
-                        Frame Color & Opacity
+                        {t('coverStudio.frameColorOpacity')}
                       </span>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', alignItems: 'center' }}>
                         <div>
-                          <label className="form-label" style={{ fontSize: '0.72rem' }}>Color</label>
+                          <label className="form-label" style={{ fontSize: '0.72rem' }}>{t('coverStudio.color')}</label>
                           <input
                             type="color"
                             value={frameColor}
@@ -1365,7 +1365,7 @@ export const CoverStudio: React.FC = () => {
                         </div>
                         <div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            <span>Border Opacity</span>
+                            <span>{t('coverStudio.borderOpacity')}</span>
                             <span>{Math.round(frameOpacity * 100)}%</span>
                           </div>
                           <input

@@ -1,12 +1,14 @@
 import React from 'react';
 import { Smartphone, Monitor, AlertTriangle } from 'lucide-react';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface MobileNoticeModalProps {
   onDismiss?: () => void;
 }
 
 export const MobileNoticeModal: React.FC<MobileNoticeModalProps> = ({ onDismiss }) => {
+  const { t } = useTranslation();
   useEscapeKey(onDismiss);
 
   return (
@@ -76,7 +78,7 @@ export const MobileNoticeModal: React.FC<MobileNoticeModalProps> = ({ onDismiss 
               }}
             >
               <AlertTriangle size={12} />
-              <span>Handheld Screen Detected</span>
+              <span>{t('mobile.noticeTitle')}</span>
             </div>
             <h3
               id="mobile-notice-title"
@@ -89,7 +91,7 @@ export const MobileNoticeModal: React.FC<MobileNoticeModalProps> = ({ onDismiss 
                 letterSpacing: '-0.02em',
               }}
             >
-              Desktop Experience Recommended
+              {t('mobile.noticeTitle')}
             </h3>
           </div>
         </div>
@@ -104,7 +106,7 @@ export const MobileNoticeModal: React.FC<MobileNoticeModalProps> = ({ onDismiss 
               lineHeight: 1.6,
             }}
           >
-            Chronicle is engineered specifically for desktop workstations and larger displays (768px+ width) to support long-form novel authoring, visual timelines, multi-column worldbuilding dossiers, and print typesetting.
+            {t('mobile.noticeSubtitle')}
           </p>
 
           <div
@@ -159,7 +161,7 @@ export const MobileNoticeModal: React.FC<MobileNoticeModalProps> = ({ onDismiss 
                 gap: '0.5rem',
               }}
             >
-              I Understand, Proceed to Web App
+              {t('mobile.continueAnyway')}
             </button>
           )}
         </div>

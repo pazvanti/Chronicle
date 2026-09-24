@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useEpub, EpubProvider } from './context/EpubContext';
 import { TtsProvider, useTts } from './context/TtsContext';
+import { I18nProvider } from './i18n/I18nContext';
 import { Header } from './components/Header';
 import { SubNavHeader } from './components/Navigation/SubNavHeader';
 import { ChapterList } from './components/Sidebar/ChapterList';
@@ -293,10 +294,12 @@ const AppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <EpubProvider>
-      <TtsProvider>
-        <AppContent />
-      </TtsProvider>
-    </EpubProvider>
+    <I18nProvider>
+      <EpubProvider>
+        <TtsProvider>
+          <AppContent />
+        </TtsProvider>
+      </EpubProvider>
+    </I18nProvider>
   );
 }

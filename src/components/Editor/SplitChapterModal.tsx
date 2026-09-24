@@ -3,6 +3,7 @@ import { useEpub } from '../../context/EpubContext';
 import { Scissors, X, Heading, Search, ArrowRight } from 'lucide-react';
 import { extractHeadings } from '../../services/epub/htmlUtils';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface SplitChapterModalProps {
   onClose: () => void;
@@ -11,13 +12,14 @@ interface SplitChapterModalProps {
 
 export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, prefillText }) => {
   const { activeChapter, splitCurrentChapter, splitAtHeading } = useEpub();
+  const { t } = useTranslation();
 
   useEscapeKey(onClose);
 
   const [mode, setMode] = useState<'heading' | 'text'>('heading');
   const [selectedHeadingIndex, setSelectedHeadingIndex] = useState<number>(0);
   const [searchText, setSearchText] = useState<string>(prefillText || '');
-  const [newChapterTitle, setNewChapterTitle] = useState<string>('New Chapter');
+  const [newChapterTitle, setNewChapterTitle] = useState<string>(t('sidebar.addChapter'));
 
   // Extract headings from active chapter
   const headings = useMemo(() => {
@@ -50,13 +52,13 @@ export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, p
     if (mode === 'heading') {
       if (headings.length > 0 && selectedHeadingIndex >= 0 && selectedHeadingIndex < headings.length) {
         const h = headings[selectedHeadingIndex];
-        const titleToUse = newChapterTitle.trim() || h.text || 'New Chapter';
+        const titleToUse = newChapterTitle.trim() || h.text || t('sidebar.addChapter');
         splitAtHeading(activeChapter.id, selectedHeadingIndex, titleToUse);
         onClose();
       }
     } else if (mode === 'text') {
       if (textSplitPreview) {
-        splitCurrentChapter(textSplitPreview.part1, textSplitPreview.part2, newChapterTitle.trim() || 'New Chapter');
+        splitCurrentChapter(textSplitPreview.part1, textSplitPreview.part2, newChapterTitle.trim() || t('sidebar.addChapter'));
         onClose();
       }
     }
@@ -84,9 +86,9 @@ export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, p
               <Scissors size={18} />
             </div>
             <div>
-              <h2 className="modal-title">Split Chapter</h2>
+              <h2 className="modal-title">{t('splitModal.title')}</h2>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Divide "{activeChapter.title}" into two separate chapters
+                {t('splitModal.subtitle', { title: activeChapter.title })}
               </p>
             </div>
           </div>
@@ -104,7 +106,7 @@ export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, p
               onClick={() => setMode('heading')}
             >
               <Heading size={15} />
-              <span>Split at Heading ({headings.length})</span>
+              <span>{t('splitModal.tabHeading', { count: headings.length })}</span>
             </button>
             <button
               className={`view-tab-btn ${mode === 'text' ? 'active' : ''}`}
@@ -112,17 +114,17 @@ export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, p
               onClick={() => setMode('text')}
             >
               <Search size={15} />
-              <span>Split at Text / Selection</span>
+              <span>{t('splitModal.tabText')}</span>
             </button>
           </div>
 
           {/* Heading Mode */}
           {mode === 'heading' && (
             <div className="form-group">
-              <label className="form-label">Select the heading where the new chapter starts:</label>
+              <label className="form-label">{t('splitModal.selectHeading')}</label>
               {headings.length === 0 ? (
                 <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  No headings (h1, h2, h3) found in this chapter. Try splitting by text selection instead.
+                  {t('splitModal.noHeadings')}
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '180px', overflowY: 'auto' }}>
@@ -161,11 +163,11 @@ export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, p
           {/* Text Marker Mode */}
           {mode === 'text' && (
             <div className="form-group">
-              <label className="form-label">Search phrase or beginning text of new chapter:</label>
+              <label className="form-label">{t('splitModal.searchPhrase')}</label>
               <input
                 type="text"
                 className="form-input"
-                placeholder="Type or paste the first words of the new chapter..."
+                placeholder={t('splitModal.placeholderSearch')}
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
               />
@@ -173,9 +175,9 @@ export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, p
               {searchText && (
                 <div style={{ fontSize: '0.8rem', marginTop: '0.4rem' }}>
                   {textSplitPreview ? (
-                    <span style={{ color: 'var(--accent-success)' }}>✓ Found match in chapter content!</span>
+                    <span style={{ color: 'var(--accent-success)' }}>{t('splitModal.foundMatch')}</span>
                   ) : (
-                    <span style={{ color: 'var(--accent-danger)' }}>✗ Phrase not found in current chapter.</span>
+                    <span style={{ color: 'var(--accent-danger)' }}>{t('splitModal.notFound')}</span>
                   )}
                 </div>
               )}
@@ -184,7 +186,7 @@ export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, p
 
           {/* New Chapter Title Input */}
           <div className="form-group">
-            <label className="form-label">New Chapter Title:</label>
+            <label className="form-label">{t('splitModal.newChapterTitle')}</label>
             <input
               type="text"
               className="form-input"
@@ -197,7 +199,7 @@ export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, p
 
         <div className="modal-footer">
           <button className="btn btn-outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             className="btn btn-primary"
@@ -208,7 +210,7 @@ export const SplitChapterModal: React.FC<SplitChapterModalProps> = ({ onClose, p
             }
           >
             <Scissors size={15} />
-            <span>Confirm Split</span>
+            <span>{t('splitModal.confirmSplit')}</span>
           </button>
         </div>
       </div>

@@ -15,6 +15,7 @@ import {
   DEFAULT_HIGHLIGHT_COLOR,
 } from '../../services/epub/commentHighlightService';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export interface CommentModalProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
   onUpdate,
   onDelete,
 }) => {
+  const { t } = useTranslation();
   const isEditingExisting = Boolean(comment);
 
   const [noteText, setNoteText] = useState('');
@@ -130,14 +132,14 @@ export const CommentModal: React.FC<CommentModalProps> = ({
               style={{ backgroundColor: selectedColor }}
             />
             <h3 className="comment-modal-title">
-              {isEditingExisting ? 'Author Note' : 'Add Comment & Highlight'}
+              {isEditingExisting ? t('comments.authorNote') : t('comments.addComment')}
             </h3>
           </div>
           <button
             type="button"
             className="btn-icon btn-sm"
             onClick={onClose}
-            aria-label="Close comment dialog"
+            aria-label={t('common.close')}
           >
             <X size={16} />
           </button>
@@ -153,7 +155,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
             >
               <div className="comment-quote-label">
                 <Quote size={12} />
-                <span>Selected Passage</span>
+                <span>{t('comments.selectedPassage')}</span>
               </div>
               <p className="comment-quote-text">"{quoteSnippet}"</p>
             </div>
@@ -163,7 +165,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
           <div className="comment-section">
             <div className="comment-section-label">
               <Palette size={13} />
-              <span>Highlight Color</span>
+              <span>{t('comments.highlightColor')}</span>
             </div>
             <div className="comment-color-palette">
               {COMMENT_HIGHLIGHT_COLORS.map(c => {
@@ -189,7 +191,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
           <div className="comment-section">
             <div className="comment-section-label">
               <MessageSquare size={13} />
-              <span>Comment Note</span>
+              <span>{t('comments.commentNote')}</span>
             </div>
 
             {isEditingNote ? (
@@ -197,7 +199,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
                 ref={textareaRef}
                 className="comment-textarea"
                 rows={4}
-                placeholder="Write your observation, revision task, or editorial note..."
+                placeholder={t('comments.placeholder')}
                 value={noteText}
                 onChange={e => setNoteText(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -228,21 +230,21 @@ export const CommentModal: React.FC<CommentModalProps> = ({
         <div className="comment-modal-footer">
           {showDeleteConfirm ? (
             <div className="comment-delete-confirm-row">
-              <span className="text-danger text-sm">Remove this highlight and note?</span>
+              <span className="text-danger text-sm">{t('comments.deleteConfirm')}</span>
               <div style={{ display: 'flex', gap: '0.4rem' }}>
                 <button
                   type="button"
                   className="btn btn-sm btn-danger"
                   onClick={handleDelete}
                 >
-                  Yes, Delete
+                  {t('comments.yesDelete')}
                 </button>
                 <button
                   type="button"
                   className="btn btn-sm btn-secondary"
                   onClick={() => setShowDeleteConfirm(false)}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -254,10 +256,10 @@ export const CommentModal: React.FC<CommentModalProps> = ({
                     type="button"
                     className="btn btn-sm btn-ghost text-danger"
                     onClick={() => setShowDeleteConfirm(true)}
-                    title="Delete this comment and remove highlight"
+                    title={t('common.delete')}
                   >
                     <Trash2 size={13} />
-                    <span>Delete</span>
+                    <span>{t('common.delete')}</span>
                   </button>
 
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -271,7 +273,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
                             setIsEditingNote(false);
                           }}
                         >
-                          Cancel
+                          {t('common.cancel')}
                         </button>
                         <button
                           type="button"
@@ -279,7 +281,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
                           onClick={handleSave}
                           disabled={!noteText.trim()}
                         >
-                          Save
+                          {t('common.save')}
                         </button>
                       </>
                     ) : (
@@ -289,7 +291,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
                           className="btn btn-sm btn-secondary"
                           onClick={onClose}
                         >
-                          Close
+                          {t('common.close')}
                         </button>
                         <button
                           type="button"
@@ -297,7 +299,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
                           onClick={() => setIsEditingNote(true)}
                         >
                           <Edit2 size={13} />
-                          <span>Edit Note</span>
+                          <span>{t('comments.editNote')}</span>
                         </button>
                       </>
                     )}
@@ -310,7 +312,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
                     className="btn btn-sm btn-secondary"
                     onClick={onClose}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="button"
@@ -318,7 +320,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
                     onClick={handleSave}
                     disabled={!noteText.trim()}
                   >
-                    Add Comment
+                    {t('comments.addComment')}
                   </button>
                 </div>
               )}

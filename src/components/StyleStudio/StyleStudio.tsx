@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { Palette, Check, Code, Sliders } from 'lucide-react';
 import { CSS_PRESETS, StylePreset } from '../../services/epub/cssPresets';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const StyleStudio: React.FC = () => {
   const { book, customCss, applyCustomCssToBook } = useEpub();
+  const { t } = useTranslation();
 
   const [activeTab, setActiveTab] = useState<'presets' | 'customizer' | 'css'>('presets');
   const [selectedPresetId, setSelectedPresetId] = useState<string>('classic-literature');
@@ -26,7 +28,7 @@ export const StyleStudio: React.FC = () => {
   if (!book) {
     return (
       <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        No book loaded
+        {t('statusBar.noManuscript')}
       </div>
     );
   }
@@ -124,10 +126,10 @@ img {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700 }}>
-            CSS & Style Studio
+            {t('styleStudio.title')}
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            Design typography presets, paragraph formatting, and manage the EPUB stylesheet
+            {t('styleStudio.subtitle')}
           </p>
         </div>
 
@@ -138,7 +140,7 @@ img {
               onClick={() => setActiveTab('presets')}
             >
               <Palette size={14} />
-              <span>Presets</span>
+              <span>{t('styleStudio.tabPresets')}</span>
             </button>
             <button
               className={`view-tab-btn ${activeTab === 'customizer' ? 'active' : ''}`}
@@ -148,20 +150,20 @@ img {
               }}
             >
               <Sliders size={14} />
-              <span>Customizer</span>
+              <span>{t('styleStudio.tabCustomizer')}</span>
             </button>
             <button
               className={`view-tab-btn ${activeTab === 'css' ? 'active' : ''}`}
               onClick={() => setActiveTab('css')}
             >
               <Code size={14} />
-              <span>Raw CSS</span>
+              <span>{t('styleStudio.tabCss')}</span>
             </button>
           </div>
 
           <button className="btn btn-primary" onClick={handleSaveCssToBook}>
             <Check size={15} />
-            <span>Apply to Book</span>
+            <span>{t('styleStudio.applyBtn')}</span>
           </button>
         </div>
       </div>
@@ -221,7 +223,7 @@ img {
             <div style={{ background: 'var(--bg-surface)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
               {/* Font Choice */}
               <div className="form-group">
-                <label className="form-label">Body Font Family</label>
+                <label className="form-label">{t('styleStudio.fontFamily')}</label>
                 <select
                   className="form-select"
                   value={fontChoice}
@@ -239,7 +241,7 @@ img {
 
               {/* Paragraph Style */}
               <div className="form-group">
-                <label className="form-label">Paragraph Layout</label>
+                <label className="form-label">{t('styleStudio.paragraphSpacing')}</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
                     type="button"
@@ -250,7 +252,7 @@ img {
                       setTimeout(handleGenerateCustomizerCss, 10);
                     }}
                   >
-                    Indented First Line (Novels)
+                    {t('styleStudio.indentStyle')}
                   </button>
                   <button
                     type="button"
@@ -261,14 +263,14 @@ img {
                       setTimeout(handleGenerateCustomizerCss, 10);
                     }}
                   >
-                    Block Paragraphs (Non-Fiction)
+                    {t('styleStudio.blockStyle')}
                   </button>
                 </div>
               </div>
 
               {/* Text Alignment */}
               <div className="form-group">
-                <label className="form-label">Text Alignment</label>
+                <label className="form-label">{t('editor.alignJustify')}</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
                     type="button"
@@ -279,7 +281,7 @@ img {
                       setTimeout(handleGenerateCustomizerCss, 10);
                     }}
                   >
-                    Justified
+                    {t('editor.alignJustify').split(' (')[0]}
                   </button>
                   <button
                     type="button"
@@ -290,7 +292,7 @@ img {
                       setTimeout(handleGenerateCustomizerCss, 10);
                     }}
                   >
-                    Left Aligned
+                    {t('editor.alignLeft').split(' (')[0]}
                   </button>
                 </div>
               </div>
@@ -298,7 +300,7 @@ img {
               {/* Line Height */}
               <div className="form-group">
                 <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Line Height</span>
+                  <span>{t('styleStudio.lineSpacing')}</span>
                   <span>{lineHeight}</span>
                 </label>
                 <input
@@ -326,7 +328,7 @@ img {
                   }}
                   style={{ accentColor: 'var(--accent-primary)' }}
                 />
-                <span style={{ fontSize: '0.88rem', fontWeight: 500 }}>Enable Chapter Initial Drop Caps</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 500 }}>{t('styleStudio.dropCaps')}</span>
               </label>
             </div>
           )}

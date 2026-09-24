@@ -11,9 +11,11 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { EpubTocItem } from '../../types/project';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const TocManager: React.FC = () => {
   const { book, updateToc, showNotification } = useEpub();
+  const { t } = useTranslation();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
   const [newTitle, setNewTitle] = useState<string>('');
@@ -22,7 +24,7 @@ export const TocManager: React.FC = () => {
   if (!book) {
     return (
       <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        No book loaded
+        {t('statusBar.noManuscript')}
       </div>
     );
   }
@@ -160,14 +162,14 @@ export const TocManager: React.FC = () => {
                   <button
                     className="btn-icon btn-sm"
                     onClick={() => handleStartRename(item)}
-                    title="Rename"
+                    title={t('tocManager.rename')}
                   >
                     <Edit2 size={14} />
                   </button>
                   <button
                     className="btn-icon btn-sm"
                     onClick={() => handleDeleteItem(item.id)}
-                    title="Delete"
+                    title={t('tocManager.delete')}
                     style={{ color: 'var(--accent-danger)' }}
                   >
                     <Trash2 size={14} />
@@ -186,16 +188,16 @@ export const TocManager: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700 }}>
-            Table of Contents
+            {t('tocManager.title')}
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            Manage the reading navigation hierarchy (NCX & EPUB 3 Nav)
+            {t('tocManager.subtitle')}
           </p>
         </div>
 
         <button className="btn btn-secondary btn-sm" onClick={handleAutoGenerate}>
           <Sparkles size={14} />
-          <span>Auto-Generate from Chapters</span>
+          <span>{t('tocManager.autoGenerate')}</span>
         </button>
       </div>
 
@@ -216,7 +218,7 @@ export const TocManager: React.FC = () => {
         <input
           type="text"
           className="form-input"
-          placeholder="New TOC Entry Title..."
+          placeholder={`${t('tocManager.entryTitle')}...`}
           value={newTitle}
           onChange={e => setNewTitle(e.target.value)}
           style={{ flex: 1 }}
@@ -235,14 +237,14 @@ export const TocManager: React.FC = () => {
         </select>
         <button type="submit" className="btn btn-primary btn-sm" disabled={!newTitle.trim()}>
           <Plus size={15} />
-          <span>Add Entry</span>
+          <span>{t('tocManager.addEntry')}</span>
         </button>
       </form>
 
       {/* TOC Tree */}
       {book.toc.length === 0 ? (
         <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)' }}>
-          No entries in Table of Contents. Click "Auto-Generate from Chapters" above.
+          {t('tocManager.subtitle')}
         </div>
       ) : (
         renderTocTree(book.toc)

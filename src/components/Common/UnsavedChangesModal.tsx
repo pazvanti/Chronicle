@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { AlertTriangle, X, Save, Trash2, ArrowRight, Loader2, BookOpen } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const UnsavedChangesModal: React.FC = () => {
   const {
@@ -15,6 +16,7 @@ export const UnsavedChangesModal: React.FC = () => {
     totalWordCount,
   } = useEpub();
 
+  const { t } = useTranslation();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleCancel = () => {
@@ -46,7 +48,7 @@ export const UnsavedChangesModal: React.FC = () => {
         // Unsaved new project without storage destination
         setPendingUnsavedAction(null);
         setIsSaveDestinationOpen(true);
-        showNotification('info', 'Please choose a destination to save your current manuscript first.');
+        showNotification('info', t('unsavedModal.chooseDestinationFirst'));
         return;
       }
 
@@ -65,19 +67,19 @@ export const UnsavedChangesModal: React.FC = () => {
   const getActionName = () => {
     switch (pendingUnsavedAction.actionType) {
       case 'new':
-        return 'Create New';
+        return t('common.new');
       case 'open':
-        return 'Open File';
+        return t('common.open');
       case 'cloud':
-        return 'Open Cloud File';
+        return t('headerActions.cloud');
       case 'sample':
-        return 'Load Sample';
+        return t('welcomeModal.sampleTitle');
       default:
-        return 'Proceed';
+        return t('common.confirm');
     }
   };
 
-  const currentTitle = book?.metadata.title || 'Untitled Manuscript';
+  const currentTitle = book?.metadata.title || t('statusBar.noManuscript');
   const currentChaptersCount = book?.chapters.length || 0;
 
   return (
@@ -155,7 +157,7 @@ export const UnsavedChangesModal: React.FC = () => {
                   borderRadius: '999px',
                 }}
               >
-                Unsaved Changes
+                {t('unsavedModal.badge')}
               </span>
             </div>
             <h2
@@ -168,14 +170,14 @@ export const UnsavedChangesModal: React.FC = () => {
                 lineHeight: 1.3,
               }}
             >
-              Discard unsaved edits?
+              {t('unsavedModal.title')}
             </h2>
           </div>
 
           <button
             onClick={handleCancel}
             className="btn-icon btn-sm"
-            title="Cancel and return to editor (Esc)"
+            title={`${t('unsavedModal.cancel')} (Esc)`}
             disabled={isSaving}
             style={{
               color: 'var(--text-muted)',
@@ -216,8 +218,8 @@ export const UnsavedChangesModal: React.FC = () => {
                 {currentTitle}
               </div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                {currentChaptersCount} {currentChaptersCount === 1 ? 'chapter' : 'chapters'} •{' '}
-                {totalWordCount.toLocaleString()} words • <span style={{ color: '#fbbf24' }}>Unsaved changes</span>
+                {currentChaptersCount} {currentChaptersCount === 1 ? t('statusBar.chapterCountSingle') : t('statusBar.chapterCountPlural')} •{' '}
+                {totalWordCount.toLocaleString()} {t('statusBar.words')} • <span style={{ color: '#fbbf24' }}>{t('statusBar.unsavedChanges')}</span>
               </div>
             </div>
           </div>
@@ -242,8 +244,8 @@ export const UnsavedChangesModal: React.FC = () => {
               lineHeight: 1.45,
             }}
           >
-            <div style={{ fontWeight: 600 }}>Note:</div>
-            <div>Any modifications, chapters, or notes written since your last save will be permanently lost.</div>
+            <div style={{ fontWeight: 600 }}>{t('unsavedModal.note')}</div>
+            <div>{t('unsavedModal.noteDesc')}</div>
           </div>
         </div>
 
@@ -267,7 +269,7 @@ export const UnsavedChangesModal: React.FC = () => {
             disabled={isSaving}
             style={{ padding: '0.5rem 1rem', fontSize: '0.82rem' }}
           >
-            Cancel
+            {t('unsavedModal.cancel')}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -286,10 +288,10 @@ export const UnsavedChangesModal: React.FC = () => {
                 alignItems: 'center',
                 gap: '0.4rem',
               }}
-              title="Discard unsaved changes and proceed"
+              title={t('unsavedModal.title')}
             >
               <Trash2 size={14} />
-              <span>Discard & {getActionName()}</span>
+              <span>{t('unsavedModal.discardAnd')} {getActionName()}</span>
             </button>
 
             <button
@@ -304,17 +306,17 @@ export const UnsavedChangesModal: React.FC = () => {
                 alignItems: 'center',
                 gap: '0.45rem',
               }}
-              title="Save current manuscript, then proceed"
+              title={t('unsavedModal.saveFirst')}
             >
               {isSaving ? (
                 <>
                   <Loader2 size={14} className="animate-spin" />
-                  <span>Saving...</span>
+                  <span>{t('common.saving')}</span>
                 </>
               ) : (
                 <>
                   <Save size={14} />
-                  <span>Save First</span>
+                  <span>{t('unsavedModal.saveFirst')}</span>
                   <ArrowRight size={13} style={{ opacity: 0.7 }} />
                 </>
               )}

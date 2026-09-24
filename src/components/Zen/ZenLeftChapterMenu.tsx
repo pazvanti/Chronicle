@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { BookOpen, Check, Search, X, Layers } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const ZenLeftChapterMenu: React.FC = () => {
   const {
@@ -10,6 +11,7 @@ export const ZenLeftChapterMenu: React.FC = () => {
     setActiveChapterId,
     zenSettings,
   } = useEpub();
+  const { t } = useTranslation();
 
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -98,7 +100,7 @@ export const ZenLeftChapterMenu: React.FC = () => {
       <div className="zen-left-menu-header">
         <div className="zen-left-menu-title-wrap">
           <BookOpen size={14} className="zen-left-menu-icon" />
-          <span className="zen-left-menu-title">Manuscript</span>
+          <span className="zen-left-menu-title">{t('zen.manuscript')}</span>
         </div>
         <span className="zen-left-menu-count">
           {book.chapters.length} ch
@@ -112,7 +114,7 @@ export const ZenLeftChapterMenu: React.FC = () => {
           <input
             type="text"
             className="zen-left-search-input"
-            placeholder="Search chapters..."
+            placeholder={t('zen.searchChapters')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
@@ -141,12 +143,12 @@ export const ZenLeftChapterMenu: React.FC = () => {
                 setActiveChapterId(ch.id);
                 setSearchQuery('');
               }}
-              title={ch.title || `Chapter ${index + 1}`}
+              title={ch.title || `${t('statusBar.activeChapter')} ${index + 1}`}
             >
               <div className="zen-left-item-left">
                 <span className="zen-left-chapter-num">{index + 1}.</span>
                 <span className="zen-left-chapter-text">
-                  {ch.title || `Chapter ${index + 1}`}
+                  {ch.title || `${t('statusBar.activeChapter')} ${index + 1}`}
                 </span>
               </div>
               <div className="zen-left-item-right">
@@ -163,7 +165,7 @@ export const ZenLeftChapterMenu: React.FC = () => {
       {/* Subtle Footer */}
       <div className="zen-left-menu-footer">
         <Layers size={11} />
-        <span>Zen Chapter Navigator</span>
+        <span>Zen Navigator</span>
       </div>
     </aside>
   );

@@ -9,6 +9,7 @@ import {
   Edit2,
   Users,
 } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const TimelineStudio: React.FC = () => {
   const {
@@ -26,8 +27,9 @@ export const TimelineStudio: React.FC = () => {
     deleteTimelineEvent,
     characters,
   } = useEpub();
+  const { t } = useTranslation();
 
-  const activeTimeline = timelines.find(t => t.id === activeTimelineId) || timelines[0] || null;
+  const activeTimeline = timelines.find(tObj => tObj.id === activeTimelineId) || timelines[0] || null;
 
   // Selected event for modal
   const [modalEvent, setModalEvent] = useState<{
@@ -204,7 +206,7 @@ export const TimelineStudio: React.FC = () => {
   };
 
   const handleCreateTimeline = () => {
-    const title = prompt('Enter Timeline Title:', `Timeline ${timelines.length + 1}`);
+    const title = prompt('Timeline:', `${t('timeline.title')} ${timelines.length + 1}`);
     if (title && title.trim()) {
       createTimeline({
         title: title.trim(),
@@ -226,7 +228,7 @@ export const TimelineStudio: React.FC = () => {
 
   const handleDeleteTimeline = () => {
     if (!activeTimeline) return;
-    if (window.confirm(`Delete timeline "${activeTimeline.title}"?`)) {
+    if (window.confirm(`${activeTimeline.title}?`)) {
       deleteTimeline(activeTimeline.id);
     }
   };
@@ -250,37 +252,37 @@ export const TimelineStudio: React.FC = () => {
               value={activeTimeline?.id || ''}
               onChange={e => setActiveTimelineId(e.target.value)}
             >
-              {timelines.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.title} ({t.segments.length} {t.segments.length === 1 ? 'segment' : 'segments'})
+              {timelines.map(tOption => (
+                <option key={tOption.id} value={tOption.id}>
+                  {tOption.title} ({tOption.segments.length} {tOption.segments.length === 1 ? t('timeline.segmentSingle') : t('timeline.segmentPlural')})
                 </option>
               ))}
             </select>
           ) : (
-            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Story Timelines</span>
+            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t('timeline.title')}</span>
           )}
 
           <button
             className="btn btn-sm btn-ghost"
             onClick={handleCreateTimeline}
-            title="Create new timeline"
+            title={t('timeline.addTimeline')}
           >
             <Plus size={14} />
-            <span>New Timeline</span>
+            <span>{t('timeline.addTimeline')}</span>
           </button>
         </div>
 
         {/* Center: Timescale Selector */}
         {activeTimeline && (
           <div className="timeline-timescale-segmented">
-            <span className="timescale-label">Scale:</span>
+            <span className="timescale-label">{t('timeline.timescaleLabel')}:</span>
             {(['hours', 'days', 'weeks', 'months', 'years'] as TimelineTimescale[]).map(ts => (
               <button
                 key={ts}
                 className={`timescale-pill ${timescale === ts ? 'active' : ''}`}
                 onClick={() => handleTimescaleChange(ts)}
               >
-                {ts === 'hours' ? '24 Hours' : ts.charAt(0).toUpperCase() + ts.slice(1)}
+                {ts === 'hours' ? t('timeline.timescaleHours') : ts === 'days' ? t('timeline.timescaleDays') : ts === 'months' ? t('timeline.timescaleMonths') : ts}
               </button>
             ))}
           </div>
@@ -292,15 +294,15 @@ export const TimelineStudio: React.FC = () => {
             <button
               className="btn btn-sm btn-primary"
               onClick={() => addTimelineSegment(activeTimeline.id)}
-              title="Add a new Day or Segment row"
+              title={t('timeline.addSegment')}
             >
               <Plus size={14} />
-              <span>Add Day / Segment</span>
+              <span>{t('timeline.addSegment')}</span>
             </button>
             <button
               className="btn btn-sm btn-ghost danger-hover"
               onClick={handleDeleteTimeline}
-              title="Delete current timeline"
+              title={t('common.delete')}
             >
               <Trash2 size={14} />
             </button>
@@ -313,11 +315,11 @@ export const TimelineStudio: React.FC = () => {
         {!activeTimeline || activeTimeline.segments.length === 0 ? (
           <div className="timeline-empty-state">
             <Clock size={48} strokeWidth={1.5} className="timeline-empty-icon" />
-            <h3>No Timelines Created Yet</h3>
-            <p>Design multi-day story timelines, plot critical beats, and visualize simultaneous events.</p>
+            <h3>{t('timeline.noEvents')}</h3>
+            <p>{t('timeline.subtitle')}</p>
             <button className="btn btn-primary" onClick={handleCreateTimeline}>
               <Plus size={16} />
-              <span>Create First Timeline</span>
+              <span>{t('timeline.addTimeline')}</span>
             </button>
           </div>
         ) : (
@@ -374,7 +376,7 @@ export const TimelineStudio: React.FC = () => {
                       )}
 
                       <span className="timeline-event-count-pill">
-                        {seg.events.length} {seg.events.length === 1 ? 'event' : 'events'}
+                        {seg.events.length} {seg.events.length === 1 ? t('timeline.eventSingle') : t('timeline.eventPlural')}
                       </span>
                     </div>
 

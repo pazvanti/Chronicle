@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { SplitChapterModal } from '../Editor/SplitChapterModal';
 import { useTts } from '../../context/TtsContext';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const ChapterList: React.FC = () => {
   const {
@@ -34,6 +35,7 @@ export const ChapterList: React.FC = () => {
   } = useEpub();
 
   const { isAudioActive, isPlaying } = useTts();
+  const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
@@ -168,7 +170,7 @@ export const ChapterList: React.FC = () => {
 
   const handleDelete = (chapterId: string, title: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (window.confirm(`Are you sure you want to delete chapter "${title}"?`)) {
+    if (window.confirm(t('sidebar.confirmDelete').replace('{title}', title))) {
       deleteChapter(chapterId);
     }
   };
@@ -196,7 +198,7 @@ export const ChapterList: React.FC = () => {
       <div className="sidebar-header">
         <div className="sidebar-header-title-group">
           <BookOpen size={14} style={{ color: 'var(--accent-primary)' }} />
-          <span className="sidebar-title">Chapters</span>
+          <span className="sidebar-title">{t('sidebar.chapters')}</span>
           <span className="sidebar-count-badge">{book.chapters.length}</span>
         </div>
 
@@ -204,7 +206,7 @@ export const ChapterList: React.FC = () => {
           <button
             className="btn-icon btn-sm"
             onClick={toggleSidebar}
-            title="Collapse Sidebar (Ctrl+\)"
+            title={sidebarCollapsed ? t('header.showSidebar') : t('header.hideSidebar')}
           >
             <Sidebar size={14} />
           </button>
@@ -218,7 +220,7 @@ export const ChapterList: React.FC = () => {
           <input
             type="text"
             className="sidebar-search-input"
-            placeholder="Search chapters..."
+            placeholder={t('common.search')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
@@ -226,7 +228,7 @@ export const ChapterList: React.FC = () => {
             <button
               className="search-clear-btn"
               onClick={() => setSearchQuery('')}
-              title="Clear search"
+              title={t('sidebar.clearSearch')}
             >
               <X size={12} />
             </button>
@@ -238,13 +240,13 @@ export const ChapterList: React.FC = () => {
       <div className="chapter-list-scroll">
         {filteredChapters.length === 0 ? (
           <div className="sidebar-empty-search">
-            <p>No chapters match "{searchQuery}"</p>
+            <p>{searchQuery ? `"${searchQuery}"` : t('sidebar.noChapters')}</p>
             <button
               className="btn btn-outline btn-sm"
               style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}
               onClick={() => setSearchQuery('')}
             >
-              Clear Search
+              {t('sidebar.clearSearch')}
             </button>
           </div>
         ) : (
@@ -301,7 +303,7 @@ export const ChapterList: React.FC = () => {
                         type="submit"
                         className="btn-icon"
                         style={{ padding: '2px', color: 'var(--accent-success)' }}
-                        title="Save title"
+                        title={t('common.save')}
                       >
                         <Check size={14} />
                       </button>
@@ -310,14 +312,14 @@ export const ChapterList: React.FC = () => {
                         className="btn-icon"
                         onClick={cancelRename}
                         style={{ padding: '2px', color: 'var(--accent-danger)' }}
-                        title="Cancel"
+                        title={t('common.cancel')}
                       >
                         <X size={14} />
                       </button>
                     </form>
                   ) : (
                     <span className="chapter-title-text" title={chapter.title}>
-                      {chapter.title || `Chapter ${originalIndex + 1}`}
+                      {chapter.title || `${t('statusBar.activeChapter')} ${originalIndex + 1}`}
                     </span>
                   )}
                 </div>
@@ -330,8 +332,8 @@ export const ChapterList: React.FC = () => {
                     <button
                       className={`btn-icon btn-sm chapter-more-btn ${isMenuOpen ? 'active' : ''}`}
                       onClick={e => openMenuForButton(chapter.id, e)}
-                      title="Chapter actions"
-                      aria-label="Chapter actions"
+                      title={t('sidebar.chapterActions')}
+                      aria-label={t('sidebar.chapterActions')}
                     >
                       <MoreHorizontal size={14} />
                     </button>
@@ -364,7 +366,7 @@ export const ChapterList: React.FC = () => {
             disabled={menuIndex === 0}
           >
             <ChevronUp size={13} />
-            <span>Move Up</span>
+            <span>{t('sidebar.moveUp')}</span>
           </button>
           <button
             className="chapter-menu-item"
@@ -375,7 +377,7 @@ export const ChapterList: React.FC = () => {
             disabled={menuIndex === book.chapters.length - 1}
           >
             <ChevronDown size={13} />
-            <span>Move Down</span>
+            <span>{t('sidebar.moveDown')}</span>
           </button>
           <button
             className="chapter-menu-item"
@@ -385,7 +387,7 @@ export const ChapterList: React.FC = () => {
             }}
           >
             <Edit2 size={13} />
-            <span>Rename Chapter</span>
+            <span>{t('sidebar.renameChapter')}</span>
           </button>
           <div className="chapter-menu-divider" />
           <button
@@ -396,7 +398,7 @@ export const ChapterList: React.FC = () => {
             }}
           >
             <Trash2 size={13} />
-            <span>Delete Chapter</span>
+            <span>{t('sidebar.deleteChapter')}</span>
           </button>
         </div>,
         document.body
@@ -406,20 +408,20 @@ export const ChapterList: React.FC = () => {
       <div className="sidebar-footer">
         <button
           className="btn btn-primary btn-sm sidebar-add-btn"
-          onClick={() => addBlankChapter(`Chapter ${book.chapters.length + 1}`)}
-          title="Add a new blank chapter to the book"
+          onClick={() => addBlankChapter(`${t('statusBar.activeChapter')} ${book.chapters.length + 1}`)}
+          title={t('sidebar.addChapterTitle')}
         >
           <Plus size={14} />
-          <span>New Chapter</span>
+          <span>{t('sidebar.addChapter')}</span>
         </button>
 
         <button
           className="btn btn-outline btn-sm sidebar-split-btn"
           onClick={() => setIsSplitModalOpen(true)}
-          title="Split current chapter at heading or cursor"
+          title={t('sidebar.splitChapterTitle')}
         >
           <Scissors size={13} />
-          <span>Split</span>
+          <span>{t('sidebar.split')}</span>
         </button>
       </div>
 

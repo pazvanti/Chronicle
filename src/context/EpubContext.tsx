@@ -76,6 +76,7 @@ import {
   checkForUpdates,
   getCachedUpdate,
 } from '../services/update/updateChecker';
+import { useTranslation } from '../i18n/I18nContext';
 
 export interface PendingUnsavedAction {
   actionType: 'new' | 'open' | 'sample' | 'cloud';
@@ -145,9 +146,14 @@ interface EpubContextType {
   openLocalDocument: (targetPath?: string, force?: boolean, initialChapterId?: string | null, isRestore?: boolean) => Promise<void>;
   loadSampleBook: (force?: boolean) => Promise<void>;
   createNewBook: (title?: string, author?: string, force?: boolean) => Promise<void>;
-  saveProject: (overrideTarget?: StorageTarget, customFilename?: string, targetSubPath?: string, forceSaveAs?: boolean) => Promise<void>;
+  saveProject: (overrideTarget?: StorageTarget, customFilename?: string, targetSubPath?: string, forceSaveAs?: boolean, isAutoSave?: boolean) => Promise<void>;
   saveAs: (target: StorageTarget, filename?: string, targetSubPath?: string) => Promise<void>;
   loadFromCloud: (href: string, filename: string, force?: boolean, relativePath?: string) => Promise<void>;
+  autoSaveEnabled: boolean;
+  setAutoSaveEnabled: (enabled: boolean) => Promise<void>;
+  autoSaveInterval: number;
+  setAutoSaveInterval: (interval: number) => Promise<void>;
+  lastAutoSavedAt: Date | null;
   updateChapterContent: (chapterId: string, newContent: string) => void;
   updateChapterTitle: (chapterId: string, newTitle: string) => void;
   reorderChapters: (fromIndex: number, toIndex: number) => void;
@@ -301,6 +307,7 @@ interface EpubContextType {
 const EpubContext = createContext<EpubContextType | undefined>(undefined);
 
 export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
   const initialSettings = getStoredSettings();
   const [book, setBook] = useState<EpubBook | null>(null);
   const [bookSessionId, setBookSessionId] = useState<string>(() => `book_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
@@ -346,6 +353,24 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isSaveAsOpen, setIsSaveAsOpen] = useState<boolean>(false);
   const [isCloudBrowserOpen, setIsCloudBrowserOpen] = useState<boolean>(false);
   const [isCloudDesktopNoticeOpen, setIsCloudDesktopNoticeOpen] = useState<boolean>(false);
+
+  const [autoSaveEnabled, setAutoSaveEnabledState] = useState<boolean>(
+    initialSettings.autoSaveEnabled ?? isTauri()
+  );
+  const [autoSaveInterval, setAutoSaveIntervalState] = useState<number>(
+    initialSettings.autoSaveInterval ?? 60
+  );
+  const [lastAutoSavedAt, setLastAutoSavedAt] = useState<Date | null>(null);
+
+  const setAutoSaveEnabled = useCallback(async (enabled: boolean) => {
+    setAutoSaveEnabledState(enabled);
+    await saveSetting('autoSaveEnabled', enabled);
+  }, []);
+
+  const setAutoSaveInterval = useCallback(async (interval: number) => {
+    setAutoSaveIntervalState(interval);
+    await saveSetting('autoSaveInterval', interval);
+  }, []);
 
   const [uiTheme, setUiThemeState] = useState<UiTheme>('classic-dark');
   const [minimalistMode, setMinimalistModeState] = useState<boolean>(false);
@@ -543,6 +568,13 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setShowWelcomeOnStartupState(settings.showWelcomeOnStartup);
         showWelcomeOnStartupRef.current = settings.showWelcomeOnStartup;
         setIsWelcomeModalOpen(settings.showWelcomeOnStartup);
+
+        if (typeof settings.autoSaveEnabled === 'boolean') {
+          setAutoSaveEnabledState(settings.autoSaveEnabled);
+        }
+        if (typeof settings.autoSaveInterval === 'number') {
+          setAutoSaveIntervalState(settings.autoSaveInterval);
+        }
 
         setReaderThemeState(settings.readerTheme);
         setReaderFontState(settings.readerFont);
@@ -918,7 +950,9 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       try {
         setIsLoading(true);
-        const sample = await createSampleEpubBook();
+        const settings = await loadAllSettings();
+        const activeLang = settings.language || (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en');
+        const sample = await createSampleEpubBook(activeLang);
         setBook(sample);
         refreshBookSession();
         extractCssFromBook(sample);
@@ -950,7 +984,9 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     try {
       setIsLoading(true);
-      const sample = await createSampleEpubBook();
+      const settings = await loadAllSettings();
+      const activeLang = settings.language || (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en');
+      const sample = await createSampleEpubBook(activeLang);
       bookRef.current = sample;
       setBook(sample);
       refreshBookSession();
@@ -967,24 +1003,31 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setCastPresenceData(null);
       setIsPresenceCacheValid(false);
       setIsDirty(false);
-      showNotification('success', 'Loaded sample book: Alice’s Adventures in Wonderland');
+      showNotification('success', t('notifications.loadedSampleBook'));
     } catch (err) {
       console.error(err);
-      showNotification('error', 'Failed to load sample book');
+      showNotification('error', t('notifications.failedLoadSampleBook'));
     } finally {
       setIsLoading(false);
     }
-  }, [setIsDirty, showNotification, refreshBookSession]);
+  }, [setIsDirty, showNotification, refreshBookSession, t]);
 
   const createNewBook = useCallback(
-    async (title: string = 'Untitled Manuscript', author: string = 'Author Name', force: boolean = false) => {
+    async (title?: string, author?: string, force: boolean = false) => {
+      const settings = await loadAllSettings();
+      const activeLang = settings.language || (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en');
+      const defaultTitle = t('welcome.defaultTitle');
+      const defaultAuthor = t('welcome.defaultAuthor');
+      const finalTitle = title || defaultTitle;
+      const finalAuthor = author || defaultAuthor;
+
       if (isDirtyRef.current && !force) {
         setPendingUnsavedAction({
           actionType: 'new',
-          title: 'Create New Manuscript',
-          description: `Creating "${title}" will replace your current workspace. Any unsaved edits in your current manuscript will be permanently lost.`,
-          targetName: title,
-          onProceed: () => createNewBook(title, author, true),
+          title: t('header.newManuscript'),
+          description: t('unsavedModal.newManuscriptDesc', { title: finalTitle }),
+          targetName: finalTitle,
+          onProceed: () => createNewBook(finalTitle, finalAuthor, true),
         });
         return;
       }
@@ -993,7 +1036,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       try {
         setIsLoading(true);
-        const newBook = await createNewBlankEpubBook(title, author);
+        const newBook = await createNewBlankEpubBook(finalTitle, finalAuthor, activeLang);
         bookRef.current = newBook;
         setBook(newBook);
         refreshBookSession();
@@ -1011,15 +1054,15 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsPresenceCacheValid(false);
         setIsDirty(true);
         setViewModeState('editor');
-        showNotification('success', `Created new blank manuscript: "${title}"`);
+        showNotification('success', t('notifications.createdNewManuscript', { title: finalTitle }));
       } catch (err: any) {
         console.error(err);
-        showNotification('error', `Failed to create new manuscript: ${err?.message || 'Error'}`);
+        showNotification('error', t('notifications.failedCreateManuscript', { error: err?.message || 'Error' }));
       } finally {
         setIsLoading(false);
       }
     },
-    [setIsDirty, showNotification, refreshBookSession]
+    [setIsDirty, showNotification, refreshBookSession, t]
   );
 
   const loadAnyFile = useCallback(
@@ -1880,7 +1923,13 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 
   const saveProject = useCallback(
-    async (overrideTarget?: StorageTarget, customFilename?: string, targetSubPath?: string, forceSaveAs: boolean = false) => {
+    async (
+      overrideTarget?: StorageTarget,
+      customFilename?: string,
+      targetSubPath?: string,
+      forceSaveAs: boolean = false,
+      isAutoSave?: boolean
+    ) => {
       isSavingRef.current = true;
       let currentBook = bookRef.current || book;
       if (!currentBook) {
@@ -1888,10 +1937,16 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return;
       }
 
-      // 1. Determine target: override, current state, or prompt if unsaved
-      const target = overrideTarget || storageTarget;
+      // 1. Determine target: override, current state, or default to local in desktop environment
+      let target = overrideTarget || storageTarget;
+      if (!target && isTauri()) {
+        target = 'local';
+      }
+
       if (!target) {
-        setIsSaveDestinationOpen(true);
+        if (!isAutoSave) {
+          setIsSaveDestinationOpen(true);
+        }
         isSavingRef.current = false;
         return;
       }
@@ -1983,12 +2038,18 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (bookRef.current === saveSnapshot) {
               setIsDirtyState(false);
             }
-            showNotification('success', `Saved project "${downloadName}" locally!`);
+            if (isAutoSave) {
+              setLastAutoSavedAt(new Date());
+            } else {
+              showNotification('success', `Saved project "${downloadName}" locally!`);
+            }
           }
         } else if (target === 'cloud') {
           if (!webdavConfig) {
-            setIsWebDavConfigOpen(true);
-            showNotification('info', 'Please configure your WebDAV server to save to cloud storage.');
+            if (!isAutoSave) {
+              setIsWebDavConfigOpen(true);
+              showNotification('info', 'Please configure your WebDAV server to save to cloud storage.');
+            }
             return;
           }
 
@@ -2009,21 +2070,29 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (bookRef.current === saveSnapshot) {
             setIsDirtyState(false);
           }
-          showNotification('success', `Saved and updated "${uploadName}" on WebDAV cloud!`);
+          if (isAutoSave) {
+            setLastAutoSavedAt(new Date());
+          } else {
+            showNotification('success', `Saved and updated "${uploadName}" on WebDAV cloud!`);
+          }
         }
 
-        try {
-          confetti({
-            particleCount: 80,
-            spread: 70,
-            origin: { y: 0.6 },
-          });
-        } catch {
-          /* Confetti optional */
+        if (!isAutoSave) {
+          try {
+            confetti({
+              particleCount: 80,
+              spread: 70,
+              origin: { y: 0.6 },
+            });
+          } catch {
+            /* Confetti optional */
+          }
         }
       } catch (err: any) {
         console.error(err);
-        showNotification('error', `Failed to save project: ${err?.message || 'Error'}`);
+        if (!isAutoSave) {
+          showNotification('error', `Failed to save project: ${err?.message || 'Error'}`);
+        }
       } finally {
         setIsSaving(false);
         // Keep isSavingRef active for 500ms after saving to guard against download blur / refocus triggers
@@ -2048,6 +2117,23 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     },
     [saveProject]
   );
+
+  // Auto-save timer effect: persists manuscript changes in background exclusively on desktop with an existing file
+  useEffect(() => {
+    // Web environment does not perform background filesystem auto-save to prevent unwanted download prompts
+    if (!isTauri() || !autoSaveEnabled || !book || autoSaveInterval <= 0) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      // Only auto-save if project already has an established file path on disk to avoid interrupting typing with a save dialog
+      if (isDirtyRef.current && !isSavingRef.current && bookRef.current && localFilePath) {
+        saveProject(undefined, undefined, undefined, false, true);
+      }
+    }, autoSaveInterval * 1000);
+
+    return () => clearInterval(timer);
+  }, [autoSaveEnabled, autoSaveInterval, book, localFilePath, saveProject]);
 
   const exportAndDownload = useCallback(async () => {
     if (!book) return;
@@ -3336,6 +3422,11 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         saveProject,
         saveAs,
         loadFromCloud,
+        autoSaveEnabled,
+        setAutoSaveEnabled,
+        autoSaveInterval,
+        setAutoSaveInterval,
+        lastAutoSavedAt,
         primaryMode,
         setPrimaryMode,
         lastWriteView,

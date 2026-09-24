@@ -15,12 +15,14 @@ import {
 } from 'lucide-react';
 import { WebDavConfigModal } from './WebDavConfigModal';
 import { CloudFolderPickerModal } from './CloudFolderPickerModal';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface SaveAsModalProps {
   onClose: () => void;
 }
 
 export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
+  const { t } = useTranslation();
   const {
     book,
     storageTarget,
@@ -128,14 +130,14 @@ export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
               </div>
               <div>
                 <h3 className="modal-title" style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>
-                  Save Manuscript As...
+                  {t('cloud.saveAsTitle')}
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  Switch storage location between local computer and WebDAV cloud
+                  {t('cloud.destinationTitle')}
                 </p>
               </div>
             </div>
-            <button className="btn-icon btn-sm" onClick={onClose} title="Cancel (Esc)">
+            <button className="btn-icon btn-sm" onClick={onClose} title={t('common.cancel')}>
               <X size={16} />
             </button>
           </div>
@@ -144,7 +146,7 @@ export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
             {/* Target Selector */}
             <div>
               <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
-                Select Destination:
+                {t('cloud.destinationTitle')}:
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 {/* Local File */}
@@ -184,7 +186,7 @@ export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
                   <div>
                     <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>Local File</div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      Save to this computer
+                      {t('cloud.saveLocal')}
                     </div>
                   </div>
                 </div>
@@ -226,7 +228,7 @@ export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
                   <div>
                     <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>WebDAV Cloud</div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      {isWebDavConnected ? 'Syncs with server' : 'Needs setup'}
+                      {isWebDavConnected ? t('settings.connectedStatus') : t('cloud.connectWebDav')}
                     </div>
                   </div>
                 </div>
@@ -260,7 +262,7 @@ export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
                   style={{ padding: '3px 8px', fontSize: '0.75rem', flexShrink: 0 }}
                 >
                   <Settings size={12} />
-                  <span>Configure</span>
+                  <span>{t('header.settingsTooltip')}</span>
                 </button>
               </div>
             )}
@@ -295,7 +297,7 @@ export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
                   title="Browse or create remote sub-folders"
                 >
                   <FolderTree size={13} />
-                  <span>Browse Folders...</span>
+                  <span>{t('cloud.selectFolder')}</span>
                 </button>
               </div>
             )}
@@ -304,7 +306,7 @@ export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
               <FileCode size={14} style={{ color: 'var(--accent-primary)' }} />
-              <span>File Name (.chronicle):</span>
+              <span>{t('cloud.fileName')} (.chronicle):</span>
             </label>
             <input
               type="text"
@@ -332,7 +334,7 @@ export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
             }}
           >
             <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} disabled={isSaving}>
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
@@ -340,7 +342,7 @@ export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
               disabled={isSaving}
             >
               <Check size={14} />
-              <span>{isSaving ? 'Saving...' : `Save as ${target === 'cloud' ? 'Cloud File' : 'Local File'}`}</span>
+              <span>{isSaving ? t('common.saving') : t('common.save')}</span>
             </button>
           </div>
         </form>

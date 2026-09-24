@@ -25,6 +25,7 @@ import {
   Users,
   Check,
 } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 const LOCATION_TYPE_OPTIONS = [
   'All',
@@ -72,6 +73,7 @@ export const LocationStudio: React.FC = () => {
     setActiveChapterId,
     setViewMode,
   } = useEpub();
+  const { t } = useTranslation();
 
   // Selection & active tabs
   const [selectedId, setSelectedId] = useState<string | null>(locations[0]?.id || null);
@@ -124,7 +126,7 @@ export const LocationStudio: React.FC = () => {
   // Create new location action
   const handleCreateNew = () => {
     const newId = addLocation({
-      name: `New Setting ${locations.length + 1}`,
+      name: `${t('locations.addLocation')} ${locations.length + 1}`,
       type: 'Interior',
       scale: 'Building / Structure',
       color: PRESET_COLORS[locations.length % PRESET_COLORS.length],
@@ -192,11 +194,11 @@ export const LocationStudio: React.FC = () => {
           <button
             className="btn btn-sm btn-ghost return-writing-btn"
             onClick={() => setViewMode('editor')}
-            title="Return to Writing mode"
+            title={t('header.writeMode')}
           >
             <ArrowLeft size={14} />
             <Edit3 size={13} style={{ color: 'var(--accent-primary)' }} />
-            <span>Writing</span>
+            <span>{t('header.writeMode')}</span>
           </button>
 
           <div className="entity-studio-brand">
@@ -204,9 +206,9 @@ export const LocationStudio: React.FC = () => {
               <Compass size={16} />
             </div>
             <div>
-              <h2 className="entity-studio-title">Location Codex Studio</h2>
+              <h2 className="entity-studio-title">{t('locations.title')}</h2>
               <span className="entity-studio-count">
-                {locations.length} {locations.length === 1 ? 'setting' : 'settings'} in manuscript
+                {locations.length} {locations.length === 1 ? t('locations.countSingle') : t('locations.countPlural')}
               </span>
             </div>
           </div>
@@ -218,7 +220,7 @@ export const LocationStudio: React.FC = () => {
             <Search size={14} className="entity-search-icon" />
             <input
               type="text"
-              placeholder="Search locations, regions, landmarks..."
+              placeholder={t('locations.searchPlaceholder')}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="entity-search-input"
@@ -238,9 +240,9 @@ export const LocationStudio: React.FC = () => {
               onChange={e => setTypeFilter(e.target.value)}
               className="entity-select-control"
             >
-              {LOCATION_TYPE_OPTIONS.map(t => (
-                <option key={t} value={t}>
-                  {t === 'All' ? 'All Types' : t}
+              {LOCATION_TYPE_OPTIONS.map(tOption => (
+                <option key={tOption} value={tOption}>
+                  {tOption === 'All' ? t('castPresence.filterAll') : tOption}
                 </option>
               ))}
             </select>
@@ -253,7 +255,7 @@ export const LocationStudio: React.FC = () => {
               onChange={e => setScaleFilter(e.target.value)}
               className="entity-select-control"
             >
-              <option value="All">All Scales</option>
+              <option value="All">{t('castPresence.filterAll')}</option>
               {SCALE_OPTIONS.map(s => (
                 <option key={s} value={s}>
                   {s}
@@ -266,16 +268,16 @@ export const LocationStudio: React.FC = () => {
           <button
             className="btn btn-sm btn-outline entity-action-btn"
             onClick={() => setViewMode('cast-grid')}
-            title="View in Presence Grid"
+            title={t('subNav.presenceGridTitle')}
           >
             <LayoutGrid size={13} />
-            <span>Presence Grid</span>
+            <span>{t('subNav.presenceGrid')}</span>
           </button>
 
           {/* New Location Button */}
           <button className="btn btn-sm btn-primary entity-action-btn" onClick={handleCreateNew}>
             <Plus size={14} />
-            <span>New Location</span>
+            <span>{t('locations.addLocation')}</span>
           </button>
         </div>
       </div>
@@ -384,7 +386,7 @@ export const LocationStudio: React.FC = () => {
                     className="dossier-name-input"
                     value={selectedLocation.name}
                     onChange={e => updateLocation(selectedLocation.id, { name: e.target.value })}
-                    placeholder="Location / Setting Name..."
+                    placeholder={t('locations.nameLabel')}
                   />
 
                   <div className="dossier-meta-controls">
@@ -393,9 +395,9 @@ export const LocationStudio: React.FC = () => {
                       value={selectedLocation.type}
                       onChange={e => updateLocation(selectedLocation.id, { type: e.target.value })}
                     >
-                      {LOCATION_TYPE_OPTIONS.filter(t => t !== 'All').map(t => (
-                        <option key={t} value={t}>
-                          {t}
+                      {LOCATION_TYPE_OPTIONS.filter(tOpt => tOpt !== 'All').map(tOpt => (
+                        <option key={tOpt} value={tOpt}>
+                          {tOpt}
                         </option>
                       ))}
                     </select>
@@ -415,7 +417,7 @@ export const LocationStudio: React.FC = () => {
                     <input
                       type="text"
                       className="dossier-inline-input"
-                      placeholder="Region / Territory..."
+                      placeholder={t('locations.regionLabel')}
                       value={selectedLocation.region || ''}
                       onChange={e => updateLocation(selectedLocation.id, { region: e.target.value })}
                     />
@@ -441,12 +443,12 @@ export const LocationStudio: React.FC = () => {
                 <button
                   className="btn btn-sm btn-ghost delete-entity-btn"
                   onClick={() => {
-                    if (window.confirm(`Are you sure you want to delete "${selectedLocation.name}"?`)) {
+                    if (window.confirm(`${t('locations.deleteConfirm')}`)) {
                       deleteLocation(selectedLocation.id);
                       setSelectedId(null);
                     }
                   }}
-                  title="Delete setting"
+                  title={t('locations.deleteBtn')}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -460,7 +462,7 @@ export const LocationStudio: React.FC = () => {
                 onClick={() => setActiveTab('sensory')}
               >
                 <Sparkles size={14} />
-                <span>Sensory & Atmosphere</span>
+                <span>{t('locations.tabSensory')}</span>
               </button>
 
               <button
@@ -468,7 +470,7 @@ export const LocationStudio: React.FC = () => {
                 onClick={() => setActiveTab('features')}
               >
                 <CheckSquare size={14} />
-                <span>Points of Interest ({selectedLocation.features.length})</span>
+                <span>{t('locations.tabCodex')} ({selectedLocation.features.length})</span>
               </button>
 
               <button
@@ -476,7 +478,7 @@ export const LocationStudio: React.FC = () => {
                 onClick={() => setActiveTab('lore')}
               >
                 <ShieldAlert size={14} />
-                <span>Lore, Rules & Hazards</span>
+                <span>{t('locations.descriptionLabel')}</span>
               </button>
 
               <button
@@ -484,7 +486,7 @@ export const LocationStudio: React.FC = () => {
                 onClick={() => setActiveTab('connections')}
               >
                 <Users size={14} />
-                <span>Narrative Connections ({selectedLocation.connectedCharacters?.length || 0})</span>
+                <span>{t('subNav.characters')} ({selectedLocation.connectedCharacters?.length || 0})</span>
               </button>
 
               <button
@@ -492,7 +494,7 @@ export const LocationStudio: React.FC = () => {
                 onClick={() => setActiveTab('footprint')}
               >
                 <Activity size={14} />
-                <span>Story Footprint</span>
+                <span>{t('locations.tabFootprint')}</span>
               </button>
 
               <button
@@ -500,7 +502,7 @@ export const LocationStudio: React.FC = () => {
                 onClick={() => setActiveTab('notes')}
               >
                 <FileText size={14} />
-                <span>Author Scraps</span>
+                <span>{t('locations.tabNotes')}</span>
               </button>
             </nav>
 
@@ -511,37 +513,35 @@ export const LocationStudio: React.FC = () => {
                 <div className="dossier-section animate-fadeIn">
                   <div className="form-group">
                     <label className="form-label">
-                      <span>Aliases & Historical Names</span>
+                      <span>{t('locations.aliasesLabel')}</span>
                       <span className="label-hint">
-                        (Used for automatic match detection in the Presence Grid & Chapters)
+                        ({t('locations.aliasesDesc')})
                       </span>
                     </label>
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="e.g. The Long Hall, The Threshold (separated by commas)"
+                      placeholder="The Threshold..."
                       value={selectedLocation.aliases || ''}
                       onChange={e => updateLocation(selectedLocation.id, { aliases: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Atmosphere & Mood Palette</label>
+                    <label className="form-label">{t('locations.atmosphereLabel')}</label>
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="Eerie, claustrophobic subterranean stillness, flickering torchlight..."
                       value={selectedLocation.atmosphere || ''}
                       onChange={e => updateLocation(selectedLocation.id, { atmosphere: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">One-Line Sensory Summary</label>
+                    <label className="form-label">{t('locations.descriptionLabel')}</label>
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="A subterranean corridor of locked bronze doors smelling of beeswax and wet flagstone..."
                       value={selectedLocation.oneLineSummary || ''}
                       onChange={e => updateLocation(selectedLocation.id, { oneLineSummary: e.target.value })}
                     />
@@ -552,12 +552,11 @@ export const LocationStudio: React.FC = () => {
                     <div className="sensory-card">
                       <div className="sensory-card-header">
                         <Eye size={15} color="#3b82f6" />
-                        <span>Sight & Architecture</span>
+                        <span>{t('locations.sightLabel')}</span>
                       </div>
                       <textarea
                         className="sensory-textarea"
                         rows={3}
-                        placeholder="Visual textures, shadows, colors, architectural grandeur, decay, light sources..."
                         value={selectedLocation.sight || ''}
                         onChange={e => updateLocation(selectedLocation.id, { sight: e.target.value })}
                       />
@@ -566,12 +565,11 @@ export const LocationStudio: React.FC = () => {
                     <div className="sensory-card">
                       <div className="sensory-card-header">
                         <Volume2 size={15} color="#8b5cf6" />
-                        <span>Sound & Acoustics</span>
+                        <span>{t('locations.soundLabel')}</span>
                       </div>
                       <textarea
                         className="sensory-textarea"
                         rows={3}
-                        placeholder="Echoes, wind whistling through grates, muffled voices, distant church bells, water drips..."
                         value={selectedLocation.sound || ''}
                         onChange={e => updateLocation(selectedLocation.id, { sound: e.target.value })}
                       />
@@ -580,12 +578,11 @@ export const LocationStudio: React.FC = () => {
                     <div className="sensory-card">
                       <div className="sensory-card-header">
                         <Wind size={15} color="#10b981" />
-                        <span>Smell & Scents</span>
+                        <span>{t('locations.smellLabel')}</span>
                       </div>
                       <textarea
                         className="sensory-textarea"
                         rows={3}
-                        placeholder="Sea salt brine, aged parchment, wood smoke, roasted coffee, ozone, damp earth..."
                         value={selectedLocation.smell || ''}
                         onChange={e => updateLocation(selectedLocation.id, { smell: e.target.value })}
                       />
@@ -594,12 +591,11 @@ export const LocationStudio: React.FC = () => {
                     <div className="sensory-card">
                       <div className="sensory-card-header">
                         <Thermometer size={15} color="#f59e0b" />
-                        <span>Touch & Climate</span>
+                        <span>{t('locations.touchLabel')}</span>
                       </div>
                       <textarea
                         className="sensory-textarea"
                         rows={3}
-                        placeholder="Chilly draft, damp humid air, rough cobblestones underfoot, sticky counter tops..."
                         value={selectedLocation.touchWeather || ''}
                         onChange={e => updateLocation(selectedLocation.id, { touchWeather: e.target.value })}
                       />
@@ -614,9 +610,9 @@ export const LocationStudio: React.FC = () => {
                   {/* Progress Meter */}
                   <div className="traits-meter-card">
                     <div className="meter-header">
-                      <span className="meter-title">Points of Interest & Setting Milestones</span>
+                      <span className="meter-title">{t('locations.tabCodex')}</span>
                       <span className="meter-stats">
-                        {exploredFeatures} of {totalFeatures} explored ({featuresPercent}%)
+                        {exploredFeatures} / {totalFeatures} ({featuresPercent}%)
                       </span>
                     </div>
                     <div className="meter-track">
@@ -646,7 +642,7 @@ export const LocationStudio: React.FC = () => {
 
                     <input
                       type="text"
-                      placeholder="Add a landmark, secret passageway, resource, or clue..."
+                      placeholder={t('locations.searchPlaceholder')}
                       value={newFeatureName}
                       onChange={e => setNewFeatureName(e.target.value)}
                       className="add-trait-input"
@@ -654,7 +650,7 @@ export const LocationStudio: React.FC = () => {
 
                     <button type="submit" className="btn btn-sm btn-primary add-trait-btn">
                       <Plus size={14} />
-                      <span>Add</span>
+                      <span>{t('common.new')}</span>
                     </button>
                   </form>
 
@@ -662,7 +658,7 @@ export const LocationStudio: React.FC = () => {
                   <div className="traits-checklist-grid">
                     {selectedLocation.features.length === 0 ? (
                       <div className="traits-empty-hint">
-                        No points of interest added yet. Add landmarks, hidden rooms, clues, or resources above.
+                        {t('locations.emptyDesc')}
                       </div>
                     ) : (
                       selectedLocation.features.map(feat => (
@@ -674,7 +670,7 @@ export const LocationStudio: React.FC = () => {
                             type="button"
                             className="trait-toggle-check"
                             onClick={() => toggleLocationFeature(selectedLocation.id, feat.id)}
-                            title={feat.explored ? 'Mark as unexplored' : 'Mark as explored in story'}
+                            title={feat.explored ? t('common.done') : t('common.edit')}
                           >
                             {feat.explored ? (
                               <CheckSquare size={17} color={selectedLocation.color || '#10b981'} />
@@ -693,7 +689,7 @@ export const LocationStudio: React.FC = () => {
                             type="button"
                             className="trait-delete-btn"
                             onClick={() => removeLocationFeature(selectedLocation.id, feat.id)}
-                            title="Remove feature"
+                            title={t('common.delete')}
                           >
                             <Trash2 size={13} />
                           </button>
@@ -708,33 +704,30 @@ export const LocationStudio: React.FC = () => {
               {activeTab === 'lore' && (
                 <div className="dossier-section animate-fadeIn">
                   <div className="form-group">
-                    <label className="form-label">Narrative Significance & Plot Role</label>
+                    <label className="form-label">{t('locations.descriptionLabel')}</label>
                     <textarea
                       className="form-textarea"
                       rows={3}
-                      placeholder="Why does this location matter to the story arc? What pivotal scenes occur here?"
                       value={selectedLocation.significance || ''}
                       onChange={e => updateLocation(selectedLocation.id, { significance: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Local Rules, Hazards & World Mechanics</label>
+                    <label className="form-label">{t('locations.atmosphereLabel')}</label>
                     <textarea
                       className="form-textarea"
                       rows={4}
-                      placeholder="Environmental hazards, supernatural laws, social taboos, security measures..."
                       value={selectedLocation.rulesHazards || ''}
                       onChange={e => updateLocation(selectedLocation.id, { rulesHazards: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Historical Lore, Origins & Architecture</label>
+                    <label className="form-label">{t('locations.tabNotes')}</label>
                     <textarea
                       className="form-textarea"
                       rows={5}
-                      placeholder="Who built it? How old is it? What legendary battles or occurrences happened here in the past?"
                       value={selectedLocation.history || ''}
                       onChange={e => updateLocation(selectedLocation.id, { history: e.target.value })}
                     />
@@ -746,15 +739,12 @@ export const LocationStudio: React.FC = () => {
               {activeTab === 'connections' && (
                 <div className="dossier-section animate-fadeIn">
                   <div className="form-group">
-                    <label className="form-label">Connected Characters Inhabiting or Visiting Here</label>
-                    <p className="form-helper-text" style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.8rem' }}>
-                      Click characters below to link them with this setting:
-                    </p>
+                    <label className="form-label">{t('subNav.characters')}</label>
 
                     <div className="connections-tag-cloud">
                       {characters.length === 0 ? (
                         <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                          No characters exist in manuscript yet.
+                          {t('characters.emptyTitle')}
                         </span>
                       ) : (
                         characters.map(char => {
@@ -786,14 +776,14 @@ export const LocationStudio: React.FC = () => {
                 <div className="dossier-section animate-fadeIn">
                   <div className="footprint-overview-card">
                     <div className="footprint-stat">
-                      <span className="stat-label">Chapters Featured</span>
+                      <span className="stat-label">{t('characters.chaptersAppeared')}</span>
                       <span className="stat-value">
                         {locationPresenceInfo ? locationPresenceInfo.chapters.length : '—'}
                       </span>
                     </div>
 
                     <div className="footprint-stat">
-                      <span className="stat-label">Total Textual Mentions</span>
+                      <span className="stat-label">{t('characters.totalMentions')}</span>
                       <span className="stat-value">
                         {locationPresenceInfo ? locationPresenceInfo.totalMentions : '—'}
                       </span>
@@ -805,21 +795,21 @@ export const LocationStudio: React.FC = () => {
                         onClick={() => setViewMode('cast-grid')}
                       >
                         <LayoutGrid size={14} />
-                        <span>Open Presence Grid</span>
+                        <span>{t('subNav.presenceGrid')}</span>
                       </button>
 
                       <button
                         className="btn btn-sm btn-primary"
                         onClick={() => runCastPresenceAnalysis(true)}
                       >
-                        <span>Re-Scan Manuscript</span>
+                        <span>{t('characters.runAnalysis')}</span>
                       </button>
                     </div>
                   </div>
 
                   {locationPresenceInfo && locationPresenceInfo.chapters.length > 0 ? (
                     <div className="footprint-chapters-list">
-                      <h4 className="footprint-subheading">Chapter Appearances</h4>
+                      <h4 className="footprint-subheading">{t('characters.chaptersAppeared')}</h4>
                       {locationPresenceInfo.chapters.map(ch => {
                         const pres = castPresenceData?.presenceMap[`${selectedLocation.id}::${ch.id}`];
                         return (
@@ -827,7 +817,7 @@ export const LocationStudio: React.FC = () => {
                             <div className="footprint-ch-info">
                               <span className="footprint-ch-title">{ch.title}</span>
                               <span className="footprint-ch-mentions">
-                                {pres?.count || 0} {(pres?.count || 0) === 1 ? 'mention' : 'mentions'}
+                                {pres?.count || 0} {t('characters.totalMentions')}
                               </span>
                             </div>
 
@@ -845,7 +835,7 @@ export const LocationStudio: React.FC = () => {
                               }}
                             >
                               <BookOpen size={12} />
-                              <span>Open in Editor</span>
+                              <span>{t('common.open')}</span>
                             </button>
                           </div>
                         );
@@ -853,8 +843,7 @@ export const LocationStudio: React.FC = () => {
                     </div>
                   ) : (
                     <div className="footprint-empty-hint">
-                      No chapter mentions found for "{selectedLocation.name}". Run the Presence Grid scanner
-                      or check that the setting's name or aliases appear in the manuscript text.
+                      {t('characters.noPresence')}
                     </div>
                   )}
                 </div>
@@ -864,11 +853,10 @@ export const LocationStudio: React.FC = () => {
               {activeTab === 'notes' && (
                 <div className="dossier-section animate-fadeIn">
                   <div className="form-group">
-                    <label className="form-label">Freeform Worldbuilding Notes, Maps & Ideas</label>
+                    <label className="form-label">{t('locations.tabNotes')}</label>
                     <textarea
                       className="form-textarea"
                       rows={12}
-                      placeholder="Jot down architectural sketches, historical timelines, floor plans, sensory inspiration..."
                       value={selectedLocation.notes || ''}
                       onChange={e => updateLocation(selectedLocation.id, { notes: e.target.value })}
                     />
@@ -880,7 +868,7 @@ export const LocationStudio: React.FC = () => {
         ) : (
           <div className="entity-detail-empty">
             <Compass size={38} color="var(--text-muted)" />
-            <p>Select a location from the codex or create a new one to begin editing.</p>
+            <p>{t('locations.emptyDesc')}</p>
           </div>
         )}
       </div>

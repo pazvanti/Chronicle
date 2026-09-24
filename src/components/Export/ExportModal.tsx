@@ -23,6 +23,7 @@ import {
 import { ShunnSetupModal } from './ShunnSetupModal';
 import { PdfSetupModal } from './PdfSetupModal';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface ExportModalProps {
   onClose: () => void;
@@ -30,6 +31,7 @@ interface ExportModalProps {
 
 export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
   const { book, exportAndDownload, isLoading } = useEpub();
+  const { t } = useTranslation();
   const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
   const [isShunnModalOpen, setIsShunnModalOpen] = useState<boolean>(false);
 
@@ -78,80 +80,80 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
   const exportFormats = [
     {
       id: 'epub',
-      title: 'Standard EPUB (.epub)',
-      desc: 'IDPF-compliant publication package ready for Apple Books, Amazon Kindle, Kobo, Google Play, and e-readers.',
+      title: t('exportModal.epubTitle'),
+      desc: t('exportModal.epubDesc'),
       icon: <BookMarked size={24} color="#818cf8" />,
-      badge: 'E-Reader Release',
+      badge: t('exportModal.epubBadge'),
       action: handleExportEpub,
       btnClass: 'btn-primary',
       isLoading: isLoading,
     },
     {
       id: 'shunn-docx',
-      title: 'Shunn Modern Manuscript (.docx)',
-      desc: 'William Shunn industry-standard submission format for publishers & agents (1-inch margins, double spaced 12pt Times, running headers, word count & contact block).',
+      title: t('exportModal.shunnTitle'),
+      desc: t('exportModal.shunnDesc'),
       icon: <FileSpreadsheet size={24} color="#60a5fa" />,
-      badge: 'Publisher Gold Standard',
+      badge: t('exportModal.shunnBadge'),
       action: handleOpenShunnModal,
       btnClass: 'btn-primary',
       isLoading: false,
     },
     {
       id: 'pdf-direct',
-      title: 'Print-Ready Vector PDF (.pdf)',
-      desc: 'Generates a publication-grade vector text PDF with customizable cover, chapter titles, ~ • ~ ornaments, publish date, table of contents, and trim sizes.',
+      title: t('exportModal.pdfTitle'),
+      desc: t('exportModal.pdfDesc'),
       icon: <FileType size={24} color="#34d399" />,
-      badge: 'Vector Text • KDP Ready',
+      badge: t('exportModal.pdfBadge'),
       action: handleOpenPdfModal,
       btnClass: 'btn-primary',
       isLoading: false,
     },
     {
       id: 'markdown',
-      title: 'Markdown Manuscript (.md)',
-      desc: 'Complete manuscript formatted as clean Markdown with YAML metadata frontmatter.',
+      title: t('exportModal.markdownTitle'),
+      desc: t('exportModal.markdownDesc'),
       icon: <FileText size={24} color="#38bdf8" />,
-      badge: 'Markdown',
+      badge: t('exportModal.markdownBadge'),
       action: handleExportMarkdown,
       btnClass: 'btn-secondary',
       isLoading: false,
     },
     {
       id: 'html',
-      title: 'Single HTML Bundle (.html)',
-      desc: 'Self-contained offline readable document with all chapters and embedded styling.',
+      title: t('exportModal.htmlTitle'),
+      desc: t('exportModal.htmlDesc'),
       icon: <FileCode size={24} color="#f59e0b" />,
-      badge: 'Web Document',
+      badge: t('exportModal.htmlBadge'),
       action: handleExportSingleHtml,
       btnClass: 'btn-secondary',
       isLoading: false,
     },
     {
       id: 'txt',
-      title: 'Plain Text (.txt)',
-      desc: 'Raw formatted text document with uppercase chapter headings and dividers.',
+      title: t('exportModal.txtTitle'),
+      desc: t('exportModal.txtDesc'),
       icon: <FileText size={24} color="#94a3b8" />,
-      badge: 'Text',
+      badge: t('exportModal.txtBadge'),
       action: handleExportPlainText,
       btnClass: 'btn-secondary',
       isLoading: false,
     },
     {
       id: 'print-view',
-      title: 'Print Preview & Printer Setup',
-      desc: 'Opens 6×9 in printable book view formatted with headers for physical paper printing.',
+      title: t('exportModal.printTitle'),
+      desc: t('exportModal.printDesc'),
       icon: <Printer size={24} color="#a78bfa" />,
-      badge: 'Print Window',
+      badge: t('exportModal.printBadge'),
       action: handlePrintPdf,
       btnClass: 'btn-secondary',
       isLoading: false,
     },
     {
       id: 'json',
-      title: 'JSON Backup Archive (.json)',
-      desc: 'Machine-readable structural backup containing metadata, spine, TOC, and chapters.',
+      title: t('exportModal.jsonTitle'),
+      desc: t('exportModal.jsonDesc'),
       icon: <Database size={24} color="#c084fc" />,
-      badge: 'Backup',
+      badge: t('exportModal.jsonBadge'),
       action: handleExportJson,
       btnClass: 'btn-secondary',
     },
@@ -177,9 +179,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
               <Download size={18} />
             </div>
             <div>
-              <h2 className="modal-title">Export Book & Multi-Format Hub</h2>
+              <h2 className="modal-title">{t('exportModal.title')}</h2>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Export "{book.metadata.title}" into your preferred format
+                {t('exportModal.subtitle').replace('{title}', book.metadata.title)}
               </p>
             </div>
           </div>
@@ -240,12 +242,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                 {fmt.isLoading ? (
                   <>
                     <Loader2 size={14} className="animate-spin" />
-                    <span>Working...</span>
+                    <span>{t('exportModal.working')}</span>
                   </>
                 ) : (
                   <>
                     <Download size={14} />
-                    <span>Export</span>
+                    <span>{t('exportModal.exportBtn')}</span>
                   </>
                 )}
               </button>
@@ -255,7 +257,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
 
         <div className="modal-footer">
           <button className="btn btn-outline" onClick={onClose}>
-            Close
+            {t('common.close')}
           </button>
         </div>
       </div>

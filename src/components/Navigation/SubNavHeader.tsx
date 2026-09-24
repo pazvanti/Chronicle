@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { AppViewMode } from '../../types/project';
+import { useTranslation } from '../../i18n/I18nContext';
 import {
   Edit3,
   BookOpen,
@@ -36,6 +37,7 @@ export const SubNavHeader: React.FC = () => {
     isLocationSidebarOpen,
     setIsLocationSidebarOpen,
   } = useEpub();
+  const { t } = useTranslation();
 
   if (isZenMode || minimalistMode || !book) {
     return null;
@@ -51,23 +53,23 @@ export const SubNavHeader: React.FC = () => {
   }[] = [
     {
       id: 'editor',
-      label: 'Editor',
+      label: t('subNav.editor'),
       icon: <Edit3 size={14} />,
       badge: totalWordCount > 0 ? `${totalWordCount.toLocaleString()} w` : undefined,
-      title: 'Manuscript writing canvas & rich text editor',
+      title: t('subNav.editorTitle'),
     },
     {
       id: 'reader',
-      label: 'Reader',
+      label: t('subNav.reader'),
       icon: <BookOpen size={14} />,
       badge: `${totalReadingTimeMinutes}m read`,
-      title: 'Distraction-free reader view with audio TTS queue playback',
+      title: t('subNav.readerTitle'),
     },
     {
       id: 'inspector',
-      label: 'Inspect',
+      label: t('subNav.inspect'),
       icon: <Terminal size={14} />,
-      title: 'Structural EPUB package validator, manifest explorer & raw files',
+      title: t('subNav.inspectTitle'),
     },
   ];
 
@@ -81,31 +83,31 @@ export const SubNavHeader: React.FC = () => {
   }[] = [
     {
       id: 'cast-grid',
-      label: 'Presence Grid',
+      label: t('subNav.presenceGrid'),
       icon: <LayoutGrid size={14} />,
       badge: characters.length + locations.length > 0 ? characters.length + locations.length : undefined,
-      title: 'Chapter cast presence and character occurrence matrix',
+      title: t('subNav.presenceGridTitle'),
     },
     {
       id: 'timeline',
-      label: 'Timeline',
+      label: t('subNav.timeline'),
       icon: <Clock size={14} />,
       badge: timelines.length > 0 ? timelines.length : undefined,
-      title: 'Story event timeline and chronology',
+      title: t('subNav.timelineTitle'),
     },
     {
       id: 'characters',
-      label: 'Characters',
+      label: t('subNav.characters'),
       icon: <Users size={14} />,
       badge: characters.length > 0 ? characters.length : undefined,
-      title: 'Character dossiers, traits, archetypes, and relationship maps',
+      title: t('subNav.charactersTitle'),
     },
     {
       id: 'locations',
-      label: 'Location codex',
+      label: t('subNav.locations'),
       icon: <Compass size={14} />,
       badge: locations.length > 0 ? locations.length : undefined,
-      title: 'Worldbuilding location codex, geography, and sensory notes',
+      title: t('subNav.locationsTitle'),
     },
   ];
 
@@ -119,35 +121,35 @@ export const SubNavHeader: React.FC = () => {
   }[] = [
     {
       id: 'cover',
-      label: 'Cover Studio',
+      label: t('subNav.coverStudio'),
       icon: <ImageIcon size={14} />,
-      title: 'Vector book cover designer & layout studio',
+      title: t('subNav.coverStudioTitle'),
     },
     {
       id: 'styles',
-      label: 'Styles & CSS',
+      label: t('subNav.stylesCss'),
       icon: <Palette size={14} />,
-      title: 'Book typography stylesheets and custom CSS editor',
+      title: t('subNav.stylesCssTitle'),
     },
     {
       id: 'toc',
-      label: 'Table of Contents',
+      label: t('subNav.tableOfContents'),
       icon: <ListOrdered size={14} />,
       badge: book.chapters.length > 0 ? book.chapters.length : undefined,
-      title: 'Hierarchical navigation and chapter ordering',
+      title: t('subNav.tableOfContentsTitle'),
     },
     {
       id: 'metadata',
-      label: 'Metadata',
+      label: t('subNav.metadata'),
       icon: <Tag size={14} />,
-      title: 'Dublin Core metadata (title, author, ISBN, series, description)',
+      title: t('subNav.metadataTitle'),
     },
     {
       id: 'assets',
-      label: 'Assets',
+      label: t('subNav.assets'),
       icon: <FolderArchive size={14} />,
       badge: book.assets.length > 0 ? book.assets.length : undefined,
-      title: 'Media assets, images, fonts, and illustrations',
+      title: t('subNav.assetsTitle'),
     },
   ];
 
@@ -218,9 +220,9 @@ export const SubNavHeader: React.FC = () => {
 
               const dynamicTitle =
                 item.id === 'characters'
-                  ? (isCharacterSidebarOpen ? 'Close Character Dossiers sidebar drawer' : 'Open Character Dossiers sidebar drawer')
+                  ? (isCharacterSidebarOpen ? t('subNav.closeCharacterSidebar') : t('subNav.openCharacterSidebar'))
                   : item.id === 'locations'
-                  ? (isLocationSidebarOpen ? 'Close Location Codex sidebar drawer' : 'Open Location Codex sidebar drawer')
+                  ? (isLocationSidebarOpen ? t('subNav.closeLocationSidebar') : t('subNav.openLocationSidebar'))
                   : item.title;
 
               return (
@@ -291,10 +293,10 @@ export const SubNavHeader: React.FC = () => {
           <button
             className="btn btn-sm btn-primary sub-nav-export-btn"
             onClick={() => setIsExportModalOpen(true)}
-            title="Open Master Export Hub (EPUB, PDF, DOCX, Shunn, TXT, HTML)"
+            title={t('subNav.exportHubTitle')}
           >
             <Share2 size={13} />
-            <span>Export Hub...</span>
+            <span>{t('subNav.exportHubBtn')}</span>
           </button>
         </>
       )}

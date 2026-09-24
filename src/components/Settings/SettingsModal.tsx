@@ -36,6 +36,8 @@ import {
   DownloadCloud,
   ExternalLink,
   RefreshCw,
+  Save,
+  Globe,
 } from 'lucide-react';
 import { ChronicleLogo } from '../Common/ChronicleLogo';
 import { markdownToHtml } from '../../services/epub/markdownImporter';
@@ -44,6 +46,7 @@ import {
   GUMROAD_DOWNLOAD_URL,
   UpdateCheckResult,
 } from '../../services/update/updateChecker';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export type SettingsTab = 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates';
 
@@ -83,7 +86,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     checkForUpdatesManually,
     showWelcomeOnStartup,
     setShowWelcomeOnStartup,
+    autoSaveEnabled,
+    setAutoSaveEnabled,
+    autoSaveInterval,
+    setAutoSaveInterval,
   } = useEpub();
+
+  const { t, language, setLanguage } = useTranslation();
 
   useEscapeKey(onClose);
 
@@ -126,11 +135,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       const res = await checkForUpdatesManually(true);
       setUpdateResult(res);
       if (res.hasUpdate) {
-        showNotification('success', `New version ${res.latestVersion} available!`);
+        showNotification('success', t('notifications.newVersionAvailable', { version: res.latestVersion }));
       } else if (res.error) {
         showNotification('error', `Update check failed: ${res.error}`);
       } else {
-        showNotification('info', `Chronicle is up to date (${res.currentVersion}).`);
+        showNotification('info', t('notifications.chronicleUpToDate', { version: res.currentVersion }));
       }
     } catch (err: any) {
       showNotification('error', `Failed to check for updates: ${err?.message || 'Error'}`);
@@ -141,7 +150,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const handleToggleCheckUpdates = async (checked: boolean) => {
     await setCheckUpdatesOnStartup(checked);
-    showNotification('info', checked ? 'Automatic update checks enabled on startup.' : 'Automatic update checks disabled.');
+    showNotification('info', checked ? t('notifications.checkUpdatesEnabled') : t('notifications.checkUpdatesDisabled'));
   };
 
   useEffect(() => {
@@ -175,7 +184,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const handleToggleWelcome = async (checked: boolean) => {
     await setShowWelcomeOnStartup(checked);
-    showNotification('info', checked ? 'Welcome guide will show on startup.' : 'Welcome guide disabled on startup.');
+    showNotification('info', checked ? t('notifications.welcomeGuideEnabled') : t('notifications.welcomeGuideDisabled'));
+  };
+
+  const handleToggleAutoSave = async (checked: boolean) => {
+    await setAutoSaveEnabled(checked);
+    showNotification('info', checked ? t('notifications.autoSaveEnabledNotify') : t('notifications.autoSaveDisabledNotify'));
+  };
+
+  const handleChangeAutoSaveInterval = async (val: number) => {
+    await setAutoSaveInterval(val);
+    const labelKey = val === 30 ? 'interval30s' : val === 60 ? 'interval1m' : val === 120 ? 'interval2m' : 'interval5m';
+    const label = t(`settings.${labelKey}` as any);
+    showNotification('info', t('notifications.autoSaveIntervalUpdated', { interval: label }));
   };
 
   const handleTestCloudConnection = async () => {
@@ -260,19 +281,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const allNavTabs: { id: SettingsTab; label: string; icon: React.ReactNode; badge?: string; badgeColor?: string }[] = [
-    { id: 'appearance', label: 'Appearance', icon: <Layout size={16} /> },
-    { id: 'themes', label: 'Themes', icon: <Palette size={16} /> },
+    { id: 'appearance', label: t('settings.tabAppearance'), icon: <Layout size={16} /> },
+    { id: 'themes', label: t('settings.tabThemes'), icon: <Palette size={16} /> },
     {
       id: 'cloud',
-      label: 'Cloud Storage',
+      label: t('settings.tabCloud'),
       icon: <Cloud size={16} />,
       badge: isWebDavConnected ? 'Active' : undefined,
     },
-    { id: 'editor', label: 'Editor & Reading', icon: <Sliders size={16} /> },
-    { id: 'general', label: 'General & Storage', icon: <Database size={16} /> },
+    { id: 'editor', label: t('settings.tabEditor'), icon: <Sliders size={16} /> },
+    { id: 'general', label: t('settings.tabGeneral'), icon: <Database size={16} /> },
     {
       id: 'updates',
-      label: 'Updates',
+      label: t('settings.tabUpdates'),
       icon: <ArrowUpCircle size={16} />,
       badge: isUpdateAvailable ? (latestRelease?.latestVersion || 'New') : undefined,
       badgeColor: isUpdateAvailable ? '#e6be75' : undefined,
@@ -318,14 +339,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
             <div>
               <h3 id="settings-dialog-title" className="modal-title" style={{ margin: 0, fontSize: '1.15rem' }}>
-                Settings & Preferences
+                {t('settings.modalTitle')}
               </h3>
               <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                All settings are stored in local browser IndexedDB and automatically restored on startup
+                {t('settings.generalDesc')}
               </p>
             </div>
           </div>
-          <button className="btn-icon btn-sm" onClick={onClose} title="Close Settings (Esc)">
+          <button className="btn-icon btn-sm" onClick={onClose} title={t('common.close')}>
             <X size={16} />
           </button>
         </div>
@@ -335,67 +356,68 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Left Navigation Sidebar */}
           <div
             style={{
-              width: '225px',
-              backgroundColor: 'var(--bg-sidebar)',
+              width: '200px',
               borderRight: '1px solid var(--border-subtle)',
+              background: 'var(--bg-card)',
               display: 'flex',
               flexDirection: 'column',
-              padding: '0.9rem 0.65rem',
-              gap: '0.25rem',
+              padding: '0.75rem 0.5rem',
+              justifyContent: 'space-between',
               flexShrink: 0,
             }}
           >
-            {navTabs.map(tab => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.55rem 0.75rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    backgroundColor: isActive ? 'var(--bg-surface-hover)' : 'transparent',
-                    color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                    fontWeight: isActive ? 600 : 500,
-                    fontSize: '0.82rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    textAlign: 'left',
-                    width: '100%',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+              {navTabs.map(tab => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className="btn"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.55rem',
+                      fontSize: '0.82rem',
+                      padding: '0.5rem 0.65rem',
+                      borderRadius: '8px',
+                      justifyContent: 'flex-start',
+                      fontWeight: isActive ? 600 : 400,
+                      background: isActive ? 'var(--accent-primary-glow)' : 'transparent',
+                      color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                      border: 'none',
+                      width: '100%',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
                     {tab.icon}
                     <span>{tab.label}</span>
-                  </div>
-                  {tab.badge && (
-                    <span
-                      style={{
-                        fontSize: '0.66rem',
-                        fontWeight: 700,
-                        backgroundColor: tab.badgeColor ? 'rgba(230, 190, 117, 0.2)' : 'rgba(16, 185, 129, 0.15)',
-                        color: tab.badgeColor || '#10b981',
-                        padding: '1px 6px',
-                        borderRadius: '9999px',
-                        border: tab.badgeColor ? '1px solid rgba(230, 190, 117, 0.35)' : 'none',
-                      }}
-                    >
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                    {tab.badge && (
+                      <span
+                        style={{
+                          marginLeft: 'auto',
+                          fontSize: '0.66rem',
+                          fontWeight: 700,
+                          backgroundColor: tab.badgeColor ? 'rgba(230, 190, 117, 0.2)' : 'rgba(16, 185, 129, 0.15)',
+                          color: tab.badgeColor || '#10b981',
+                          padding: '1px 6px',
+                          borderRadius: '9999px',
+                          border: tab.badgeColor ? '1px solid rgba(230, 190, 117, 0.35)' : 'none',
+                        }}
+                      >
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
 
-            <div style={{ marginTop: 'auto', paddingTop: '0.6rem', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+            {/* Bottom Actions: Guide Shortcut & App Info */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.75rem' }}>
               <button
-                type="button"
-                className="btn btn-ghost btn-sm"
+                className="btn btn-secondary btn-sm"
                 onClick={() => {
                   onClose();
                   setIsWelcomeModalOpen(true);
@@ -411,10 +433,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   justifyContent: 'flex-start',
                   width: '100%',
                 }}
-                title="Open Chronicle Welcome & Quick Start Guide"
+                title={t('settings.welcomeGuide')}
               >
                 <Sparkles size={15} style={{ color: '#c084fc' }} />
-                <span>Guide & Overview</span>
+                <span>{t('settings.welcomeGuide')}</span>
               </button>
 
               <div style={{ padding: '0 0.5rem', fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -464,10 +486,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div>
                   <div style={{ marginBottom: '0.85rem' }}>
                     <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      Workspace Interface Mode
+                      {t('settings.workspaceInterfaceMode')}
                     </h4>
                     <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                      Choose between the full authoring studio suite or a distraction-free minimalist writing environment.
+                      {t('settings.workspaceInterfaceDesc')}
                     </p>
                   </div>
 
@@ -508,10 +530,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           </div>
                           <div>
                             <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
-                              Studio Mode
+                              {t('settings.studioModeTitle')}
                             </div>
                             <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                              Full Authoring Suite
+                              {t('settings.studioModeSubtitle')}
                             </div>
                           </div>
                         </div>
@@ -530,13 +552,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                               borderRadius: '9999px',
                             }}
                           >
-                            <Check size={11} /> Active
+                            <Check size={11} /> {t('settings.activeBadge')}
                           </span>
                         )}
                       </div>
 
                       <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                        Complete multi-pane workspace with top view navigation, utility sidebars, casting tools, and status telemetry.
+                        {t('settings.studioModeDesc')}
                       </p>
                     </div>
 
@@ -576,10 +598,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           </div>
                           <div>
                             <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
-                              Minimalist Mode
+                              {t('settings.minimalistModeTitle')}
                             </div>
                             <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                              Distraction-Free Canvas
+                              {t('settings.minimalistModeSubtitle')}
                             </div>
                           </div>
                         </div>
@@ -598,13 +620,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                               borderRadius: '9999px',
                             }}
                           >
-                            <Check size={11} /> Active
+                            <Check size={11} /> {t('settings.activeBadge')}
                           </span>
                         )}
                       </div>
 
                       <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                        Conceals secondary toolbars, status bars, and studio panels to keep you in pure creative flow. Toggle with <kbd className="kbd-shortcut" style={{ fontSize: '0.7rem' }}>Alt+M</kbd>.
+                        {t('settings.minimalistModeDesc')}
                       </p>
                     </div>
                   </div>
@@ -616,7 +638,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                          Zen Mode (Distraction-Free Immersion)
+                          {t('settings.zenModeTitle')}
                         </h4>
                         <span
                           style={{
@@ -629,11 +651,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             border: `1px solid ${isZenMode ? 'var(--accent-primary)' : 'var(--border-subtle)'}`,
                           }}
                         >
-                          {isZenMode ? 'Active Now' : 'Inactive'}
+                          {isZenMode ? t('settings.zenModeActive') : t('settings.zenModeInactive')}
                         </span>
                       </div>
                       <p style={{ margin: '2px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                        Deep-work writing environment with centered typewriter viewport, dimmed inactive paragraphs, and zero UI chrome.
+                        {t('settings.zenModeDesc')}
                       </p>
                     </div>
 
@@ -644,7 +666,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       style={{ fontSize: '0.78rem', gap: '5px' }}
                     >
                       <Focus size={14} />
-                      <span>{isZenMode ? 'Exit Zen Mode (Esc)' : 'Enter Zen Mode (Alt+Z)'}</span>
+                      <span>{isZenMode ? t('settings.exitZenBtn') : t('settings.enterZenBtn')}</span>
                     </button>
                   </div>
 
@@ -664,10 +686,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   >
                     <div>
                       <div style={{ fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
-                        Switch to Zen Mode on typing
+                        {t('settings.switchZenOnTyping')}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                        Automatically transitions the workspace into Zen mode the moment you begin typing in the manuscript.
+                        {t('settings.switchZenOnTypingDesc')}
                       </div>
                     </div>
                     <label className="toggle-switch" style={{ margin: 0, flexShrink: 0 }}>
@@ -697,7 +719,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                           <MoveVertical size={16} color="var(--accent-primary)" />
-                          Typewriter Scrolling
+                          {t('settings.typewriterScrolling')}
                         </div>
                         <input
                           type="checkbox"
@@ -707,7 +729,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         />
                       </div>
                       <p style={{ margin: 0, fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                        Keeps the currently active paragraph locked at vertical eye-level while you type, preventing neck fatigue.
+                        {t('settings.typewriterScrollingDesc')}
                       </p>
                     </div>
 
@@ -733,7 +755,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                           <Focus size={16} color="var(--accent-primary)" />
-                          Focus Dimming
+                          {t('settings.focusDimming')}
                         </div>
                         <input
                           type="checkbox"
@@ -746,7 +768,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         />
                       </div>
                       <p style={{ margin: 0, fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                        Fades surrounding paragraphs to {zenSettings.focusDimOpacity ?? 35}% visibility, brightly spotlighting only your active sentence and thought.
+                        {t('settings.focusDimmingDesc')}
                       </p>
 
                       {/* Dimming Visibility Slider */}
@@ -815,7 +837,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                           <EyeOff size={16} color="var(--accent-primary)" />
-                          Ghost HUD (Zero UI)
+                          {t('settings.ghostHud')}
                         </div>
                         <input
                           type="checkbox"
@@ -825,7 +847,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         />
                       </div>
                       <p style={{ margin: 0, fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                        Hides all toolbars and borders. Moving the mouse reveals faint Ghost Bar with chapter, words, and Exit (Esc).
+                        {t('settings.ghostHudDesc')}
                       </p>
                     </div>
 
@@ -844,7 +866,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                           <MessageSquareOff size={16} color="var(--accent-primary)" />
-                          Hide Comments
+                          {t('settings.hideComments')}
                         </div>
                         <input
                           type="checkbox"
@@ -854,7 +876,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         />
                       </div>
                       <p style={{ margin: 0, fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                        Conceals margin notes and in-text comment highlights while in Zen mode for clean, distraction-free writing.
+                        {t('settings.hideCommentsDesc')}
                       </p>
                     </div>
                   </div>
@@ -876,7 +898,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <Keyboard size={18} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
                   <div>
-                    <strong>Focus Shortcuts:</strong> Press <kbd className="kbd-shortcut" style={{ fontSize: '0.72rem' }}>Alt+M</kbd> anywhere to quickly toggle Minimalist Mode, or <kbd className="kbd-shortcut" style={{ fontSize: '0.72rem' }}>Alt+Z</kbd> to enter full distraction-free Zen Mode. Press <kbd className="kbd-shortcut" style={{ fontSize: '0.72rem' }}>Esc</kbd> to exit.
+                    {t('settings.focusShortcutsFooter')}
                   </div>
                 </div>
               </div>
@@ -888,10 +910,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
                   <div>
                     <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      Application UI Themes
+                      {t('settings.appUiThemes')}
                     </h4>
                     <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                      Switch the visual atmosphere across all studio headers, sidebars, cards, modals, and workspace chrome.
+                      {t('settings.appUiThemesDesc')}
                     </p>
                   </div>
                   <span
@@ -906,7 +928,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       flexShrink: 0,
                     }}
                   >
-                    Active: {UI_THEMES.find(t => t.id === uiTheme)?.name || 'Classic - Dark'}
+                    {t('settings.activeBadge')}: {UI_THEMES.find(t => t.id === uiTheme)?.name || 'Classic - Dark'}
                   </span>
                 </div>
 
@@ -1014,7 +1036,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 borderRadius: '9999px',
                               }}
                             >
-                              <Check size={11} /> Active
+                              <Check size={11} /> {t('settings.activeBadge')}
                             </span>
                           )}
                         </div>
@@ -1042,21 +1064,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.8rem' }}>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
-                        Default Manuscript Canvas Paper Tone
+                        {t('settings.defaultPaperTone')}
                       </div>
                       <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                        Set the default paper background for your manuscript editor and reading canvas.
+                        {t('settings.defaultPaperToneDesc')}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      {(['light', 'sepia', 'dark', 'obsidian'] as const).map(t => {
-                        const isToneActive = readerTheme === t;
+                      {(['light', 'sepia', 'dark', 'obsidian'] as const).map(itemTheme => {
+                        const isToneActive = readerTheme === itemTheme;
                         return (
                           <button
-                            key={t}
+                            key={itemTheme}
                             type="button"
                             className={`btn btn-sm ${isToneActive ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setReaderTheme(t)}
+                            onClick={() => setReaderTheme(itemTheme)}
                             style={{
                               textTransform: 'capitalize',
                               fontSize: '0.8rem',
@@ -1072,17 +1094,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 height: 9,
                                 borderRadius: '50%',
                                 backgroundColor:
-                                  t === 'light'
+                                  itemTheme === 'light'
                                     ? '#f8fafc'
-                                    : t === 'sepia'
+                                    : itemTheme === 'sepia'
                                       ? '#fbf0d9'
-                                      : t === 'dark'
+                                      : itemTheme === 'dark'
                                         ? '#1e293b'
                                         : '#09090b',
                                 border: '1px solid rgba(128,128,128,0.4)',
                               }}
                             />
-                            {t}
+                            {itemTheme}
                             {isToneActive && <Check size={12} />}
                           </button>
                         );
@@ -1108,7 +1130,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <Sparkles size={20} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
                   <div>
-                    <strong>Studio Chrome vs Manuscript Paper:</strong> Chronicle completely decouples your application chrome theme from your writing canvas paper tone. You can compose in a sleek, focused dark or cyberpunk studio while keeping your manuscript on warm sepia or high-contrast crisp white paper.
+                    {t('settings.chromeVsPaperCallout')}
                   </div>
                 </div>
               </div>
@@ -1120,10 +1142,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div style={{ marginBottom: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      WebDAV Cloud Storage Configuration
+                      {t('settings.webdavCloudConfig')}
                     </h4>
                     <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      Sync manuscripts seamlessly with Nextcloud, ownCloud, Fastmail, or any standard WebDAV cloud server.
+                      {t('settings.webdavCloudDesc')}
                     </p>
                   </div>
                   {isWebDavConnected && (
@@ -1132,10 +1154,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       className="btn btn-ghost btn-sm"
                       onClick={handleDisconnectCloud}
                       style={{ color: 'var(--accent-danger)', gap: '4px', fontSize: '0.78rem' }}
-                      title="Remove WebDAV configuration"
+                      title={t('settings.disconnect')}
                     >
                       <Trash2 size={13} />
-                      <span>Disconnect</span>
+                      <span>{t('settings.disconnect')}</span>
                     </button>
                   )}
                 </div>
@@ -1165,7 +1187,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     />
                     <div>
                       <div style={{ fontWeight: 600, fontSize: '0.84rem', color: isWebDavConnected ? '#10b981' : '#d97706' }}>
-                        {isWebDavConnected ? 'WebDAV Cloud Connected & Synchronized' : 'WebDAV Not Configured'}
+                        {isWebDavConnected ? t('settings.connectedStatus') : t('settings.notConfiguredStatus')}
                       </div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                         {isWebDavConnected && webdavConfig
@@ -1181,7 +1203,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div className="form-group">
                     <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
                       <Server size={13} color="var(--accent-primary)" />
-                      <span>WebDAV Server Endpoint URL:</span>
+                      <span>{t('settings.serverUrlLabel')}</span>
                     </label>
                     <input
                       type="url"
@@ -1197,7 +1219,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div className="form-group">
                       <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
                         <User size={13} color="var(--accent-primary)" />
-                        <span>Username:</span>
+                        <span>{t('settings.usernameLabel')}</span>
                       </label>
                       <input
                         type="text"
@@ -1212,7 +1234,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div className="form-group">
                       <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
                         <KeyRound size={13} color="var(--accent-primary)" />
-                        <span>Password or App Token:</span>
+                        <span>{t('settings.passwordLabel')}</span>
                       </label>
                       <div style={{ position: 'relative' }}>
                         <input
@@ -1239,7 +1261,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div className="form-group">
                     <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
                       <FolderTree size={13} color="var(--accent-primary)" />
-                      <span>Remote Folder Path:</span>
+                      <span>{t('settings.remotePathLabel')}</span>
                     </label>
                     <input
                       type="text"
@@ -1279,7 +1301,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       style={{ gap: '4px', fontSize: '0.76rem' }}
                     >
                       <HelpCircle size={13} />
-                      <span>{showCloudHelp ? 'Hide Setup Tips' : 'Provider Tips (Nextcloud, etc.)'}</span>
+                      <span>{showCloudHelp ? t('settings.hideSetupTips') : t('settings.providerTips')}</span>
                     </button>
 
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -1290,7 +1312,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         disabled={isTesting || !serverUrl.trim()}
                       >
                         {isTesting ? <Loader2 size={13} className="animate-spin" /> : <Server size={13} />}
-                        <span>{isTesting ? 'Testing...' : 'Test Connection'}</span>
+                        <span>{isTesting ? t('settings.testing') : t('settings.testConnection')}</span>
                       </button>
 
                       <button
@@ -1299,7 +1321,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         disabled={isSavingCloud || !serverUrl.trim()}
                       >
                         {isSavingCloud ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
-                        <span>Save Cloud Settings</span>
+                        <span>{t('settings.saveCloudSettings')}</span>
                       </button>
                     </div>
                   </div>
@@ -1318,7 +1340,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       }}
                     >
                       <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.35rem' }}>
-                        Endpoint URL Cheat Sheet:
+                        {t('settings.cheatSheetTitle')}
                       </div>
                       <ul style={{ paddingLeft: '1.2rem', margin: 0 }}>
                         <li><strong>Nextcloud / ownCloud:</strong> <code>https://your-cloud.com/remote.php/dav/files/YOUR_USERNAME/</code></li>
@@ -1336,26 +1358,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.3rem' }}>
                 <div>
                   <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    Reading & Writing Preferences
+                    {t('settings.readingWritingPrefs')}
                   </h4>
                   <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Set default typography, page width, and reading tone across the studio.
+                    {t('settings.readingWritingDesc')}
                   </p>
                 </div>
 
                 {/* Default Reading Tone */}
                 <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Default Reading Paper Tone:</label>
+                  <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{t('settings.paperTone')}</label>
                   <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.3rem' }}>
-                    {(['light', 'sepia', 'dark', 'obsidian'] as const).map(t => (
+                    {(['light', 'sepia', 'dark', 'obsidian'] as const).map(itemTone => (
                       <button
-                        key={t}
+                        key={itemTone}
                         type="button"
-                        className={`btn btn-sm ${readerTheme === t ? 'btn-primary' : 'btn-secondary'}`}
-                        onClick={() => setReaderTheme(t)}
+                        className={`btn btn-sm ${readerTheme === itemTone ? 'btn-primary' : 'btn-secondary'}`}
+                        onClick={() => setReaderTheme(itemTone)}
                         style={{ textTransform: 'capitalize', fontSize: '0.78rem' }}
                       >
-                        {t}
+                        {itemTone}
                       </button>
                     ))}
                   </div>
@@ -1363,7 +1385,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 {/* Default Font Family */}
                 <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Default Reader Font Family:</label>
+                  <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{t('settings.fontFamily')}</label>
                   <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.3rem' }}>
                     {(['serif', 'sans', 'literata', 'opendyslexic', 'mono'] as const).map(f => (
                       <button
@@ -1383,7 +1405,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
                     <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 600, margin: 0 }}>
-                      Editor / Reader Margin Width:
+                      {t('settings.marginWidth')}
                     </label>
                     <span style={{ fontSize: '0.78rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
                       {readerMarginWidth}px
@@ -1399,9 +1421,86 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     style={{ width: '100%', accentColor: 'var(--accent-primary)' }}
                   />
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    <span>Narrow (560px)</span>
-                    <span>Standard (760px)</span>
-                    <span>Widescreen (1080px)</span>
+                    <span>{t('settings.marginNarrow')}</span>
+                    <span>{t('settings.marginStandard')}</span>
+                    <span>{t('settings.marginWide')}</span>
+                  </div>
+                </div>
+
+                {/* Auto-save Preferences Card */}
+                <div
+                  style={{
+                    padding: '0.9rem 1rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.8rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Save size={15} style={{ color: 'var(--accent-primary)' }} />
+                        <span>{t('settings.autoSaveTitle')}</span>
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        {t('settings.autoSaveDesc')}
+                      </div>
+                    </div>
+
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={autoSaveEnabled}
+                        onChange={e => handleToggleAutoSave(e.target.checked)}
+                        style={{ width: '18px', height: '18px', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+                      />
+                    </label>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingTop: '0.6rem',
+                      borderTop: '1px solid var(--border-subtle)',
+                      opacity: autoSaveEnabled ? 1 : 0.5,
+                      transition: 'opacity 0.2s ease',
+                    }}
+                  >
+                    <div>
+                      <label
+                        htmlFor="auto-save-interval"
+                        style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', display: 'block' }}
+                      >
+                        {t('settings.autoSaveInterval')}
+                      </label>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        {t('settings.autoSaveIntervalDesc')}
+                      </div>
+                    </div>
+
+                    <select
+                      id="auto-save-interval"
+                      className="form-select"
+                      value={autoSaveInterval}
+                      disabled={!autoSaveEnabled}
+                      onChange={e => handleChangeAutoSaveInterval(Number(e.target.value))}
+                      style={{
+                        width: '180px',
+                        fontSize: '0.8rem',
+                        padding: '0.35rem 0.6rem',
+                        cursor: autoSaveEnabled ? 'pointer' : 'not-allowed',
+                      }}
+                    >
+                      <option value={30}>{t('settings.interval30s')}</option>
+                      <option value={60}>{t('settings.interval1m')}</option>
+                      <option value={120}>{t('settings.interval2m')}</option>
+                      <option value={300}>{t('settings.interval5m')}</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -1412,11 +1511,59 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.3rem' }}>
                 <div>
                   <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    General & Local Storage Diagnostics
+                    {t('settings.generalDiagnostics')}
                   </h4>
                   <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    System startup preferences and browser database status.
+                    {t('settings.generalDesc')}
                   </p>
+                </div>
+
+                {/* Interface Language Selector Card */}
+                <div
+                  style={{
+                    padding: '0.9rem 1rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.8rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Globe size={15} style={{ color: 'var(--accent-primary)' }} />
+                        <span>{t('settings.languageTitle')}</span>
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        {t('settings.languageDesc')}
+                      </div>
+                    </div>
+
+                    <select
+                      className="form-select"
+                      value={language}
+                      onChange={e => {
+                        const newLang = e.target.value as 'en' | 'pt-BR';
+                        setLanguage(newLang);
+                        const langLabel =
+                          newLang === 'pt-BR'
+                            ? t('settings.portuguese')
+                            : t('settings.english');
+                        showNotification('info', t('notifications.languageChanged', { lang: langLabel }));
+                      }}
+                      style={{
+                        width: '180px',
+                        fontSize: '0.8rem',
+                        padding: '0.35rem 0.6rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="en">{t('settings.english')}</option>
+                      <option value="pt-BR">{t('settings.portuguese')}</option>
+                    </select>
+                  </div>
                 </div>
 
                 {/* User & Welcome Guide Launch Card */}
@@ -1435,10 +1582,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div>
                     <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Sparkles size={15} style={{ color: '#c084fc' }} />
-                      <span>Welcome & Feature Guide</span>
+                      <span>{t('settings.welcomeGuide')}</span>
                     </div>
                     <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      Feature overview, writing tools guide, worldbuilding dossiers, and publishing walkthrough.
+                      {t('settings.welcomeGuideDesc')}
                     </div>
                   </div>
 
@@ -1452,7 +1599,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', flexShrink: 0 }}
                   >
                     <Sparkles size={13} style={{ color: '#c084fc' }} />
-                    <span>Open Guide</span>
+                    <span>{t('settings.openGuide')}</span>
                   </button>
                 </div>
 
@@ -1470,10 +1617,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <div>
                     <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                      Show Welcome Guide on Startup
+                      {t('settings.showWelcomeStartup')}
                     </div>
                     <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                      Presents the introductory feature overview and quick-open actions when Chronicle boots.
+                      {t('settings.showWelcomeStartupDesc')}
                     </div>
                   </div>
 
@@ -1499,11 +1646,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                     <Database size={16} color="var(--accent-primary)" />
-                    <span>IndexedDB Persistence Engine</span>
+                    <span>{t('settings.dbPersistence')}</span>
                   </div>
 
                   <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    Chronicle uses a local browser IndexedDB database (<code>chronicle_app_settings_db</code>) to preserve:
+                    {t('settings.dbPersistenceDesc')}
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
@@ -1528,36 +1675,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.84rem', color: 'var(--text-primary)' }}>
                     <Keyboard size={15} color="var(--accent-primary)" />
-                    <span>Global Desktop Keybindings</span>
+                    <span>{t('settings.globalDesktopKeybindings')}</span>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem', fontSize: '0.75rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
-                      <span>Settings & Preferences</span>
+                      <span>{t('settings.keySettings')}</span>
                       <kbd className="kbd-shortcut">Ctrl+,</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
-                      <span>{isDesktop ? 'Quick Save (Local / Cloud)' : 'Quick Save (Project File)'}</span>
+                      <span>{isDesktop ? t('settings.keyQuickSave') : 'Quick Save (Project File)'}</span>
                       <kbd className="kbd-shortcut">Ctrl+S</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
-                      <span>Open File / Manuscript</span>
+                      <span>{t('settings.keyOpen')}</span>
                       <kbd className="kbd-shortcut">Ctrl+O</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
-                      <span>Toggle Chapters Sidebar</span>
+                      <span>{t('settings.keySidebar')}</span>
                       <kbd className="kbd-shortcut">Ctrl+\</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
-                      <span>Toggle Minimalist / Studio Mode</span>
+                      <span>{t('settings.keyMinimalist')}</span>
                       <kbd className="kbd-shortcut">Alt+M</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
-                      <span>Toggle Zen Mode</span>
+                      <span>{t('settings.keyZen')}</span>
                       <kbd className="kbd-shortcut">Alt+Z</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
-                      <span>Exit Zen Mode</span>
+                      <span>{t('settings.keyExitZen')}</span>
                       <kbd className="kbd-shortcut">Esc</kbd>
                     </div>
                   </div>

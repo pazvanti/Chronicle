@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { isTauri } from '../../services/cloud/webdavClient';
+import { useTranslation } from '../../i18n/I18nContext';
 import { ChronicleLogo } from '../Common/ChronicleLogo';
 import {
   PlusCircle,
@@ -14,6 +15,7 @@ import {
 
 export const WelcomeScreen: React.FC = () => {
   const { loadAnyFile, openLocalDocument, loadSampleBook, createNewBook } = useEpub();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpenClick = () => {
@@ -78,9 +80,9 @@ export const WelcomeScreen: React.FC = () => {
         >
           <ChronicleLogo size={68} mode="raster" glow />
         </div>
-        <h1 className="welcome-title">Chronicle</h1>
+        <h1 className="welcome-title">{t('welcome.title')}</h1>
         <p className="welcome-subtitle">
-          The complete authoring, worldbuilding, and multi-format book publishing suite for writers
+          {t('welcome.subtitle')}
         </p>
       </div>
 
@@ -89,7 +91,7 @@ export const WelcomeScreen: React.FC = () => {
         {/* Action 1: Create Blank Book */}
         <div
           className="welcome-card welcome-card-primary"
-          onClick={() => createNewBook('My Novel', 'Author Name')}
+          onClick={() => createNewBook()}
           role="button"
           tabIndex={0}
         >
@@ -97,11 +99,11 @@ export const WelcomeScreen: React.FC = () => {
             <PlusCircle size={24} />
           </div>
           <div className="card-body">
-            <h3>Start New Chronicle</h3>
-            <p>Create a fresh manuscript with Chapter 1, typography styles, and TOC ready to write.</p>
+            <h3>{t('welcome.startNewTitle')}</h3>
+            <p>{t('welcome.startNewDesc')}</p>
           </div>
           <div className="card-action-hint">
-            <span>New Chronicle</span>
+            <span>{t('welcome.startNewAction')}</span>
             <ArrowRight size={14} />
           </div>
         </div>
@@ -117,11 +119,11 @@ export const WelcomeScreen: React.FC = () => {
             <Upload size={24} />
           </div>
           <div className="card-body">
-            <h3>Open Manuscript</h3>
-            <p>Drag and drop any .chronicle project, .epub book, or .md Markdown file here, or click to browse.</p>
+            <h3>{t('welcome.openTitle')}</h3>
+            <p>{t('welcome.openDesc')}</p>
           </div>
           <div className="card-action-hint">
-            <span>Browse (Ctrl+O)</span>
+            <span>{t('welcome.openAction')}</span>
             <ArrowRight size={14} />
           </div>
         </div>
@@ -137,11 +139,11 @@ export const WelcomeScreen: React.FC = () => {
             <Sparkles size={24} />
           </div>
           <div className="card-body">
-            <h3>Explore Sample Book</h3>
-            <p>Open <em>Alice's Adventures in Wonderland</em> with custom styles, cover art, and chapters.</p>
+            <h3>{t('welcome.sampleTitle')}</h3>
+            <p>{t('welcome.sampleDesc')}</p>
           </div>
           <div className="card-action-hint">
-            <span>Load Demo</span>
+            <span>{t('welcome.sampleAction')}</span>
             <ArrowRight size={14} />
           </div>
         </div>
@@ -151,15 +153,15 @@ export const WelcomeScreen: React.FC = () => {
       <div className="welcome-footer-features">
         <div className="feature-item">
           <FileText size={15} color="var(--accent-primary)" />
-          <span>WYSIWYG & XHTML split-chapter editing</span>
+          <span>{t('welcome.featureSplit')}</span>
         </div>
         <div className="feature-item">
           <Palette size={15} color="#c084fc" />
-          <span>Cover Studio & Typographic CSS presets</span>
+          <span>{t('welcome.featureCover')}</span>
         </div>
         <div className="feature-item">
           <Keyboard size={15} color="#34d399" />
-          <span>Keyboard shortcuts: Ctrl+S Save • Ctrl+O Open • Ctrl+\ Sidebar</span>
+          <span>{t('welcome.featureShortcuts')}</span>
         </div>
       </div>
     </div>

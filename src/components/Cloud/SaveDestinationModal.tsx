@@ -4,12 +4,14 @@ import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { HardDrive, Cloud, X, ArrowRight, Settings, Check } from 'lucide-react';
 import { WebDavConfigModal } from './WebDavConfigModal';
 import { isTauri } from '../../services/cloud/webdavClient';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface SaveDestinationModalProps {
   onClose: () => void;
 }
 
 export const SaveDestinationModal: React.FC<SaveDestinationModalProps> = ({ onClose }) => {
+  const { t } = useTranslation();
   const {
     book,
     saveProject,
@@ -68,20 +70,20 @@ export const SaveDestinationModal: React.FC<SaveDestinationModalProps> = ({ onCl
         <div className="modal-header">
           <div>
             <h3 className="modal-title" style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>
-              Choose Save Destination
+              {t('cloud.destinationTitle')}
             </h3>
             <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Where would you like to save "{bookTitle}"?
+              "{bookTitle}"
             </p>
           </div>
-          <button className="btn-icon btn-sm" onClick={onClose} title="Cancel (Esc)">
+          <button className="btn-icon btn-sm" onClick={onClose} title={t('common.cancel')}>
             <X size={16} />
           </button>
         </div>
 
         <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-            Subsequent saves (via <kbd className="kbd-shortcut">Ctrl+S</kbd> or the <strong>Save</strong> button) will automatically update this location without asking again. You can switch destinations anytime using <strong>Save As...</strong>.
+            Subsequent saves (via <kbd className="kbd-shortcut">Ctrl+S</kbd>) will automatically update this location without asking again. You can switch destinations anytime.
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.9rem' }}>
@@ -122,7 +124,7 @@ export const SaveDestinationModal: React.FC<SaveDestinationModalProps> = ({ onCl
                   Local Computer
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.35 }}>
-                  Save standalone <code>.chronicle</code> project file to your computer.
+                  {t('cloud.saveLocal')}
                 </div>
               </div>
               <button
@@ -130,7 +132,7 @@ export const SaveDestinationModal: React.FC<SaveDestinationModalProps> = ({ onCl
                 className="btn btn-secondary btn-sm"
                 style={{ width: '100%', marginTop: 'auto', pointerEvents: 'none' }}
               >
-                <span>Save Locally</span>
+                <span>{t('common.save')} Locally</span>
                 <ArrowRight size={13} />
               </button>
             </div>
@@ -178,10 +180,10 @@ export const SaveDestinationModal: React.FC<SaveDestinationModalProps> = ({ onCl
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.35 }}>
                   {isWebDavConnected ? (
                     <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                      <Check size={12} /> Connected to server
+                      <Check size={12} /> {t('settings.connectedStatus')}
                     </span>
                   ) : (
-                    'Sync automatically with Nextcloud, ownCloud, or WebDAV.'
+                    t('cloud.saveCloud')
                   )}
                 </div>
               </div>
@@ -190,7 +192,7 @@ export const SaveDestinationModal: React.FC<SaveDestinationModalProps> = ({ onCl
                 className="btn btn-primary btn-sm"
                 style={{ width: '100%', marginTop: 'auto', pointerEvents: 'none' }}
               >
-                <span>{isWebDavConnected ? 'Save to Cloud' : 'Setup & Save'}</span>
+                <span>{isWebDavConnected ? t('cloud.saveCloud') : t('cloud.connectWebDav')}</span>
                 {isWebDavConnected ? <ArrowRight size={13} /> : <Settings size={13} />}
               </button>
             </div>
@@ -198,7 +200,7 @@ export const SaveDestinationModal: React.FC<SaveDestinationModalProps> = ({ onCl
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
             <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>

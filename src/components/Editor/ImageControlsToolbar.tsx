@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '../../i18n/I18nContext';
 import {
   ArrowUp,
   ArrowDown,
@@ -42,6 +43,7 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
   onAlign,
   onResize,
 }) => {
+  const { t } = useTranslation();
   const [showSizeMenu, setShowSizeMenu] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
@@ -101,10 +103,10 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
           onMoveUp();
         }}
         disabled={!canMoveUp}
-        title="Move image up (Alt+↑)"
+        title={`${t('imageToolbar.up')} (Alt+↑)`}
       >
         <ArrowUp size={15} />
-        <span className="tool-btn-text">Up</span>
+        <span className="tool-btn-text">{t('imageToolbar.up')}</span>
       </button>
 
       {/* Move Down */}
@@ -117,10 +119,10 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
           onMoveDown();
         }}
         disabled={!canMoveDown}
-        title="Move image down (Alt+↓)"
+        title={`${t('imageToolbar.down')} (Alt+↓)`}
       >
         <ArrowDown size={15} />
-        <span className="tool-btn-text">Down</span>
+        <span className="tool-btn-text">{t('imageToolbar.down')}</span>
       </button>
 
       <div className="toolbar-separator" />
@@ -134,7 +136,7 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
           e.stopPropagation();
           onAlign('left');
         }}
-        title="Align left (wrap text)"
+        title={t('imageToolbar.alignLeft')}
       >
         <AlignLeft size={15} />
       </button>
@@ -146,7 +148,7 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
           e.stopPropagation();
           onAlign('center');
         }}
-        title="Align center (standard)"
+        title={t('imageToolbar.alignCenter')}
       >
         <AlignCenter size={15} />
       </button>
@@ -158,7 +160,7 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
           e.stopPropagation();
           onAlign('right');
         }}
-        title="Align right (wrap text)"
+        title={t('imageToolbar.alignRight')}
       >
         <AlignRight size={15} />
       </button>
@@ -170,7 +172,7 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
           e.stopPropagation();
           onAlign('full');
         }}
-        title="Full width"
+        title={t('imageToolbar.fullWidth')}
       >
         <Maximize2 size={14} />
       </button>
@@ -187,11 +189,11 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
             e.stopPropagation();
             setShowSizeMenu(prev => !prev);
           }}
-          title="Image size"
+          title={t('imageToolbar.size')}
           style={{ gap: '3px' }}
         >
           <Expand size={14} />
-          <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Size</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t('imageToolbar.size')}</span>
         </button>
 
         {showSizeMenu && (
@@ -224,10 +226,10 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
               onClick={e => e.stopPropagation()}
             >
               {[
-                { label: 'Small (25%)', val: 25 },
-                { label: 'Medium (50%)', val: 50 },
-                { label: 'Large (75%)', val: 75 },
-                { label: 'Full (100%)', val: 100 },
+                { label: t('imageToolbar.sizeSmall'), val: 25 },
+                { label: t('imageToolbar.sizeMedium'), val: 50 },
+                { label: t('imageToolbar.sizeLarge'), val: 75 },
+                { label: t('imageToolbar.sizeFull'), val: 100 },
               ].map(opt => (
                 <button
                   key={opt.val}
@@ -261,10 +263,10 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
             type="button"
             className="tool-btn tool-btn-danger-confirm"
             onClick={handleConfirmDelete}
-            title="Click to permanently delete image (Ctrl+Z to undo)"
+            title={t('imageToolbar.confirmDelete')}
           >
             <AlertTriangle size={13} />
-            <span className="tool-btn-text">Confirm Delete?</span>
+            <span className="tool-btn-text">{t('imageToolbar.confirmDelete')}</span>
           </button>
           <button
             type="button"
@@ -274,7 +276,7 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
               e.stopPropagation();
               setIsConfirmingDelete(false);
             }}
-            title="Cancel delete"
+            title={t('imageToolbar.cancel')}
           >
             <X size={14} />
           </button>
@@ -288,10 +290,10 @@ export const ImageControlsToolbar: React.FC<ImageControlsToolbarProps> = ({
             e.stopPropagation();
             setIsConfirmingDelete(true);
           }}
-          title="Delete image (Del / Backspace)"
+          title={`${t('imageToolbar.delete')} (Del / Backspace)`}
         >
           <Trash2 size={15} />
-          <span className="tool-btn-text">Delete</span>
+          <span className="tool-btn-text">{t('imageToolbar.delete')}</span>
         </button>
       )}
     </div>

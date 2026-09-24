@@ -33,8 +33,10 @@ import {
 import { CommentFloatingPill } from '../Comments/CommentFloatingPill';
 import { CommentModal } from '../Comments/CommentModal';
 import { CommentsSidebar } from '../Comments/CommentsSidebar';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const ReaderView: React.FC = () => {
+  const { t } = useTranslation();
   const {
     book,
     activeChapter,
@@ -460,7 +462,7 @@ export const ReaderView: React.FC = () => {
   if (!book || !activeChapter) {
     return (
       <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        Select a chapter to read
+        {t('reader.selectChapterToRead')}
       </div>
     );
   }
@@ -507,11 +509,11 @@ export const ReaderView: React.FC = () => {
             >
               <BookOpen size={15} color="var(--accent-primary)" />
               <span>
-                Chapter {currentIndex + 1}: {activeChapter.title}
+                {t('sidebar.chapters')} {currentIndex + 1}: {activeChapter.title}
               </span>
             </div>
             <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-              • {activeChapter.wordCount.toLocaleString()} words (~{readingMinutes} min read)
+              • {activeChapter.wordCount.toLocaleString()} {t('reader.words')} (~{readingMinutes} {t('reader.minRead')})
             </span>
           </div>
 
@@ -522,7 +524,7 @@ export const ReaderView: React.FC = () => {
               <button
                 className={`theme-segment-btn ${readerTheme === 'light' ? 'active' : ''}`}
                 onClick={() => setReaderTheme('light')}
-                title="Light Paper"
+                title={t('reader.themeLight')}
               >
                 <Sun size={12} />
                 <span>Light</span>
@@ -530,7 +532,7 @@ export const ReaderView: React.FC = () => {
               <button
                 className={`theme-segment-btn ${readerTheme === 'sepia' ? 'active' : ''}`}
                 onClick={() => setReaderTheme('sepia')}
-                title="Warm Sepia"
+                title={t('reader.themeSepia')}
               >
                 <span className="theme-dot dot-sepia" />
                 <span>Sepia</span>
@@ -538,7 +540,7 @@ export const ReaderView: React.FC = () => {
               <button
                 className={`theme-segment-btn ${readerTheme === 'dark' ? 'active' : ''}`}
                 onClick={() => setReaderTheme('dark')}
-                title="Graphite Dark"
+                title={t('reader.themeDark')}
               >
                 <Moon size={12} />
                 <span>Dark</span>
@@ -546,7 +548,7 @@ export const ReaderView: React.FC = () => {
               <button
                 className={`theme-segment-btn ${readerTheme === 'obsidian' ? 'active' : ''}`}
                 onClick={() => setReaderTheme('obsidian')}
-                title="Obsidian OLED"
+                title={t('reader.themeOled')}
               >
                 <span className="theme-dot dot-oled" />
                 <span>OLED</span>
@@ -620,7 +622,7 @@ export const ReaderView: React.FC = () => {
                 ref={widthTriggerRef}
                 className={`btn-icon btn-sm ${showWidthMenu ? 'active' : ''}`}
                 onClick={() => setShowWidthMenu(prev => !prev)}
-                title="Adjust Reading Page Width"
+                title={t('reader.pageWidth')}
                 style={{
                   padding: '3px 8px',
                   fontSize: '0.75rem',
@@ -672,7 +674,7 @@ export const ReaderView: React.FC = () => {
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                          Reading Page Width
+                          {t('reader.pageWidth')}
                         </span>
                         <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent-primary)' }}>
                           {readerMarginWidth}px
@@ -699,7 +701,7 @@ export const ReaderView: React.FC = () => {
                             setShowWidthMenu(false);
                           }}
                         >
-                          Compact (680px)
+                          {t('reader.compactPreset')}
                         </button>
                         <button
                           className={`btn btn-sm ${readerMarginWidth === 760 ? 'btn-primary' : 'btn-secondary'}`}
@@ -709,7 +711,7 @@ export const ReaderView: React.FC = () => {
                             setShowWidthMenu(false);
                           }}
                         >
-                          Standard (760px)
+                          {t('reader.standardPreset')}
                         </button>
                         <button
                           className={`btn btn-sm ${readerMarginWidth === 920 ? 'btn-primary' : 'btn-secondary'}`}
@@ -719,7 +721,7 @@ export const ReaderView: React.FC = () => {
                             setShowWidthMenu(false);
                           }}
                         >
-                          Comfort (920px)
+                          {t('reader.comfortPreset')}
                         </button>
                         <button
                           className={`btn btn-sm ${readerMarginWidth === 1150 ? 'btn-primary' : 'btn-secondary'}`}
@@ -729,7 +731,7 @@ export const ReaderView: React.FC = () => {
                             setShowWidthMenu(false);
                           }}
                         >
-                          Wide (1150px)
+                          {t('reader.widePreset')}
                         </button>
                       </div>
 
@@ -742,7 +744,7 @@ export const ReaderView: React.FC = () => {
                           paddingTop: '0.4rem',
                         }}
                       >
-                        Reader view only (doesn't alter EPUB)
+                        {t('reader.readerViewOnly')}
                       </div>
                     </div>
                   </>,
@@ -774,7 +776,7 @@ export const ReaderView: React.FC = () => {
                 }}
               >
                 <Headphones size={13} />
-                <span>{isAudioActive ? (isPlaying ? 'Pause' : 'Resume') : 'Listen'}</span>
+                <span>{isAudioActive ? (isPlaying ? t('reader.pause') : t('reader.resume')) : t('reader.listen')}</span>
               </button>
 
               {isAudioActive && (
@@ -801,7 +803,7 @@ export const ReaderView: React.FC = () => {
             <button
               className={`btn btn-secondary btn-sm ${isCommentsSidebarOpen ? 'active' : ''}`}
               onClick={() => setIsCommentsSidebarOpen(!isCommentsSidebarOpen)}
-              title="Comments & Highlights"
+              title={t('editor.toggleHighlights')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -811,7 +813,7 @@ export const ReaderView: React.FC = () => {
               }}
             >
               <MessageSquare size={13} />
-              <span>Comments</span>
+              <span>{t('editor.comments')}</span>
               {chapterComments.length > 0 && (
                 <span
                   style={{
@@ -833,7 +835,7 @@ export const ReaderView: React.FC = () => {
             <button
               className={`btn btn-secondary btn-sm ${!showCommentHighlights ? 'active' : ''}`}
               onClick={toggleCommentHighlights}
-              title={showCommentHighlights ? "Hide comment highlights in text" : "Show comment highlights in text"}
+              title={showCommentHighlights ? t('comments.hide') : t('comments.show')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -853,7 +855,7 @@ export const ReaderView: React.FC = () => {
               style={{ color: 'var(--text-muted)' }}
             >
               <Edit3 size={13} />
-              <span>Edit</span>
+              <span>{t('reader.edit')}</span>
             </button>
           </div>
         </div>
@@ -863,7 +865,7 @@ export const ReaderView: React.FC = () => {
           ref={readerContainerRef}
           className={`reader-container reader-theme-${readerTheme} ${isAudioActive ? 'reader-audio-active' : ''} ${!showCommentHighlights ? 'hide-comment-highlights' : ''}`}
           onClick={handleArticleClick}
-          title={isAudioActive ? 'Click any sentence to play from here' : undefined}
+          title={isAudioActive ? t('reader.clickSentenceToPlay') : undefined}
           style={{
             flex: 1,
             overflowY: 'auto',
@@ -911,11 +913,11 @@ export const ReaderView: React.FC = () => {
             style={{ fontSize: '0.78rem' }}
           >
             <ChevronLeft size={15} />
-            <span>Prev: {prevChapter ? prevChapter.title : 'None'}</span>
+            <span>{t('reader.prevBtn')}: {prevChapter ? prevChapter.title : t('reader.none')}</span>
           </button>
 
           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            Chapter {currentIndex + 1} of {book.chapters.length} ({activeChapter.wordCount.toLocaleString()} words)
+            {t('sidebar.chapters')} {currentIndex + 1} {t('reader.chapterOf')} {book.chapters.length} ({activeChapter.wordCount.toLocaleString()} {t('reader.words')})
           </span>
 
           <button
@@ -924,7 +926,7 @@ export const ReaderView: React.FC = () => {
             disabled={!nextChapter}
             style={{ fontSize: '0.78rem' }}
           >
-            <span>Next: {nextChapter ? nextChapter.title : 'End'}</span>
+            <span>{t('reader.nextBtn')}: {nextChapter ? nextChapter.title : t('reader.end')}</span>
             <ChevronRight size={15} />
           </button>
         </div>

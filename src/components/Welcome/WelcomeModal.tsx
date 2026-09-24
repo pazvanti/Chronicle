@@ -3,6 +3,7 @@ import { useEpub } from '../../context/EpubContext';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { ChronicleLogo } from '../Common/ChronicleLogo';
 import { isTauri } from '../../services/cloud/webdavClient';
+import { useTranslation } from '../../i18n/I18nContext';
 import {
   Sparkles,
   ArrowRight,
@@ -44,6 +45,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
     showWelcomeOnStartup,
     setShowWelcomeOnStartup,
   } = useEpub();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<TabType>('quickstart');
 
@@ -56,7 +58,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   };
 
   const handleCreateNew = () => {
-    createNewBook('Untitled Novel', 'Author Name');
+    createNewBook();
     onClose();
   };
 
@@ -127,10 +129,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
           </div>
           <div className="intro-hero-content">
             <h1 id="intro-modal-title" className="intro-title">
-              Welcome to <span className="intro-title-gradient">Chronicle</span>
+              {t('welcomeModal.title')}
             </h1>
             <p className="intro-subtitle">
-              The unified authoring, worldbuilding, and multi-format book publishing suite designed for novelists and storytellers.
+              {t('welcomeModal.subtitle')}
             </p>
           </div>
         </div>
@@ -142,21 +144,21 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             onClick={() => setActiveTab('quickstart')}
           >
             <Rocket size={15} />
-            <span>Quick Start</span>
+            <span>{t('welcomeModal.tabQuickStart')}</span>
           </button>
           <button
             className={`intro-tab-btn ${activeTab === 'features' ? 'active' : ''}`}
             onClick={() => setActiveTab('features')}
           >
             <Compass size={15} />
-            <span>Suite Features</span>
+            <span>{t('welcomeModal.tabFeatures')}</span>
           </button>
           <button
             className={`intro-tab-btn ${activeTab === 'shortcuts' ? 'active' : ''}`}
             onClick={() => setActiveTab('shortcuts')}
           >
             <Keyboard size={15} />
-            <span>Shortcuts</span>
+            <span>{t('welcomeModal.tabShortcuts')}</span>
           </button>
         </div>
 
@@ -177,13 +179,11 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <PlusCircle size={22} />
                 </div>
                 <div className="intro-card-text">
-                  <h3>Start Blank Manuscript</h3>
-                  <p>
-                    Create a fresh novel with Chapter 1, typography rules, and table of contents ready for writing.
-                  </p>
+                  <h3>{t('welcomeModal.blankTitle')}</h3>
+                  <p>{t('welcomeModal.blankDesc')}</p>
                 </div>
                 <div className="intro-card-action">
-                  <span>Create New</span>
+                  <span>{t('welcomeModal.blankAction')}</span>
                   <ArrowRight size={14} />
                 </div>
               </div>
@@ -200,13 +200,11 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <Sparkles size={22} />
                 </div>
                 <div className="intro-card-text">
-                  <h3>Explore Alice in Wonderland</h3>
-                  <p>
-                    Tour the interactive narrative timeline, character profiles, location codex, and custom styles.
-                  </p>
+                  <h3>{t('welcomeModal.sampleTitle')}</h3>
+                  <p>{t('welcomeModal.sampleDesc')}</p>
                 </div>
                 <div className="intro-card-action">
-                  <span>Load Sample</span>
+                  <span>{t('welcomeModal.sampleAction')}</span>
                   <ArrowRight size={14} />
                 </div>
               </div>
@@ -223,13 +221,11 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <FolderOpen size={22} />
                 </div>
                 <div className="intro-card-text">
-                  <h3>Open Local Manuscript</h3>
-                  <p>
-                    Browse any <kbd>.chronicle</kbd> project archive, <kbd>.epub</kbd> book, or <kbd>.md</kbd> Markdown file from your drive.
-                  </p>
+                  <h3>{t('welcomeModal.openFileTitle')}</h3>
+                  <p>{t('welcomeModal.openFileDesc')}</p>
                 </div>
                 <div className="intro-card-action">
-                  <span>Browse (Ctrl+O)</span>
+                  <span>{t('welcomeModal.openFileAction')}</span>
                   <ArrowRight size={14} />
                 </div>
               </div>
@@ -246,13 +242,11 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <Cloud size={22} />
                 </div>
                 <div className="intro-card-text">
-                  <h3>Connect Cloud Storage</h3>
-                  <p>
-                    Sync with Nextcloud, ownCloud, Synology, or WebDAV servers with seamless auto-save and zero CORS limits.
-                  </p>
+                  <h3>{t('welcomeModal.cloudTitle')}</h3>
+                  <p>{t('welcomeModal.cloudDesc')}</p>
                 </div>
                 <div className="intro-card-action">
-                  <span>Cloud Hub</span>
+                  <span>{t('welcomeModal.cloudAction')}</span>
                   <ArrowRight size={14} />
                 </div>
               </div>
@@ -267,11 +261,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <div className="intro-feat-icon bubble-emerald">
                     <Edit3 size={18} />
                   </div>
-                  <h4>Focus Writing & Typography</h4>
+                  <h4>{t('welcomeModal.featWritingTitle')}</h4>
                 </div>
-                <p>
-                  Distraction-free WYSIWYG editor with live paragraph alignment (<kbd>Ctrl+L/E/R/J</kbd>), smart em-dashes, and chapter splitting.
-                </p>
+                <p>{t('welcomeModal.featWritingDesc')}</p>
               </div>
 
               <div className="intro-feature-card">
@@ -279,11 +271,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <div className="intro-feat-icon bubble-purple">
                     <Clock size={18} />
                   </div>
-                  <h4>Narrative Timeline Studio</h4>
+                  <h4>{t('welcomeModal.featTimelineTitle')}</h4>
                 </div>
-                <p>
-                  Multi-track story chronology with 24-hour & multi-day timescales, drag-to-resize blocks, and automatic lane collision stacking.
-                </p>
+                <p>{t('welcomeModal.featTimelineDesc')}</p>
               </div>
 
               <div className="intro-feature-card">
@@ -291,11 +281,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <div className="intro-feat-icon bubble-cyan">
                     <Users size={18} />
                   </div>
-                  <h4>Character Arc Sheets</h4>
+                  <h4>{t('welcomeModal.featCharactersTitle')}</h4>
                 </div>
-                <p>
-                  Flesh out motivations, fatal flaws, character arcs, physical traits, secrets, and scene connections across your story.
-                </p>
+                <p>{t('welcomeModal.featCharactersDesc')}</p>
               </div>
 
               <div className="intro-feature-card">
@@ -303,11 +291,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <div className="intro-feat-icon bubble-amber">
                     <MapPin size={18} />
                   </div>
-                  <h4>Locations & Setting Codex</h4>
+                  <h4>{t('welcomeModal.featLocationsTitle')}</h4>
                 </div>
-                <p>
-                  Immersive worldbuilding sensory palettes (sights, sounds, smells, climate), points of interest checklist, and lore rules.
-                </p>
+                <p>{t('welcomeModal.featLocationsDesc')}</p>
               </div>
 
               <div className="intro-feature-card">
@@ -315,11 +301,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <div className="intro-feat-icon bubble-blue">
                     <Volume2 size={18} />
                   </div>
-                  <h4>AI Voice Audition</h4>
+                  <h4>{t('welcomeModal.featVoiceTitle')}</h4>
                 </div>
-                <p>
-                  Audition chapters with local Kokoro & Qwen speech synthesis, featuring instant real-time volume and pace controls.
-                </p>
+                <p>{t('welcomeModal.featVoiceDesc')}</p>
               </div>
 
               <div className="intro-feature-card">
@@ -327,11 +311,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   <div className="intro-feat-icon bubble-rose">
                     <Printer size={18} />
                   </div>
-                  <h4>Publication & Export Center</h4>
+                  <h4>{t('welcomeModal.featExportTitle')}</h4>
                 </div>
-                <p>
-                  Export print-ready 300+ DPI vector PDFs (KDP Trade Paperbacks), official Shunn submission manuscripts, EPUB3, and Word DOCX.
-                </p>
+                <p>{t('welcomeModal.featExportDesc')}</p>
               </div>
             </div>
           )}
@@ -340,9 +322,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
           {activeTab === 'shortcuts' && (
             <div className="intro-shortcuts-wrapper">
               <div className="intro-shortcuts-section">
-                <h4>Writing & Formatting</h4>
+                <h4>{t('welcomeModal.shortWritingSection')}</h4>
                 <div className="intro-shortcut-row">
-                  <span>Align Left / Center / Right / Justify</span>
+                  <span>{t('welcomeModal.shortAlign')}</span>
                   <div className="intro-kbd-group">
                     <kbd>Ctrl+L</kbd>
                     <kbd>Ctrl+E</kbd>
@@ -351,7 +333,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   </div>
                 </div>
                 <div className="intro-shortcut-row">
-                  <span>Bold / Italic / Underline</span>
+                  <span>{t('welcomeModal.shortStyle')}</span>
                   <div className="intro-kbd-group">
                     <kbd>Ctrl+B</kbd>
                     <kbd>Ctrl+I</kbd>
@@ -361,21 +343,21 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
               </div>
 
               <div className="intro-shortcuts-section">
-                <h4>Project & Navigation</h4>
+                <h4>{t('welcomeModal.shortNavSection')}</h4>
                 <div className="intro-shortcut-row">
-                  <span>Save Manuscript (Local / Cloud)</span>
+                  <span>{t('welcomeModal.shortSave')}</span>
                   <kbd>Ctrl+S</kbd>
                 </div>
                 <div className="intro-shortcut-row">
-                  <span>Open Chronicle or EPUB</span>
+                  <span>{t('welcomeModal.shortOpen')}</span>
                   <kbd>Ctrl+O</kbd>
                 </div>
                 <div className="intro-shortcut-row">
-                  <span>Toggle Chapter Sidebar</span>
+                  <span>{t('welcomeModal.shortSidebar')}</span>
                   <kbd>Ctrl+\</kbd>
                 </div>
                 <div className="intro-shortcut-row">
-                  <span>Dismiss Any Modal / Dialog</span>
+                  <span>{t('welcomeModal.shortDismiss')}</span>
                   <kbd>Esc</kbd>
                 </div>
               </div>
@@ -394,16 +376,16 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             <span className="intro-checkbox-custom">
               {showWelcomeOnStartup && <Check size={12} strokeWidth={3} />}
             </span>
-            <span className="intro-toggle-label">Show this welcome guide on startup</span>
+            <span className="intro-toggle-label">{t('welcomeModal.showOnStartup')}</span>
           </label>
 
           <div className="intro-footer-actions">
             <button className="btn btn-ghost btn-sm" onClick={onClose}>
-              Dismiss
+              {t('welcomeModal.dismiss')}
             </button>
             <button className="btn btn-primary intro-start-btn" onClick={onClose}>
               <Sparkles size={15} />
-              <span>Get Started</span>
+              <span>{t('welcomeModal.getStarted')}</span>
               <ArrowRight size={15} />
             </button>
           </div>

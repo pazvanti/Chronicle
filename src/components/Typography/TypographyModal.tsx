@@ -17,12 +17,14 @@ import {
   cleanChapterContent,
 } from '../../services/epub/typographyUtils';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface TypographyModalProps {
   onClose: () => void;
 }
 
 export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => {
+  const { t } = useTranslation();
   const {
     book,
     activeChapter,
@@ -111,9 +113,9 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
               <Sparkles size={18} />
             </div>
             <div>
-              <h2 className="modal-title">Smart Typography & Cleanup</h2>
+              <h2 className="modal-title">{t('typography.modalTitle')}</h2>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Enhance punctuation, smart quotes, dashes, spacing, and formatting
+                {t('typography.modalSubtitle')}
               </p>
             </div>
           </div>
@@ -130,7 +132,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
               style={{ flex: 1, justifyContent: 'center' }}
               onClick={() => setScope('current')}
             >
-              <span>Current Chapter: "{activeChapter.title.substring(0, 24)}..."</span>
+              <span>{t('typography.scopeCurrent')}: "{activeChapter.title.substring(0, 24)}..."</span>
             </button>
             <button
               className={`view-tab-btn ${scope === 'all' ? 'active' : ''}`}
@@ -138,7 +140,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
               onClick={() => setScope('all')}
             >
               <BookOpen size={15} />
-              <span>Entire Book ({book.chapters.length} Chapters)</span>
+              <span>{t('typography.scopeAll')} ({book.chapters.length} {t('sidebar.chapters')})</span>
             </button>
           </div>
 
@@ -164,7 +166,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
               />
               <Quote size={16} color="var(--accent-primary)" />
               <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Smart Curly Quotes</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{t('typography.quotesTitle')}</div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>"..." ➔ “...” and '...' ➔ ‘...’</div>
               </div>
             </label>
@@ -189,7 +191,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
               />
               <Minus size={16} color="var(--accent-primary)" />
               <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Typographic Em-Dashes</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{t('typography.dashesTitle')}</div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>-- or --- ➔ —</div>
               </div>
             </label>
@@ -214,7 +216,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
               />
               <MoreHorizontal size={16} color="var(--accent-primary)" />
               <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>True Ellipses</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{t('typography.ellipsisTitle')}</div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>... ➔ …</div>
               </div>
             </label>
@@ -239,7 +241,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
               />
               <Trash2 size={16} color="var(--accent-danger)" />
               <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Remove Empty Paragraphs</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{t('typography.blankParagraphsTitle')}</div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Strip empty &lt;p&gt;&amp;nbsp;&lt;/p&gt;</div>
               </div>
             </label>
@@ -264,7 +266,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
               />
               <Space size={16} color="var(--accent-warning)" />
               <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Normalize Spacing</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{t('typography.doubleSpacesTitle')}</div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Fix double spaces & misplaced spaces</div>
               </div>
             </label>
@@ -299,7 +301,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
           {previewResult && (
             <div style={{ background: 'var(--bg-surface-elevated)', padding: '0.85rem 1.1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
               <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                Found in Active Chapter:
+                {t('typography.previewTitle')}:
               </div>
               <div style={{ display: 'flex', gap: '1.2rem', flexWrap: 'wrap', fontSize: '0.8rem' }}>
                 <span>Quotes: <strong style={{ color: 'var(--accent-primary)' }}>{previewResult.stats.smartQuotesFixed}</strong></span>
@@ -314,11 +316,11 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
 
         <div className="modal-footer">
           <button className="btn btn-outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button className="btn btn-primary" onClick={handleApplyCleanup}>
             <Sparkles size={15} />
-            <span>Apply Cleanup ({scope === 'current' ? 'Current Chapter' : 'Entire Book'})</span>
+            <span>{t('typography.applyCleanupBtn')} ({scope === 'current' ? t('typography.scopeCurrent') : t('typography.scopeAll')})</span>
           </button>
         </div>
       </div>

@@ -151,3 +151,4 @@ $RECYCLE.BIN/
 # Note: /docs (except docs/downloads/) is intentionally tracked as it serves
 # the GitHub Pages presentation site and the in-browser Web Studio app (/docs/app/).
 # ------------------------------------------------------------------------------
+atualiza.sh

@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { Tag, Save, Plus, X, Book, User, Globe, Calendar, Shield, Hash, Layers } from 'lucide-react';
 import { EpubMetadata } from '../../types/project';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const MetadataEditor: React.FC = () => {
   const { book, updateMetadata } = useEpub();
+  const { t } = useTranslation();
   const [form, setForm] = useState<EpubMetadata>({
     title: '',
     creator: '',
@@ -29,7 +31,7 @@ export const MetadataEditor: React.FC = () => {
   if (!book) {
     return (
       <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        No book loaded
+        {t('statusBar.noManuscript')}
       </div>
     );
   }
@@ -66,16 +68,16 @@ export const MetadataEditor: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
           <div>
             <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700 }}>
-              Book Metadata & Information
+              {t('metadataEditor.title')}
             </h2>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Standard Dublin Core and EPUB 3 metadata embedded into the package OPF
+              {t('metadataEditor.subtitle')}
             </p>
           </div>
 
           <button type="submit" className="btn btn-primary">
             <Save size={15} />
-            <span>Save Metadata</span>
+            <span>{t('metadataEditor.saveBtn')}</span>
           </button>
         </div>
 
@@ -84,7 +86,7 @@ export const MetadataEditor: React.FC = () => {
           <div className="form-group" style={{ gridColumn: 'span 2' }}>
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Book size={14} />
-              <span>Book Title</span>
+              <span>{t('metadataEditor.bookTitle')}</span>
             </label>
             <input
               type="text"
@@ -100,7 +102,7 @@ export const MetadataEditor: React.FC = () => {
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <User size={14} />
-              <span>Author / Creator</span>
+              <span>{t('metadataEditor.author')}</span>
             </label>
             <input
               type="text"
@@ -115,7 +117,7 @@ export const MetadataEditor: React.FC = () => {
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Globe size={14} />
-              <span>Language Code</span>
+              <span>{t('metadataEditor.language')}</span>
             </label>
             <select
               className="form-select"
@@ -123,11 +125,11 @@ export const MetadataEditor: React.FC = () => {
               onChange={e => handleChange('language', e.target.value)}
             >
               <option value="en">English (en)</option>
-              <option value="es">Spanish (es)</option>
-              <option value="fr">French (fr)</option>
-              <option value="de">German (de)</option>
-              <option value="it">Italian (it)</option>
-              <option value="pt">Portuguese (pt)</option>
+              <option value="pt">Português (pt)</option>
+              <option value="es">Español (es)</option>
+              <option value="fr">Français (fr)</option>
+              <option value="de">Deutsch (de)</option>
+              <option value="it">Italiano (it)</option>
               <option value="zh">Chinese (zh)</option>
               <option value="ja">Japanese (ja)</option>
               <option value="ru">Russian (ru)</option>
@@ -139,7 +141,7 @@ export const MetadataEditor: React.FC = () => {
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Hash size={14} />
-              <span>Identifier / ISBN / UUID</span>
+              <span>{t('metadataEditor.identifier')}</span>
             </label>
             <input
               type="text"
@@ -152,7 +154,7 @@ export const MetadataEditor: React.FC = () => {
 
           {/* Publisher */}
           <div className="form-group">
-            <label className="form-label">Publisher</label>
+            <label className="form-label">{t('metadataEditor.publisher')}</label>
             <input
               type="text"
               className="form-input"
@@ -166,7 +168,7 @@ export const MetadataEditor: React.FC = () => {
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Calendar size={14} />
-              <span>Publication Date</span>
+              <span>{t('metadataEditor.pubdate')}</span>
             </label>
             <input
               type="date"
@@ -180,7 +182,7 @@ export const MetadataEditor: React.FC = () => {
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Shield size={14} />
-              <span>Rights / License</span>
+              <span>{t('metadataEditor.rights')}</span>
             </label>
             <input
               type="text"
@@ -195,7 +197,7 @@ export const MetadataEditor: React.FC = () => {
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Layers size={14} />
-              <span>Series Name (Optional)</span>
+              <span>{t('metadataEditor.series')}</span>
             </label>
             <input
               type="text"
@@ -208,7 +210,7 @@ export const MetadataEditor: React.FC = () => {
 
           {/* Series Index */}
           <div className="form-group">
-            <label className="form-label">Series Index / Volume</label>
+            <label className="form-label">{t('metadataEditor.seriesIndex')}</label>
             <input
               type="text"
               className="form-input"
@@ -220,7 +222,7 @@ export const MetadataEditor: React.FC = () => {
 
           {/* Description */}
           <div className="form-group" style={{ gridColumn: 'span 2' }}>
-            <label className="form-label">Description / Synopsis</label>
+            <label className="form-label">{t('metadataEditor.description')}</label>
             <textarea
               className="form-textarea"
               rows={4}
@@ -234,13 +236,13 @@ export const MetadataEditor: React.FC = () => {
           <div className="form-group" style={{ gridColumn: 'span 2' }}>
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Tag size={14} />
-              <span>Subject Tags & Categories</span>
+              <span>{t('metadataEditor.subjects')}</span>
             </label>
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.6rem' }}>
               <input
                 type="text"
                 className="form-input"
-                placeholder="Add a genre or subject tag..."
+                placeholder={t('metadataEditor.tagPlaceholder')}
                 value={newTag}
                 onChange={e => setNewTag(e.target.value)}
                 onKeyDown={e => {
@@ -252,7 +254,7 @@ export const MetadataEditor: React.FC = () => {
               />
               <button type="button" className="btn btn-secondary" onClick={handleAddTag}>
                 <Plus size={15} />
-                <span>Add Tag</span>
+                <span>{t('metadataEditor.addTag')}</span>
               </button>
             </div>
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { X, Check, BookMarked, User } from 'lucide-react';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface TitleRenameModalProps {
   onClose: () => void;
@@ -9,6 +10,7 @@ interface TitleRenameModalProps {
 
 export const TitleRenameModal: React.FC<TitleRenameModalProps> = ({ onClose }) => {
   const { book, updateMetadata } = useEpub();
+  const { t } = useTranslation();
   const [title, setTitle] = useState(book?.metadata.title || '');
   const [author, setAuthor] = useState(book?.metadata.creator || '');
 
@@ -35,7 +37,7 @@ export const TitleRenameModal: React.FC<TitleRenameModalProps> = ({ onClose }) =
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <BookMarked size={18} color="var(--accent-primary)" />
-            <h3 className="modal-title">Rename Manuscript</h3>
+            <h3 className="modal-title">{t('titleRename.modalTitle')}</h3>
           </div>
           <button className="btn-icon btn-sm" onClick={onClose}>
             <X size={16} />
@@ -46,7 +48,7 @@ export const TitleRenameModal: React.FC<TitleRenameModalProps> = ({ onClose }) =
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
               <BookMarked size={13} />
-              <span>Book Title:</span>
+              <span>{t('titleRename.bookTitleLabel')}</span>
             </label>
             <input
               type="text"
@@ -62,7 +64,7 @@ export const TitleRenameModal: React.FC<TitleRenameModalProps> = ({ onClose }) =
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
               <User size={13} />
-              <span>Author / Creator:</span>
+              <span>{t('titleRename.authorLabel')}</span>
             </label>
             <input
               type="text"
@@ -75,11 +77,11 @@ export const TitleRenameModal: React.FC<TitleRenameModalProps> = ({ onClose }) =
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
             <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>
-              Cancel
+              {t('common.cancel')}
             </button>
             <button type="submit" className="btn btn-primary btn-sm">
               <Check size={14} />
-              <span>Save Changes</span>
+              <span>{t('titleRename.saveChanges')}</span>
             </button>
           </div>
         </form>

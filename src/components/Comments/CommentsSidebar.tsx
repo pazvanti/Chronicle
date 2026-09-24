@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { AuthorComment } from '../../types/project';
 import { useEpub } from '../../context/EpubContext';
+import { useTranslation } from '../../i18n/I18nContext';
 
 interface CommentsSidebarProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
   onJumpToHighlight,
 }) => {
   const { showCommentHighlights, toggleCommentHighlights, setShowCommentHighlights } = useEpub();
+  const { t } = useTranslation();
 
   if (!isOpen) return null;
 
@@ -44,7 +46,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
       <div className="comments-sidebar-header">
         <div className="comments-sidebar-title-row">
           <MessageSquare size={16} className="text-accent" />
-          <h3 className="comments-sidebar-title">Comments</h3>
+          <h3 className="comments-sidebar-title">{t('comments.title')}</h3>
           <span className="badge badge-sm">{comments.length}</span>
         </div>
         <div className="comments-sidebar-header-actions">
@@ -52,8 +54,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             type="button"
             className={`btn-icon btn-sm ${!showCommentHighlights ? 'active' : ''}`}
             onClick={toggleCommentHighlights}
-            title={showCommentHighlights ? 'Hide highlights in manuscript text' : 'Show highlights in manuscript text'}
-            aria-label={showCommentHighlights ? 'Hide highlights in manuscript text' : 'Show highlights in manuscript text'}
+            title={showCommentHighlights ? t('comments.hiddenStatus') : t('comments.visibleStatus')}
+            aria-label={showCommentHighlights ? t('comments.hiddenStatus') : t('comments.visibleStatus')}
             style={{
               color: !showCommentHighlights ? 'var(--accent-warning, #f59e0b)' : undefined,
             }}
@@ -64,7 +66,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             type="button"
             className="btn-icon btn-sm"
             onClick={onClose}
-            aria-label="Close comments sidebar"
+            aria-label={t('common.close')}
           >
             <X size={15} />
           </button>
@@ -73,7 +75,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
 
       {chapterTitle && (
         <div className="comments-sidebar-subhead">
-          <span>Chapter: {chapterTitle}</span>
+          <span>{t('statusBar.activeChapter')}: {chapterTitle}</span>
         </div>
       )}
 
@@ -82,16 +84,16 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         <div className="comments-visibility-status">
           <span className={`comments-visibility-dot ${showCommentHighlights ? 'active' : 'hidden'}`} />
           <span className="comments-visibility-text">
-            {showCommentHighlights ? 'Text highlights visible' : 'Text highlights hidden'}
+            {showCommentHighlights ? t('comments.visibleStatus') : t('comments.hiddenStatus')}
           </span>
         </div>
         <button
           type="button"
           className="comments-visibility-toggle-btn"
           onClick={toggleCommentHighlights}
-          title={showCommentHighlights ? 'Hide highlights in text' : 'Show highlights in text'}
+          title={showCommentHighlights ? t('comments.hide') : t('comments.show')}
         >
-          {showCommentHighlights ? 'Hide' : 'Show'}
+          {showCommentHighlights ? t('comments.hide') : t('comments.show')}
         </button>
       </div>
 
@@ -102,9 +104,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             <div className="comments-empty-icon">
               <MessageSquare size={26} />
             </div>
-            <h4>No Comments Yet</h4>
+            <h4>{t('comments.noCommentsYet')}</h4>
             <p>
-              Select any piece of text in the editor or reader to add author feedback, revision tasks, or notes.
+              {t('comments.noCommentsDesc')}
             </p>
           </div>
         ) : (
@@ -158,7 +160,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         }
                         onJumpToHighlight(c.id);
                       }}
-                      title="Jump to highlighted text"
+                      title={t('comments.jumpToHighlight')}
                     >
                       <ExternalLink size={12} />
                     </button>
@@ -166,7 +168,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                       type="button"
                       className="btn-icon btn-xs"
                       onClick={() => onSelectComment(c)}
-                      title="Edit comment or change color"
+                      title={t('comments.editNote')}
                     >
                       <Edit2 size={12} />
                     </button>
@@ -174,7 +176,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                       type="button"
                       className="btn-icon btn-xs text-danger"
                       onClick={() => onDeleteComment(c.id)}
-                      title="Delete comment"
+                      title={t('common.delete')}
                     >
                       <Trash2 size={12} />
                     </button>

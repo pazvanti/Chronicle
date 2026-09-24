@@ -3,15 +3,17 @@ import { useEpub } from '../../context/EpubContext';
 import { Plus, Image as ImageIcon, FileCode, FileType } from 'lucide-react';
 import { EpubAsset } from '../../types/project';
 import { formatBytes } from '../../services/epub/pathUtils';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const AssetManager: React.FC = () => {
   const { book, showNotification } = useEpub();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!book) {
     return (
       <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        No book loaded
+        {t('statusBar.noManuscript')}
       </div>
     );
   }
@@ -61,10 +63,10 @@ export const AssetManager: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700 }}>
-            Asset Manager
+            {t('assetManager.title')}
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            Embedded images, stylesheets, fonts, and media files ({book.assets.length} items)
+            {t('assetManager.subtitle')} ({book.assets.length} items)
           </p>
         </div>
 
@@ -77,7 +79,7 @@ export const AssetManager: React.FC = () => {
           />
           <button className="btn btn-primary btn-sm" onClick={() => fileInputRef.current?.click()}>
             <Plus size={15} />
-            <span>Add Asset</span>
+            <span>{t('assetManager.addAsset')}</span>
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEpub } from '../../context/EpubContext';
+import { useTranslation } from '../../i18n/I18nContext';
 import {
   Loader2,
   Clock,
@@ -12,6 +13,7 @@ import {
   Cloud,
   HardDrive,
   FileQuestion,
+  CheckCircle2,
 } from 'lucide-react';
 
 export const StatusBar: React.FC = () => {
@@ -20,6 +22,7 @@ export const StatusBar: React.FC = () => {
     isLoading,
     isSaving,
     isDirty,
+    lastAutoSavedAt,
     activeChapter,
     readerTheme,
     setReaderTheme,
@@ -35,12 +38,13 @@ export const StatusBar: React.FC = () => {
     minimalistMode,
     isZenMode,
   } = useEpub();
+  const { t } = useTranslation();
 
   const formatReadingTime = (mins: number) => {
-    if (mins < 60) return `${mins} min read`;
+    if (mins < 60) return `${mins} ${t('statusBar.readTimeMin')}`;
     const hrs = Math.floor(mins / 60);
     const remainingMins = mins % 60;
-    return remainingMins > 0 ? `${hrs}h ${remainingMins}m read` : `${hrs}h read`;
+    return remainingMins > 0 ? `${hrs}h ${remainingMins}m ${t('statusBar.readTimeHours')}` : `${hrs}h ${t('statusBar.readTimeHours')}`;
   };
 
   const cycleTheme = () => {
@@ -60,7 +64,7 @@ export const StatusBar: React.FC = () => {
         className="minimalist-floating-word-pill"
         title="Minimalist Writing Mode (Press Alt+M to toggle)"
       >
-        <span>{totalWordCount.toLocaleString()} words</span>
+        <span>{totalWordCount.toLocaleString()} {t('statusBar.words')}</span>
         {activeChapter && <span style={{ opacity: 0.8 }}> • {activeChapter.wordCount.toLocaleString()} w</span>}
       </div>
     );
@@ -74,7 +78,7 @@ export const StatusBar: React.FC = () => {
           {isLoading ? (
             <span className="status-badge status-loading">
               <Loader2 size={12} className="animate-spin" />
-              <span>Processing...</span>
+              <span>{t('statusBar.processing')}</span>
             </span>
           ) : isSaving ? (
             <span
@@ -87,22 +91,22 @@ export const StatusBar: React.FC = () => {
               title="Saving changes in background..."
             >
               <Loader2 size={12} className="animate-spin" />
-              <span>{storageTarget === 'cloud' ? 'Uploading to cloud...' : 'Saving...'}</span>
+              <span>{storageTarget === 'cloud' ? t('statusBar.uploadingCloud') : t('statusBar.saving')}</span>
             </span>
           ) : isDirty ? (
             <span className="status-badge status-dirty" title="You have unsaved changes. Press Ctrl+S to save project.">
               <span className="status-dot dot-dirty" />
-              <span>Unsaved changes</span>
+              <span>{t('statusBar.unsavedChanges')}</span>
             </span>
           ) : book ? (
             <span className="status-badge status-ready">
               <span className="status-dot dot-ready" />
-              <span>Ready</span>
+              <span>{t('statusBar.ready')}</span>
             </span>
           ) : (
             <span className="status-badge status-idle">
               <span className="status-dot dot-idle" />
-              <span>No manuscript</span>
+              <span>{t('statusBar.noManuscript')}</span>
             </span>
           )}
         </div>
@@ -120,7 +124,7 @@ export const StatusBar: React.FC = () => {
                   title={`Stored in WebDAV Cloud: ${cloudFileName || 'document'}. Click to browse cloud manuscripts.`}
                 >
                   <Cloud size={11} style={{ color: '#3b82f6' }} />
-                  <span>Cloud: {cloudFileName || 'WebDAV'}</span>
+                  <span>{t('statusBar.cloudStorage')}: {cloudFileName || 'WebDAV'}</span>
                 </span>
               ) : storageTarget === 'local' ? (
                 <span
@@ -130,7 +134,7 @@ export const StatusBar: React.FC = () => {
                   title="Local file. Click to Save As."
                 >
                   <HardDrive size={11} style={{ opacity: 0.8 }} />
-                  <span>Local File</span>
+                  <span>{t('statusBar.localStorage')}</span>
                 </span>
               ) : (
                 <span
@@ -140,9 +144,23 @@ export const StatusBar: React.FC = () => {
                   title="New manuscript (unsaved location). Click to select destination."
                 >
                   <FileQuestion size={11} style={{ opacity: 0.8 }} />
-                  <span>Unsaved Target</span>
+                  <span>{t('statusBar.unsavedTarget')}</span>
                 </span>
               )}
+            </div>
+          </>
+        )}
+
+        {book && lastAutoSavedAt && !isSaving && !isDirty && (
+          <>
+            <div className="status-separator" />
+            <div
+              className="status-item auto-save-status"
+              title={`Manuscript was automatically saved at ${lastAutoSavedAt.toLocaleTimeString()}`}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.74rem', color: 'var(--text-muted)' }}
+            >
+              <CheckCircle2 size={11} style={{ color: 'var(--accent-primary, #34d399)' }} />
+              <span>{t('statusBar.autoSaved')} {lastAutoSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
             </div>
           </>
         )}
@@ -165,7 +183,7 @@ export const StatusBar: React.FC = () => {
           <>
             <div className="status-item" title="Total manuscript word count">
               <FileText size={12} style={{ color: 'var(--accent-primary)' }} />
-              <span>{totalWordCount.toLocaleString()} words</span>
+              <span>{totalWordCount.toLocaleString()} {t('statusBar.words')}</span>
             </div>
 
             <span className="status-separator" />
@@ -179,7 +197,7 @@ export const StatusBar: React.FC = () => {
 
             <div className="status-item" title="Total chapter count">
               <BookOpen size={12} style={{ color: '#34d399' }} />
-              <span>{book.chapters.length} {book.chapters.length === 1 ? 'chapter' : 'chapters'}</span>
+              <span>{book.chapters.length} {book.chapters.length === 1 ? t('statusBar.chapterCountSingle') : t('statusBar.chapterCountPlural')}</span>
             </div>
           </>
         ) : (
@@ -194,7 +212,7 @@ export const StatusBar: React.FC = () => {
         {book && activeChapter && (
           <>
             <div className="status-item active-chapter-pill" title={`Active: ${activeChapter.title}`}>
-              <span style={{ opacity: 0.65 }}>Chapter:</span>
+              <span style={{ opacity: 0.65 }}>{t('statusBar.activeChapter')}:</span>
               <strong style={{ fontWeight: 600 }}>{activeChapter.wordCount.toLocaleString()} w</strong>
             </div>
 

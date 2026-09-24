@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TimelineEvent, TimelineTimescale, CharacterProfile } from '../../types/project';
 import { X, Trash2, Clock, Check, Users } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 
@@ -100,6 +101,7 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
   onSave,
   onDelete,
 }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startStr, setStartStr] = useState<string>('0');
@@ -221,7 +223,7 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <Clock size={18} style={{ color }} />
             <div>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Edit Event</h3>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>{t('timeline.eventModalTitle')}</h3>
               <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                 {segmentName} • {formatUnitValue(numStart)} - {formatUnitValue(numStart + numDuration)}
               </span>
@@ -231,12 +233,12 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
             <button
               type="button"
               className="btn btn-ghost danger-hover"
-              title="Delete event"
+              title={t('common.delete')}
               onClick={onDelete}
             >
               <Trash2 size={16} />
             </button>
-            <button type="button" className="btn btn-ghost" onClick={onClose} title="Close">
+            <button type="button" className="btn btn-ghost" onClick={onClose} title={t('common.close')}>
               <X size={18} />
             </button>
           </div>
@@ -256,12 +258,12 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
         >
           {/* Title input */}
           <div>
-            <label className="section-label" style={{ marginBottom: '4px', display: 'block' }}>Event Title</label>
+            <label className="section-label" style={{ marginBottom: '4px', display: 'block' }}>{t('timeline.eventTitleLabel')}</label>
             <input
               type="text"
               className="form-input"
               style={{ width: '100%', boxSizing: 'border-box', fontSize: '0.95rem', fontWeight: 600 }}
-              placeholder="e.g. Down the Rabbit Hole, A Mad Tea-Party"
+              placeholder={t('timeline.eventTitleLabel')}
               value={title}
               onChange={e => setTitle(e.target.value)}
               autoFocus
@@ -270,7 +272,7 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
 
           {/* Color Palette */}
           <div>
-            <label className="section-label" style={{ marginBottom: '6px', display: 'block' }}>Event Color</label>
+            <label className="section-label" style={{ marginBottom: '6px', display: 'block' }}>{t('timeline.eventColorLabel')}</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
               {PRESET_EVENT_COLORS.map(c => (
                 <button
@@ -308,7 +310,7 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
                   cursor: 'pointer',
                   padding: 0,
                 }}
-                title="Custom color"
+                title={t('timeline.eventColorLabel')}
               />
             </div>
           </div>
@@ -334,7 +336,7 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {timescale === 'hours' ? 'Start Time (HH:mm)' : `Start (${timescale})`}
+                {t('timeline.eventStartLabel')}
               </label>
               <input
                 type="text"
@@ -371,13 +373,13 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
                   textOverflow: 'ellipsis',
                 }}
               >
-                Duration {timescale === 'hours' ? '(hrs)' : `(${timescale})`}
+                {t('timeline.eventDurationLabel')}
               </label>
               <input
                 type="text"
                 className="form-input"
                 style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}
-                placeholder={timescale === 'hours' ? 'e.g. 2 or 1:30' : '1'}
+                placeholder={timescale === 'hours' ? '2 or 1:30' : '1'}
                 value={durationStr}
                 onChange={e => setDurationStr(e.target.value)}
               />
@@ -406,7 +408,7 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
                   textOverflow: 'ellipsis',
                 }}
               >
-                Track Lane
+                Lane
               </label>
               <select
                 className="form-input"
@@ -420,13 +422,10 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
                   textOverflow: 'ellipsis',
                 }}
               >
-                <option value={0}>Top Lane (0)</option>
-                <option value={1}>Sub-Lane 1</option>
-                <option value={2}>Sub-Lane 2</option>
+                <option value={0}>Lane 0</option>
+                <option value={1}>Lane 1</option>
+                <option value={2}>Lane 2</option>
               </select>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '3px' }}>
-                Vertical row
-              </span>
             </div>
           </div>
 
@@ -435,7 +434,7 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
             <div>
               <label className="section-label" style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <Users size={12} />
-                <span>Featured Characters</span>
+                <span>{t('timeline.eventCharactersLabel')}</span>
               </label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {characters.map(char => {
@@ -471,11 +470,10 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
 
           {/* Description / Notes */}
           <div>
-            <label className="section-label" style={{ marginBottom: '4px', display: 'block' }}>Event Notes / Description</label>
+            <label className="section-label" style={{ marginBottom: '4px', display: 'block' }}>{t('timeline.eventDescriptionLabel')}</label>
             <textarea
               className="form-input"
               rows={3}
-              placeholder="What happens in this scene or event? Key reveals, actions, or conflicts..."
               value={description}
               onChange={e => setDescription(e.target.value)}
               style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical' }}
@@ -485,10 +483,10 @@ export const TimelineEventModal: React.FC<TimelineEventModalProps> = ({
           {/* Footer actions */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem' }}>
             <button type="button" className="btn btn-outline" onClick={onClose}>
-              Cancel
+              {t('common.cancel')}
             </button>
             <button type="submit" className="btn btn-primary">
-              Save Event
+              {t('common.save')}
             </button>
           </div>
         </form>

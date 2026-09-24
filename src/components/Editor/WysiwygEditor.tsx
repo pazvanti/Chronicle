@@ -31,6 +31,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 import { SplitChapterModal } from './SplitChapterModal';
 import { TextColorPicker } from './TextColorPicker';
 import { scopeCssForContainer } from '../../services/epub/cssPresets';
@@ -171,6 +172,7 @@ export const WysiwygEditor: React.FC = () => {
     readerFont,
     setReaderFont,
   } = useEpub();
+  const { t } = useTranslation();
 
   const initialSettings = getStoredSettings();
   const editorRef = useRef<HTMLDivElement>(null);
@@ -1349,7 +1351,7 @@ export const WysiwygEditor: React.FC = () => {
   if (!activeChapter) {
     return (
       <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        Select a chapter to edit
+        {t('editor.selectChapterToEdit')}
       </div>
     );
   }
@@ -1414,21 +1416,21 @@ export const WysiwygEditor: React.FC = () => {
           <button
             className="tool-btn"
             onClick={() => insertHeading('h1')}
-            title="Heading 1"
+            title={t('editor.h1')}
           >
             <Heading1 size={17} />
           </button>
           <button
             className="tool-btn"
             onClick={() => insertHeading('h2')}
-            title="Heading 2"
+            title={t('editor.h2')}
           >
             <Heading2 size={17} />
           </button>
           <button
             className="tool-btn"
             onClick={() => insertHeading('h3')}
-            title="Heading 3"
+            title={t('editor.h3')}
           >
             <Heading3 size={17} />
           </button>
@@ -1438,28 +1440,28 @@ export const WysiwygEditor: React.FC = () => {
           <button
             className="tool-btn"
             onClick={() => execCommand('bold')}
-            title="Bold (Ctrl+B)"
+            title={t('editor.bold')}
           >
             <Bold size={16} />
           </button>
           <button
             className="tool-btn"
             onClick={() => execCommand('italic')}
-            title="Italic (Ctrl+I)"
+            title={t('editor.italic')}
           >
             <Italic size={16} />
           </button>
           <button
             className="tool-btn"
             onClick={() => execCommand('underline')}
-            title="Underline (Ctrl+U)"
+            title={t('editor.underline')}
           >
             <Underline size={16} />
           </button>
           <button
             className="tool-btn"
             onClick={() => execCommand('strikeThrough')}
-            title="Strikethrough"
+            title={t('editor.strikethrough')}
           >
             <Strikethrough size={16} />
           </button>
@@ -1493,28 +1495,28 @@ export const WysiwygEditor: React.FC = () => {
           <button
             className={`tool-btn ${currentAlign === 'left' ? 'active' : ''}`}
             onClick={() => handleAlign('left')}
-            title="Align Left (Ctrl+L)"
+            title={t('editor.alignLeft')}
           >
             <AlignLeft size={16} />
           </button>
           <button
             className={`tool-btn ${currentAlign === 'center' ? 'active' : ''}`}
             onClick={() => handleAlign('center')}
-            title="Align Center (Ctrl+E)"
+            title={t('editor.alignCenter')}
           >
             <AlignCenter size={16} />
           </button>
           <button
             className={`tool-btn ${currentAlign === 'right' ? 'active' : ''}`}
             onClick={() => handleAlign('right')}
-            title="Align Right (Ctrl+R)"
+            title={t('editor.alignRight')}
           >
             <AlignRight size={16} />
           </button>
           <button
             className={`tool-btn ${currentAlign === 'justify' ? 'active' : ''}`}
             onClick={() => handleAlign('justify')}
-            title="Justify (Ctrl+J)"
+            title={t('editor.alignJustify')}
           >
             <AlignJustify size={16} />
           </button>
@@ -1524,28 +1526,28 @@ export const WysiwygEditor: React.FC = () => {
           <button
             className="tool-btn"
             onClick={() => execCommand('insertUnorderedList')}
-            title="Bullet List"
+            title={t('editor.bulletList')}
           >
             <List size={16} />
           </button>
           <button
             className="tool-btn"
             onClick={() => execCommand('insertOrderedList')}
-            title="Numbered List"
+            title={t('editor.numberedList')}
           >
             <ListOrdered size={16} />
           </button>
           <button
             className="tool-btn"
             onClick={() => execCommand('formatBlock', '<blockquote>')}
-            title="Blockquote"
+            title={t('editor.blockquote')}
           >
             <Quote size={16} />
           </button>
           <button
             className="tool-btn"
             onClick={() => execCommand('insertHorizontalRule')}
-            title="Horizontal Divider"
+            title={t('editor.divider')}
           >
             <Minus size={16} />
           </button>
@@ -1557,14 +1559,14 @@ export const WysiwygEditor: React.FC = () => {
               <button
                 className="tool-btn"
                 onClick={() => setShowImageDialog(true)}
-                title="Insert Image"
+                title={t('editor.insertImage')}
               >
                 <ImageIcon size={16} />
               </button>
               <button
                 className="tool-btn"
                 onClick={handleInsertLink}
-                title="Insert Link"
+                title={t('editor.insertLink')}
               >
                 <Link size={16} />
               </button>
@@ -1573,7 +1575,7 @@ export const WysiwygEditor: React.FC = () => {
           <button
             className="tool-btn"
             onClick={() => execCommand('removeFormat')}
-            title="Clear Formatting"
+            title={t('editor.clearFormatting')}
           >
             <RemoveFormatting size={16} />
           </button>
@@ -1590,11 +1592,11 @@ export const WysiwygEditor: React.FC = () => {
                   setEditorLayout('page');
                   if (editorWidth > 950) setEditorWidth(820);
                 }}
-                title="Page Layout (Centered Sheet)"
+                title={t('editor.pageLayout')}
                 style={{ padding: '3px 7px', fontSize: '0.75rem', gap: '4px', width: 'auto' }}
               >
                 <FileText size={13} />
-                <span>Page</span>
+                <span>{t('editor.page')}</span>
               </button>
               <button
                 className={`btn-icon btn-sm ${editorLayout === 'widescreen' ? 'active' : ''}`}
@@ -1602,11 +1604,11 @@ export const WysiwygEditor: React.FC = () => {
                   setEditorLayout('widescreen');
                   if (editorWidth < 1000) setEditorWidth(1200);
                 }}
-                title="Widescreen Layout (Expanded Canvas)"
+                title={t('editor.widescreenLayout')}
                 style={{ padding: '3px 7px', fontSize: '0.75rem', gap: '4px', width: 'auto' }}
               >
                 <Maximize2 size={13} />
-                <span>Widescreen</span>
+                <span>{t('editor.widescreenLayout')}</span>
               </button>
             </div>
 
@@ -1616,7 +1618,7 @@ export const WysiwygEditor: React.FC = () => {
                 ref={widthTriggerRef}
                 className={`btn-icon btn-sm ${showWidthMenu ? 'active' : ''}`}
                 onClick={() => setShowWidthMenu(prev => !prev)}
-                title="Adjust Editor Width (Editor only - does not affect book)"
+                title={t('editor.canvasWidth')}
                 style={{ padding: '3px 8px', fontSize: '0.75rem', gap: '4px', width: 'auto', background: 'var(--bg-input)' }}
               >
                 <SlidersHorizontal size={13} />
@@ -1656,7 +1658,7 @@ export const WysiwygEditor: React.FC = () => {
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                          Editor Canvas Width
+                          {t('editor.canvasWidth')}
                         </span>
                         <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent-primary)' }}>
                           {editorWidth}px
@@ -1680,33 +1682,33 @@ export const WysiwygEditor: React.FC = () => {
                           style={{ fontSize: '0.7rem', padding: '0.2rem' }}
                           onClick={() => setEditorWidth(680)}
                         >
-                          Compact (680px)
+                          {t('editor.compact')}
                         </button>
                         <button
                           className={`btn btn-sm ${editorWidth === 820 ? 'btn-primary' : 'btn-secondary'}`}
                           style={{ fontSize: '0.7rem', padding: '0.2rem' }}
                           onClick={() => setEditorWidth(820)}
                         >
-                          Page (820px)
+                          {t('editor.page')}
                         </button>
                         <button
                           className={`btn btn-sm ${editorWidth === 1100 ? 'btn-primary' : 'btn-secondary'}`}
                           style={{ fontSize: '0.7rem', padding: '0.2rem' }}
                           onClick={() => setEditorWidth(1100)}
                         >
-                          Wide (1100px)
+                          {t('editor.wide')}
                         </button>
                         <button
                           className={`btn btn-sm ${editorWidth === 1450 ? 'btn-primary' : 'btn-secondary'}`}
                           style={{ fontSize: '0.7rem', padding: '0.2rem' }}
                           onClick={() => setEditorWidth(1450)}
                         >
-                          Ultra (1450px)
+                          {t('editor.ultra')}
                         </button>
                       </div>
 
                       <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.4rem' }}>
-                        Authoring view only (doesn't alter EPUB)
+                        {t('editor.authorViewOnly')}
                       </div>
                     </div>
                   </>,
@@ -1720,7 +1722,7 @@ export const WysiwygEditor: React.FC = () => {
             <button
               className={`btn btn-secondary btn-sm ${isCommentsSidebarOpen ? 'active' : ''}`}
               onClick={() => setIsCommentsSidebarOpen(!isCommentsSidebarOpen)}
-              title="Comments & Highlights"
+              title={t('editor.toggleHighlights')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1730,7 +1732,7 @@ export const WysiwygEditor: React.FC = () => {
               }}
             >
               <MessageSquare size={14} />
-              <span>Comments</span>
+              <span>{t('editor.comments')}</span>
               {chapterComments.length > 0 && (
                 <span
                   style={{
@@ -1752,7 +1754,7 @@ export const WysiwygEditor: React.FC = () => {
             <button
               className={`btn btn-secondary btn-sm ${!showCommentHighlights ? 'active' : ''}`}
               onClick={toggleCommentHighlights}
-              title={showCommentHighlights ? "Hide comment highlights in text" : "Show comment highlights in text"}
+              title={showCommentHighlights ? t('comments.hide') : t('comments.show')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1787,7 +1789,7 @@ export const WysiwygEditor: React.FC = () => {
           }}
         >
           <span style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-            Selected: <strong style={{ color: 'var(--text-primary)' }}>"{selectedText.substring(0, 24)}..."</strong>
+            {t('editor.selected')}: <strong style={{ color: 'var(--text-primary)' }}>"{selectedText.substring(0, 24)}..."</strong>
           </span>
           <button
             className="btn btn-secondary btn-sm"
@@ -1795,14 +1797,14 @@ export const WysiwygEditor: React.FC = () => {
             style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
           >
             <MessageSquare size={13} />
-            <span>Add Comment</span>
+            <span>{t('editor.addCommentBtn')}</span>
           </button>
           <button
             className="btn btn-primary btn-sm"
             onClick={handleQuickSplit}
           >
             <Scissors size={13} />
-            <span>Split from here</span>
+            <span>{t('editor.splitFromHere')}</span>
           </button>
         </div>
       )}
@@ -1902,13 +1904,13 @@ export const WysiwygEditor: React.FC = () => {
         <div className="modal-overlay" onClick={() => setShowImageDialog(false)}>
           <div className="modal-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '520px' }}>
             <div className="modal-header">
-              <h3 className="modal-title">Insert Image</h3>
+              <h3 className="modal-title">{t('editor.insertImage')}</h3>
             </div>
             <div className="modal-body">
               {/* Asset Pool Selection */}
               {book && book.assets.filter(a => a.mediaType.startsWith('image/')).length > 0 && (
                 <div className="form-group">
-                  <label className="form-label">Choose from Book Assets:</label>
+                  <label className="form-label">{t('editor.chooseBookAssets')}</label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem', maxHeight: '180px', overflowY: 'auto' }}>
                     {book.assets
                       .filter(a => a.mediaType.startsWith('image/'))
@@ -1941,7 +1943,7 @@ export const WysiwygEditor: React.FC = () => {
 
               {/* Upload Local Image */}
               <div className="form-group">
-                <label className="form-label">Or Upload an Image File:</label>
+                <label className="form-label">{t('editor.uploadImageFile')}</label>
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -1953,11 +1955,11 @@ export const WysiwygEditor: React.FC = () => {
 
               {/* Image URL input */}
               <div className="form-group">
-                <label className="form-label">Or Image URL:</label>
+                <label className="form-label">{t('editor.orImageUrl')}</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="https://example.com/image.jpg"
+                  placeholder="https://..."
                   value={imageUrlInput}
                   onChange={e => setImageUrlInput(e.target.value)}
                 />
@@ -1965,14 +1967,14 @@ export const WysiwygEditor: React.FC = () => {
             </div>
             <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setShowImageDialog(false)}>
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 className="btn btn-primary"
                 onClick={() => handleInsertImage(imageUrlInput)}
                 disabled={!imageUrlInput.trim()}
               >
-                Insert
+                {t('editor.insert')}
               </button>
             </div>
           </div>

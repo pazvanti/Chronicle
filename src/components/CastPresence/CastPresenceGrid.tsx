@@ -29,6 +29,7 @@ import {
   ArrowLeft,
   Edit3,
 } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export const CastPresenceGrid: React.FC = () => {
   const {
@@ -44,6 +45,7 @@ export const CastPresenceGrid: React.FC = () => {
     setViewMode,
     addCharacter,
   } = useEpub();
+  const { t } = useTranslation();
 
   // Filters & display preferences
   const [entityTypeFilter, setEntityTypeFilter] = useState<'all' | 'character' | 'location'>('all');
@@ -226,9 +228,9 @@ export const CastPresenceGrid: React.FC = () => {
           </div>
 
           <div className="presence-scanning-info">
-            <h2 className="presence-scanning-title">Analyzing Cast & Location Presence</h2>
+            <h2 className="presence-scanning-title">{t('castPresence.analyzing')}</h2>
             <p className="presence-scanning-subtitle">
-              Performing full-text deep lexical scan across all chapters in manuscript...
+              {t('castPresence.subtitle')}
             </p>
 
             {/* Scanning Progress Bar */}
@@ -242,18 +244,18 @@ export const CastPresenceGrid: React.FC = () => {
             <div className="presence-progress-labels">
               <span className="presence-step-text">
                 {presenceProgress?.chapterTitle
-                  ? `Scanning: ${presenceProgress.chapterTitle}`
-                  : 'Preparing chapter text index...'}
+                  ? `${presenceProgress.chapterTitle}`
+                  : t('common.loading')}
               </span>
               <span className="presence-percent-text">{percent}%</span>
             </div>
 
             <div className="presence-scan-entities-badge">
               <Users size={14} />
-              <span>{characters.length} Characters</span>
+              <span>{characters.length} {t('subNav.characters')}</span>
               <span style={{ opacity: 0.4 }}>•</span>
               <Compass size={14} />
-              <span>{locations.length} Locations</span>
+              <span>{locations.length} {t('subNav.locations')}</span>
             </div>
           </div>
         </div>
@@ -272,22 +274,20 @@ export const CastPresenceGrid: React.FC = () => {
             <div className="presence-empty-icon-halo">
               <Users size={32} color="var(--accent-primary)" />
             </div>
-            <h3 className="presence-empty-title">No Cast Members or Locations Found</h3>
+            <h3 className="presence-empty-title">{t('characters.emptyTitle')}</h3>
             <p className="presence-empty-desc">
-              The Presence Grid maps every chapter to see where your characters and
-              story locations appear throughout your book. Add characters or locations
-              in your manuscript to generate the matrix.
+              {t('characters.emptyDesc')}
             </p>
             <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center', marginTop: '1.25rem' }}>
               <button
                 className="btn btn-primary"
                 onClick={() => {
-                  addCharacter({ name: 'Protagonist', role: 'Protagonist' });
+                  addCharacter({ name: t('characters.roles.protagonist'), role: 'Protagonist' });
                   setViewMode('editor');
                 }}
               >
                 <Users size={16} />
-                <span>Add First Character</span>
+                <span>{t('characters.addCharacter')}</span>
               </button>
             </div>
           </div>
@@ -316,11 +316,11 @@ export const CastPresenceGrid: React.FC = () => {
               padding: '0.35rem 0.65rem',
               color: 'var(--text-secondary)',
             }}
-            title="Return to Writing Editor"
+            title={t('header.writeMode')}
           >
             <ArrowLeft size={14} />
             <Edit3 size={13} style={{ color: 'var(--accent-primary)' }} />
-            <span>Writing</span>
+            <span>{t('header.writeMode')}</span>
           </button>
 
           <div className="presence-brand-group">
@@ -328,9 +328,9 @@ export const CastPresenceGrid: React.FC = () => {
               <Layers size={18} />
             </div>
             <div>
-              <div className="presence-brand-heading">Presence Grid</div>
+              <div className="presence-brand-heading">{t('castPresence.title')}</div>
               <div className="presence-brand-subheading">
-                {castPresenceData?.chapters.length || 0} Chapters × {castPresenceData?.entities.length || 0} Entities
+                {castPresenceData?.chapters.length || 0} {t('statusBar.chapterCountPlural')} × {castPresenceData?.entities.length || 0} {t('castPresence.totalEntities')}
               </div>
             </div>
           </div>
@@ -340,7 +340,7 @@ export const CastPresenceGrid: React.FC = () => {
               className={`presence-tab-btn ${entityTypeFilter === 'all' ? 'active' : ''}`}
               onClick={() => setEntityTypeFilter('all')}
             >
-              <span>All Entities</span>
+              <span>{t('castPresence.filterAll')}</span>
               <span className="presence-tab-count">{castPresenceData?.entities.length || 0}</span>
             </button>
             <button
@@ -348,7 +348,7 @@ export const CastPresenceGrid: React.FC = () => {
               onClick={() => setEntityTypeFilter('character')}
             >
               <Users size={13} />
-              <span>Characters</span>
+              <span>{t('castPresence.filterCharacters')}</span>
               <span className="presence-tab-count">
                 {castPresenceData?.entities.filter(e => e.type === 'character').length || 0}
               </span>
@@ -358,7 +358,7 @@ export const CastPresenceGrid: React.FC = () => {
               onClick={() => setEntityTypeFilter('location')}
             >
               <Compass size={13} />
-              <span>Locations</span>
+              <span>{t('castPresence.filterLocations')}</span>
               <span className="presence-tab-count">
                 {castPresenceData?.entities.filter(e => e.type === 'location').length || 0}
               </span>
@@ -374,7 +374,7 @@ export const CastPresenceGrid: React.FC = () => {
             <input
               type="text"
               className="presence-search-input"
-              placeholder="Search cast / alias..."
+              placeholder={t('castPresence.searchPlaceholder')}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
@@ -415,9 +415,9 @@ export const CastPresenceGrid: React.FC = () => {
               value={sortMode}
               onChange={e => setSortMode(e.target.value as any)}
             >
-              <option value="default">Default Order</option>
-              <option value="mentions">Most Mentions</option>
-              <option value="alphabetical">Name (A–Z)</option>
+              <option value="default">{t('castPresence.sortDefault')}</option>
+              <option value="mentions">{t('castPresence.sortMentions')}</option>
+              <option value="alphabetical">{t('castPresence.sortAlphabetical')}</option>
             </select>
           </div>
 
@@ -426,26 +426,26 @@ export const CastPresenceGrid: React.FC = () => {
             <button
               className={`presence-display-btn ${displayMode === 'heatmap' ? 'active' : ''}`}
               onClick={() => setDisplayMode('heatmap')}
-              title="Heatmap Glow View"
+              title={t('castPresence.modeHeatmap')}
             >
               <Sparkles size={13} />
-              <span>Glow</span>
+              <span>{t('castPresence.modeHeatmap')}</span>
             </button>
             <button
               className={`presence-display-btn ${displayMode === 'counts' ? 'active' : ''}`}
               onClick={() => setDisplayMode('counts')}
-              title="Mention Counts View"
+              title={t('castPresence.modeCounts')}
             >
               <Hash size={13} />
-              <span>Counts</span>
+              <span>{t('castPresence.modeCounts')}</span>
             </button>
             <button
               className={`presence-display-btn ${displayMode === 'dots' ? 'active' : ''}`}
               onClick={() => setDisplayMode('dots')}
-              title="Minimal Dots View"
+              title={t('castPresence.modeDots')}
             >
               <Circle size={13} />
-              <span>Dots</span>
+              <span>{t('castPresence.modeDots')}</span>
             </button>
           </div>
 
@@ -453,7 +453,7 @@ export const CastPresenceGrid: React.FC = () => {
           <button
             className="btn btn-ghost btn-sm presence-action-btn"
             onClick={handleExportCsv}
-            title="Export Matrix to CSV"
+            title={t('common.export')}
           >
             <FileSpreadsheet size={14} />
             <span>CSV</span>
@@ -462,24 +462,24 @@ export const CastPresenceGrid: React.FC = () => {
           {/* Cache Status & Re-Analyze Action */}
           <div className="presence-cache-indicator">
             {isPresenceCacheValid ? (
-              <span className="presence-cache-badge cached" title="Analysis cached. Zero wait time.">
+              <span className="presence-cache-badge cached">
                 <CheckCircle2 size={12} />
-                <span>Cached</span>
+                <span>{t('common.ready')}</span>
               </span>
             ) : (
-              <span className="presence-cache-badge stale" title="Edits detected since last analysis">
+              <span className="presence-cache-badge stale">
                 <AlertCircle size={12} />
-                <span>Edits Detected</span>
+                <span>{t('statusBar.unsavedChanges')}</span>
               </span>
             )}
 
             <button
               className="btn btn-sm btn-outline presence-reanalyze-btn"
               onClick={() => runCastPresenceAnalysis(true)}
-              title="Re-run deep manuscript analysis"
+              title={t('castPresence.reanalyze')}
             >
               <RefreshCw size={13} />
-              <span>Re-Analyze</span>
+              <span>{t('castPresence.reanalyze')}</span>
             </button>
           </div>
         </div>
@@ -494,7 +494,7 @@ export const CastPresenceGrid: React.FC = () => {
             </div>
             <div className="metric-data">
               <div className="metric-value">{analytics.totalEntities}</div>
-              <div className="metric-label">Cast & Locations Tracked</div>
+              <div className="metric-label">{t('castPresence.totalEntities')}</div>
             </div>
           </div>
 
@@ -504,7 +504,7 @@ export const CastPresenceGrid: React.FC = () => {
             </div>
             <div className="metric-data">
               <div className="metric-value">{analytics.coveragePercent}%</div>
-              <div className="metric-label">Chapter Cast Coverage</div>
+              <div className="metric-label">{t('castPresence.subtitle')}</div>
             </div>
           </div>
 
@@ -518,9 +518,9 @@ export const CastPresenceGrid: React.FC = () => {
                   <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {analytics.topEntity.name}
                   </span>
-                  <span className="metric-pill">{analytics.topEntity.totalMentions} hits</span>
+                  <span className="metric-pill">{analytics.topEntity.totalMentions} {t('characters.totalMentions')}</span>
                 </div>
-                <div className="metric-label">Lead Presence ({analytics.topEntity.chaptersPresentCount} chapters)</div>
+                <div className="metric-label">({analytics.topEntity.chaptersPresentCount} {t('statusBar.chapterCountPlural')})</div>
               </div>
             </div>
           )}
@@ -537,7 +537,7 @@ export const CastPresenceGrid: React.FC = () => {
                   </span>
                   <span className="metric-pill">{analytics.peakChapter.distinctEntitiesCount} cast</span>
                 </div>
-                <div className="metric-label">Densest Ensemble Scene</div>
+                <div className="metric-label">{t('castPresence.title')}</div>
               </div>
             </div>
           )}
@@ -554,7 +554,7 @@ export const CastPresenceGrid: React.FC = () => {
                 {/* Top-Left Corner Anchor */}
                 <th className="presence-corner-cell">
                   <div className="corner-content">
-                    <span className="corner-title">Entities</span>
+                    <span className="corner-title">{t('castPresence.totalEntities')}</span>
                     <span className="corner-count">({filteredEntities.length})</span>
                   </div>
                 </th>
@@ -569,7 +569,7 @@ export const CastPresenceGrid: React.FC = () => {
                       onMouseEnter={() => setHoveredChapterId(ch.id)}
                       onMouseLeave={() => setHoveredChapterId(null)}
                       onClick={() => handleChapterHeaderClick(ch.id)}
-                      title={`${ch.title} (${ch.wordCount.toLocaleString()} words)\nClick to open in Editor`}
+                      title={`${ch.title} (${ch.wordCount.toLocaleString()} ${t('statusBar.words')})`}
                     >
                       <div className="chapter-header-content">
                         <div className="chapter-title-text">{ch.title}</div>
@@ -596,7 +596,7 @@ export const CastPresenceGrid: React.FC = () => {
                     colSpan={(castPresenceData?.chapters.length || 0) + 1}
                     style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}
                   >
-                    No matching entities found for the current search or filters.
+                    {t('castPresence.noData')}
                   </td>
                 </tr>
               ) : (
