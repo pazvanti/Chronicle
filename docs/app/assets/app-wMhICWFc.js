@@ -1,1 +1,0 @@
-import{t as e}from"./index-CSsmu74H.js";async function t(){return e(`plugin:app|version`)}export{t as getVersion};
