@@ -77,9 +77,9 @@ html, body, #root {
   overflow: hidden;
   background: var(--bg-app);
 }
-
 /* Desktop App Chrome Header */
 .app-header {
+  position: relative;
   height: var(--header-height);
   background: var(--bg-sidebar);
   border-bottom: 1px solid var(--border-subtle);
@@ -87,11 +87,10 @@ html, body, #root {
   align-items: center;
   justify-content: space-between;
   padding: 0 1rem;
-  z-index: 50;
+  z-index: 500;
   gap: 0.75rem;
   flex-shrink: 0;
 }
-
 /* Header Left: Brand & Document Title */
 .header-left-section {
   display: flex;
@@ -444,6 +443,8 @@ html, body, #root {
   border: 1px solid var(--border-medium) !important;
   box-shadow: var(--shadow-lg) !important;
   backdrop-filter: var(--glass-backdrop, blur(16px));
+  max-height: calc(100vh - var(--header-height, 48px) - 16px);
+  overflow-y: auto;
 }
 
 .dropdown-section-title {
@@ -4094,6 +4095,8 @@ html, body, #root {
   box-shadow: var(--shadow-lg) !important;
   backdrop-filter: var(--glass-backdrop, blur(16px));
   z-index: 101 !important;
+  max-height: calc(100vh - var(--header-height, 48px) - 16px);
+  overflow-y: auto;
 }
 
 .header-dropdown-menu .dropdown-item {
@@ -7044,6 +7047,7 @@ html[data-minimalist-mode="true"] {
 }
 
 .minimalist-header {
+  position: relative;
   height: 42px !important;
   padding: 0 1rem !important;
   background: var(--bg-sidebar);
@@ -7051,7 +7055,7 @@ html[data-minimalist-mode="true"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  z-index: 50;
+  z-index: 500;
   transition: all var(--transition-normal);
 }
 

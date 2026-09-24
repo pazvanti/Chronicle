@@ -24,8 +24,6 @@ import {
   Link,
   RemoveFormatting,
   Scissors,
-  FileText,
-  Maximize2,
   SlidersHorizontal,
   MessageSquare,
   Eye,
@@ -35,7 +33,6 @@ import { useTranslation } from '../../i18n/I18nContext';
 import { SplitChapterModal } from './SplitChapterModal';
 import { TextColorPicker } from './TextColorPicker';
 import { scopeCssForContainer } from '../../services/epub/cssPresets';
-import { getStoredSettings, updateStoredSettings } from '../../services/epub/settingsStorage';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { AuthorComment, ReaderFont } from '../../types/project';
 import { ZenFloatingToolbar } from '../Zen/ZenFloatingToolbar';
@@ -171,10 +168,12 @@ export const WysiwygEditor: React.FC = () => {
     bookSessionId,
     readerFont,
     setReaderFont,
+    editorWidth,
+    setEditorWidth,
+    editorLayout,
   } = useEpub();
   const { t } = useTranslation();
 
-  const initialSettings = getStoredSettings();
   const editorRef = useRef<HTMLDivElement>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [selectedText, setSelectedText] = useState<string>('');
@@ -182,8 +181,6 @@ export const WysiwygEditor: React.FC = () => {
   const [isSplitModalOpen, setIsSplitModalOpen] = useState<boolean>(false);
   const [showImageDialog, setShowImageDialog] = useState<boolean>(false);
   const [imageUrlInput, setImageUrlInput] = useState<string>('');
-  const [editorLayout, setEditorLayoutState] = useState<'page' | 'widescreen'>(initialSettings.editorLayout);
-  const [editorWidth, setEditorWidthState] = useState<number>(initialSettings.editorWidth);
   const [showWidthMenu, setShowWidthMenu] = useState<boolean>(false);
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
   const [activeTextColor, setActiveTextColor] = useState<string>('auto');
@@ -272,16 +269,6 @@ export const WysiwygEditor: React.FC = () => {
       deselectImage();
     }
   }, !!selectedImage);
-
-  const setEditorLayout = (layout: 'page' | 'widescreen') => {
-    setEditorLayoutState(layout);
-    updateStoredSettings({ editorLayout: layout });
-  };
-
-  const setEditorWidth = (width: number) => {
-    setEditorWidthState(width);
-    updateStoredSettings({ editorWidth: width });
-  };
 
   const lastSelfUpdatedHtmlRef = useRef<string>('');
 
@@ -1584,34 +1571,6 @@ export const WysiwygEditor: React.FC = () => {
         {/* Right side tools: Layout, Width, Theme & Split (Hidden in Minimalist Mode) */}
         {!minimalistMode && (
           <div className="toolbar-group">
-            {/* Layout Mode Switcher */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', background: 'var(--bg-input)', padding: '2px', borderRadius: 'var(--radius-sm)' }}>
-              <button
-                className={`btn-icon btn-sm ${editorLayout === 'page' ? 'active' : ''}`}
-                onClick={() => {
-                  setEditorLayout('page');
-                  if (editorWidth > 950) setEditorWidth(820);
-                }}
-                title={t('editor.pageLayout')}
-                style={{ padding: '3px 7px', fontSize: '0.75rem', gap: '4px', width: 'auto' }}
-              >
-                <FileText size={13} />
-                <span>{t('editor.page')}</span>
-              </button>
-              <button
-                className={`btn-icon btn-sm ${editorLayout === 'widescreen' ? 'active' : ''}`}
-                onClick={() => {
-                  setEditorLayout('widescreen');
-                  if (editorWidth < 1000) setEditorWidth(1200);
-                }}
-                title={t('editor.widescreenLayout')}
-                style={{ padding: '3px 7px', fontSize: '0.75rem', gap: '4px', width: 'auto' }}
-              >
-                <Maximize2 size={13} />
-                <span>{t('editor.widescreenLayout')}</span>
-              </button>
-            </div>
-
             {/* Width Adjuster Popover Trigger */}
             <div style={{ position: 'relative' }}>
               <button

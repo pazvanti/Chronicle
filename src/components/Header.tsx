@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useEpub } from '../context/EpubContext';
 import { useTts } from '../context/TtsContext';
 import {
@@ -81,6 +81,41 @@ export const Header: React.FC = () => {
   const [isSaveMenuOpen, setIsSaveMenuOpen] = useState<boolean>(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const saveMenuRef = useRef<HTMLDivElement>(null);
+  const cloudMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleDocumentClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (isMoreMenuOpen && moreMenuRef.current && !moreMenuRef.current.contains(target)) {
+        setIsMoreMenuOpen(false);
+      }
+      if (isSaveMenuOpen && saveMenuRef.current && !saveMenuRef.current.contains(target)) {
+        setIsSaveMenuOpen(false);
+      }
+      if (isCloudMenuOpen && cloudMenuRef.current && !cloudMenuRef.current.contains(target)) {
+        setIsCloudMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMoreMenuOpen(false);
+        setIsSaveMenuOpen(false);
+        setIsCloudMenuOpen(false);
+      }
+    };
+
+    if (isMoreMenuOpen || isSaveMenuOpen || isCloudMenuOpen) {
+      document.addEventListener('mousedown', handleDocumentClick);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleDocumentClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMoreMenuOpen, isSaveMenuOpen, isCloudMenuOpen]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -347,7 +382,7 @@ export const Header: React.FC = () => {
                 <span>{t('headerActions.cloud')}</span>
               </button>
             ) : (
-              <div className="header-btn-collapsible" style={{ position: 'relative' }}>
+              <div ref={cloudMenuRef} className="header-btn-collapsible" style={{ position: 'relative' }}>
                 <button
                   className="btn btn-ghost btn-sm"
                   onClick={() => setIsCloudMenuOpen(!isCloudMenuOpen)}
@@ -511,7 +546,7 @@ export const Header: React.FC = () => {
             </button>
 
             {/* Split Save Button Group (Save + Dropdown Arrow for Save As) */}
-            <div className="btn-split-group" style={{ position: 'relative', display: 'inline-flex', alignItems: 'stretch' }}>
+            <div ref={saveMenuRef} className="btn-split-group" style={{ position: 'relative', display: 'inline-flex', alignItems: 'stretch' }}>
               <button
                 className="btn btn-primary btn-sm header-save-btn btn-split-main"
                 onClick={() => saveProject()}
@@ -745,7 +780,7 @@ export const Header: React.FC = () => {
             </button>
 
             {/* Responsive Overflow "More" Menu for Narrow/Standard Screens */}
-            <div className="header-more-btn-container" style={{ position: 'relative' }}>
+            <div ref={moreMenuRef} className="header-more-btn-container" style={{ position: 'relative' }}>
               <button
                 className={`btn btn-ghost btn-sm header-more-btn ${isMoreMenuOpen ? 'active' : ''}`}
                 onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
@@ -779,6 +814,8 @@ export const Header: React.FC = () => {
                       right: 0,
                       zIndex: 101,
                       minWidth: '240px',
+                      maxHeight: 'calc(100vh - 56px)',
+                      overflowY: 'auto',
                       borderRadius: '8px',
                       padding: '5px',
                       display: 'flex',

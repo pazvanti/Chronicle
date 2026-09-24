@@ -163,6 +163,9 @@ async function migrateLegacySettings(): Promise<Partial<ChronicleSettings>> {
   return legacy;
 }
 
+let memorySettings: ChronicleSettings | null = null;
+let saveQueue: Promise<ChronicleSettings> = Promise.resolve(DEFAULT_CHRONICLE_SETTINGS);
+
 /**
  * Loads all settings from IndexedDB on startup
  */
@@ -184,6 +187,18 @@ export async function loadAllSettings(): Promise<ChronicleSettings> {
       };
     });
 
+    let localFallback: Partial<ChronicleSettings> = {};
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const raw = localStorage.getItem('epub_editor_app_settings_v1');
+        if (raw) {
+          localFallback = JSON.parse(raw);
+        }
+      }
+    } catch {
+      // ignore
+    }
+
     if (stored) {
       let welcomePref = stored.showWelcomeOnStartup;
       try {
@@ -199,6 +214,7 @@ export async function loadAllSettings(): Promise<ChronicleSettings> {
 
       const merged: ChronicleSettings = {
         ...DEFAULT_CHRONICLE_SETTINGS,
+        ...localFallback,
         ...stored,
         showWelcomeOnStartup: welcomePref,
         zenSettings: {
@@ -206,6 +222,21 @@ export async function loadAllSettings(): Promise<ChronicleSettings> {
           ...(stored.zenSettings || {}),
         },
       };
+
+      // Ensure custom canvas width is respected from stored or local fallback
+      if (typeof stored.editorWidth === 'number' && stored.editorWidth >= 600) {
+        merged.editorWidth = stored.editorWidth;
+      } else if (typeof (localFallback as any).editorWidth === 'number' && (localFallback as any).editorWidth >= 600) {
+        merged.editorWidth = (localFallback as any).editorWidth;
+      }
+
+      if (stored.editorLayout) {
+        merged.editorLayout = stored.editorLayout;
+      } else if ((localFallback as any).editorLayout) {
+        merged.editorLayout = (localFallback as any).editorLayout;
+      }
+
+      memorySettings = merged;
       return merged;
     }
 
@@ -213,28 +244,52 @@ export async function loadAllSettings(): Promise<ChronicleSettings> {
     const legacy = await migrateLegacySettings();
     const initialSettings: ChronicleSettings = {
       ...DEFAULT_CHRONICLE_SETTINGS,
+      ...localFallback,
       ...legacy,
     };
+    if (typeof (localFallback as any).editorWidth === 'number' && (localFallback as any).editorWidth >= 600) {
+      initialSettings.editorWidth = (localFallback as any).editorWidth;
+    }
+    if ((localFallback as any).editorLayout) {
+      initialSettings.editorLayout = (localFallback as any).editorLayout;
+    }
 
+    memorySettings = initialSettings;
     await saveSettings(initialSettings);
     return initialSettings;
   } catch (err) {
     console.error('Failed to load settings from IndexedDB, using defaults:', err);
     let fallbackWelcome = DEFAULT_CHRONICLE_SETTINGS.showWelcomeOnStartup;
+    let fallbackWidth = DEFAULT_CHRONICLE_SETTINGS.editorWidth;
+    let fallbackLayout = DEFAULT_CHRONICLE_SETTINGS.editorLayout;
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         const savedWelcome = localStorage.getItem('chronicle_show_welcome_on_startup');
         if (savedWelcome !== null) {
           fallbackWelcome = savedWelcome === 'true';
         }
+        const raw = localStorage.getItem('epub_editor_app_settings_v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (typeof parsed.editorWidth === 'number' && parsed.editorWidth >= 600) {
+            fallbackWidth = parsed.editorWidth;
+          }
+          if (parsed.editorLayout === 'page' || parsed.editorLayout === 'widescreen') {
+            fallbackLayout = parsed.editorLayout;
+          }
+        }
       }
     } catch {
       /* ignore */
     }
-    return {
+    const fallbackSettings: ChronicleSettings = {
       ...DEFAULT_CHRONICLE_SETTINGS,
       showWelcomeOnStartup: fallbackWelcome,
+      editorWidth: fallbackWidth,
+      editorLayout: fallbackLayout,
     };
+    memorySettings = fallbackSettings;
+    return fallbackSettings;
   }
 }
 
@@ -242,60 +297,55 @@ export async function loadAllSettings(): Promise<ChronicleSettings> {
  * Saves multiple settings fields atomically into IndexedDB
  */
 export async function saveSettings(updates: Partial<ChronicleSettings>): Promise<ChronicleSettings> {
-  try {
-    const db = await openSettingsDatabase();
-
-    // Read current first to merge
-    const current = await new Promise<ChronicleSettings>((resolve) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const request = store.get(SETTINGS_KEY);
-
-      request.onsuccess = () => {
-        resolve(request.result ? { ...DEFAULT_CHRONICLE_SETTINGS, ...request.result } : DEFAULT_CHRONICLE_SETTINGS);
-      };
-
-      request.onerror = () => {
-        resolve(DEFAULT_CHRONICLE_SETTINGS);
-      };
-    });
-
-    const merged: ChronicleSettings = {
-      ...current,
-      ...updates,
-    };
-
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      const store = tx.objectStore(STORE_NAME);
-      const request = store.put(merged, SETTINGS_KEY);
-
-      request.onsuccess = () => {
-        resolve();
-      };
-
-      request.onerror = () => {
-        reject(request.error);
-      };
-    });
-
-    // Also mirror to legacy localStorage for instant synchronous fallback if needed
+  // 1. Maintain in-memory cache synchronously so rapid/concurrent calls never trample each other
+  if (!memorySettings) {
+    let localFallback: Partial<ChronicleSettings> = {};
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        if (updates.showWelcomeOnStartup !== undefined) {
-          localStorage.setItem('chronicle_show_welcome_on_startup', String(updates.showWelcomeOnStartup));
-        }
-        localStorage.setItem('epub_editor_app_settings_v1', JSON.stringify(merged));
+        const raw = localStorage.getItem('epub_editor_app_settings_v1');
+        if (raw) localFallback = JSON.parse(raw);
       }
     } catch {
       // ignore
     }
-
-    return merged;
-  } catch (err) {
-    console.error('Failed to save settings into IndexedDB:', err);
-    return { ...DEFAULT_CHRONICLE_SETTINGS, ...updates };
+    memorySettings = { ...DEFAULT_CHRONICLE_SETTINGS, ...localFallback };
   }
+  memorySettings = {
+    ...memorySettings,
+    ...updates,
+  };
+  const snapshotToSave = { ...memorySettings };
+
+  // 2. Synchronously write to localStorage immediately (so page refresh right after drag is 100% persistent)
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      if (updates.showWelcomeOnStartup !== undefined) {
+        localStorage.setItem('chronicle_show_welcome_on_startup', String(updates.showWelcomeOnStartup));
+      }
+      localStorage.setItem('epub_editor_app_settings_v1', JSON.stringify(snapshotToSave));
+    }
+  } catch {
+    // ignore
+  }
+
+  // 3. Queue IndexedDB persist sequentially without racing
+  saveQueue = saveQueue.then(async () => {
+    try {
+      const db = await openSettingsDatabase();
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.put(snapshotToSave, SETTINGS_KEY);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    } catch (err) {
+      console.error('Failed to save settings into IndexedDB:', err);
+    }
+    return snapshotToSave;
+  });
+
+  return snapshotToSave;
 }
 
 /**

@@ -53,8 +53,10 @@ import { saveWebDavConfig, deleteWebDavConfig } from '../services/cloud/webdavSt
 import {
   loadAllSettings,
   saveSetting,
+  saveSettings,
   ZenModeSettings,
   DEFAULT_ZEN_SETTINGS,
+  DEFAULT_CHRONICLE_SETTINGS,
 } from '../services/storage/indexedDbSettings';
 import { uploadFile, downloadFile } from '../services/cloud/webdavClient';
 import {
@@ -113,6 +115,10 @@ interface EpubContextType {
   readerFontSize: number;
   readerLineHeight: number;
   readerMarginWidth: number;
+  editorLayout: 'page' | 'widescreen';
+  setEditorLayout: (layout: 'page' | 'widescreen') => void;
+  editorWidth: number;
+  setEditorWidth: (width: number) => void;
   isDirty: boolean;
   notification: NotificationState | null;
 
@@ -337,6 +343,14 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [readerFontSize, setReaderFontSizeState] = useState<number>(initialSettings.readerFontSize);
   const [readerLineHeight, setReaderLineHeightState] = useState<number>(initialSettings.readerLineHeight);
   const [readerMarginWidth, setReaderMarginWidthState] = useState<number>(initialSettings.readerMarginWidth);
+  const [editorLayout, setEditorLayoutState] = useState<'page' | 'widescreen'>(initialSettings.editorLayout || 'page');
+  const [editorWidth, setEditorWidthState] = useState<number>(() => {
+    const fromStorage = initialSettings.editorWidth;
+    if (typeof fromStorage === 'number' && fromStorage >= 600) {
+      return fromStorage;
+    }
+    return DEFAULT_CHRONICLE_SETTINGS.editorWidth || 820;
+  });
   const [customCss, setCustomCss] = useState<string>('');
   const [isDirty, setIsDirtyState] = useState<boolean>(false);
   const isSavingRef = useRef<boolean>(false);
@@ -581,6 +595,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setReaderFontSizeState(settings.readerFontSize);
         setReaderLineHeightState(settings.readerLineHeight);
         setReaderMarginWidthState(settings.readerMarginWidth);
+        if (typeof settings.editorWidth === 'number' && settings.editorWidth >= 600) {
+          setEditorWidthState(settings.editorWidth);
+        }
+        if (settings.editorLayout === 'page' || settings.editorLayout === 'widescreen') {
+          setEditorLayoutState(settings.editorLayout);
+        }
         setViewModeState(settings.viewMode);
         setEditorSubModeState(settings.editorSubMode);
 
@@ -751,6 +771,20 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setReaderMarginWidthState(w);
     updateStoredSettings({ readerMarginWidth: w });
     saveSetting('readerMarginWidth', w);
+  }, []);
+
+  const setEditorWidth = useCallback((w: number) => {
+    setEditorWidthState(w);
+    const layout = w > 950 ? 'widescreen' : 'page';
+    setEditorLayoutState(layout);
+    updateStoredSettings({ editorWidth: w, editorLayout: layout });
+    saveSettings({ editorWidth: w, editorLayout: layout });
+  }, []);
+
+  const setEditorLayout = useCallback((layout: 'page' | 'widescreen') => {
+    setEditorLayoutState(layout);
+    updateStoredSettings({ editorLayout: layout });
+    saveSetting('editorLayout', layout);
   }, []);
 
   const showNotification = useCallback(
@@ -3446,6 +3480,10 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setReaderLineHeight,
         readerMarginWidth,
         setReaderMarginWidth,
+        editorWidth,
+        setEditorWidth,
+        editorLayout,
+        setEditorLayout,
         customCss,
         setCustomCss,
         applyCustomCssToBook,
