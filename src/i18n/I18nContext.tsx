@@ -2,11 +2,13 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { SupportedLanguage, TranslationDictionary } from './types';
 import { en } from './locales/en';
 import { ptBR } from './locales/pt-BR';
+import { ro } from './locales/ro';
 import { saveSetting, loadAllSettings } from '../services/storage/indexedDbSettings';
 
 const DICTIONARIES: Record<SupportedLanguage, TranslationDictionary> = {
   en,
   'pt-BR': ptBR,
+  ro,
 };
 
 type NestedKeyOf<ObjectType extends object> = {
@@ -35,6 +37,7 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
     if (typeof navigator !== 'undefined') {
       const navLang = navigator.language?.toLowerCase() || '';
       if (navLang.startsWith('pt')) return 'pt-BR';
+      if (navLang.startsWith('ro')) return 'ro';
     }
     return 'en';
   });
@@ -43,7 +46,7 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
     async function initLanguage() {
       try {
         const settings = await loadAllSettings();
-        if (settings.language === 'en' || settings.language === 'pt-BR' || settings.language === 'es') {
+        if (settings.language === 'en' || settings.language === 'pt-BR' || settings.language === 'ro') {
           setLanguageState(settings.language);
         }
       } catch (err) {

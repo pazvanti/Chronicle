@@ -27,7 +27,7 @@ export interface ChronicleSettings {
   autoSaveInterval: number;
 
   // Language / i18n
-  language: 'en' | 'pt-BR';
+  language: 'en' | 'pt-BR' | 'ro';
 
   // Shunn manuscript author preferences
   shunnLegalName?: string;
@@ -83,7 +83,9 @@ export const DEFAULT_CHRONICLE_SETTINGS: ChronicleSettings = {
   language:
     typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('pt')
       ? 'pt-BR'
-      : 'en',
+      : typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('ro')
+        ? 'ro'
+        : 'en',
   shunnChapterPageBreak: true,
   shunnIncludeChapterTitles: true,
   shunnFontFamily: 'Times New Roman',

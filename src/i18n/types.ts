@@ -1,4 +1,4 @@
-export type SupportedLanguage = 'en' | 'pt-BR';
+export type SupportedLanguage = 'en' | 'pt-BR' | 'ro';
 
 export interface TranslationDictionary {
   common: {
@@ -87,6 +87,7 @@ export interface TranslationDictionary {
     selectLanguage: string;
     portuguese: string;
     english: string;
+    romanian: string;
 
     // Auto-save
     autoSaveTitle: string;
