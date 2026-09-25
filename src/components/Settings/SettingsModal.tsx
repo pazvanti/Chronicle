@@ -48,6 +48,7 @@ import {
   UpdateCheckResult,
 } from '../../services/update/updateChecker';
 import { useTranslation } from '../../i18n/I18nContext';
+import { SupportedLanguage } from '../../i18n/types';
 import { DEFAULT_CUSTOM_PAPER_TONE } from '../../types/project';
 
 interface PaperPreset {
@@ -1932,12 +1933,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       className="form-select"
                       value={language}
                       onChange={e => {
-                        const newLang = e.target.value as 'en' | 'pt-BR';
+                        const newLang = e.target.value as SupportedLanguage;
                         setLanguage(newLang);
                         const langLabel =
                           newLang === 'pt-BR'
                             ? t('settings.portuguese')
-                            : t('settings.english');
+                            : newLang === 'ro'
+                              ? t('settings.romanian')
+                              : t('settings.english');
                         showNotification('info', t('notifications.languageChanged', { lang: langLabel }));
                       }}
                       style={{
@@ -1949,6 +1952,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     >
                       <option value="en">{t('settings.english')}</option>
                       <option value="pt-BR">{t('settings.portuguese')}</option>
+                      <option value="ro">{t('settings.romanian')}</option>
                     </select>
                   </div>
                 </div>

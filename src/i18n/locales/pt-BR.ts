@@ -87,6 +87,7 @@ export const ptBR: TranslationDictionary = {
     selectLanguage: 'Idioma:',
     portuguese: 'Português (Brasil)',
     english: 'English (US)',
+    romanian: 'Română',
 
     // Auto-save
     autoSaveTitle: 'Salvamento Automático (Desktop)',

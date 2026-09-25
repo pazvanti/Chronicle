@@ -87,6 +87,7 @@ export const en: TranslationDictionary = {
     selectLanguage: 'Language:',
     portuguese: 'Português (Brasil)',
     english: 'English (US)',
+    romanian: 'Română',
 
     // Auto-save
     autoSaveTitle: 'Auto-save (Desktop)',
