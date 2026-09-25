@@ -3,6 +3,16 @@ import { createPortal } from 'react-dom';
 import { Baseline, Check, RotateCcw } from 'lucide-react';
 import { ReaderTheme } from '../../types/project';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useEpub } from '../../context/EpubContext';
+
+function isColorLight(hexColor: string): boolean {
+  const hex = hexColor.replace('#', '');
+  if (hex.length < 6) return true;
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 >= 128;
+}
 
 export interface TextColorPickerProps {
   isOpen: boolean;
@@ -131,12 +141,21 @@ export const TextColorPicker: React.FC<TextColorPickerProps> = ({
     }
   };
 
+  const { customPaperTone } = useEpub();
   const isAuto = normalizedActive === 'auto';
-  const previewBarColor = isAuto
-    ? readerTheme === 'light' || readerTheme === 'sepia'
-      ? '#18181b'
-      : '#f4f4f6'
-    : normalizedActive;
+  const isLightTone =
+    readerTheme === 'light' ||
+    readerTheme === 'sepia' ||
+    (readerTheme === 'custom' && customPaperTone ? isColorLight(customPaperTone.paperColor) : false);
+
+  const defaultAutoColor =
+    readerTheme === 'custom' && customPaperTone
+      ? customPaperTone.textColor
+      : isLightTone
+        ? '#18181b'
+        : '#f4f4f6';
+
+  const previewBarColor = isAuto ? defaultAutoColor : normalizedActive;
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -232,7 +251,7 @@ export const TextColorPicker: React.FC<TextColorPickerProps> = ({
                 <div className="text-color-auto-text">
                   <span className="text-color-auto-name">Auto</span>
                   <span className="text-color-auto-desc">
-                    {readerTheme === 'light' || readerTheme === 'sepia'
+                    {isLightTone
                       ? 'Theme Default (Dark on light paper)'
                       : 'Theme Default (Light on dark paper)'}
                   </span>

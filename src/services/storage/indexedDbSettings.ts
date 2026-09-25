@@ -1,6 +1,6 @@
 import { UiTheme } from '../../types/theme';
 import { WebDavConfig } from '../../types/cloud';
-import { AppViewMode, EditorSubMode, ReaderTheme, ReaderFont } from '../../types/project';
+import { AppViewMode, EditorSubMode, ReaderTheme, ReaderFont, CustomPaperTone, DEFAULT_CUSTOM_PAPER_TONE } from '../../types/project';
 import { loadWebDavConfig as loadLegacyWebDavConfig } from '../cloud/webdavStorage';
 
 export interface ChronicleSettings {
@@ -8,6 +8,7 @@ export interface ChronicleSettings {
   webdavConfig: WebDavConfig | null;
   showWelcomeOnStartup: boolean;
   readerTheme: ReaderTheme;
+  customPaperTone?: CustomPaperTone;
   readerFont: ReaderFont;
   readerFontSize: number;
   readerLineHeight: number;
@@ -65,6 +66,7 @@ export const DEFAULT_CHRONICLE_SETTINGS: ChronicleSettings = {
   showWelcomeOnStartup: true,
   checkUpdatesOnStartup: true,
   readerTheme: 'light',
+  customPaperTone: DEFAULT_CUSTOM_PAPER_TONE,
   readerFont: 'serif',
   readerFontSize: 18,
   readerLineHeight: 1.75,

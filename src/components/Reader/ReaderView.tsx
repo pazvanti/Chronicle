@@ -44,6 +44,7 @@ export const ReaderView: React.FC = () => {
     setViewMode,
     readerTheme,
     setReaderTheme,
+    customPaperTone,
     readerFont,
     setReaderFont,
     readerFontSize,
@@ -552,6 +553,20 @@ export const ReaderView: React.FC = () => {
               >
                 <span className="theme-dot dot-oled" />
                 <span>OLED</span>
+              </button>
+              <button
+                className={`theme-segment-btn ${readerTheme === 'custom' ? 'active' : ''}`}
+                onClick={() => setReaderTheme('custom')}
+                title="Custom Paper Tone"
+              >
+                <span
+                  className="theme-dot"
+                  style={{
+                    backgroundColor: customPaperTone?.paperColor || '#FBF7EE',
+                    border: '1px solid rgba(128,128,128,0.4)',
+                  }}
+                />
+                <span>Custom</span>
               </button>
             </div>
 

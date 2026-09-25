@@ -38,6 +38,7 @@ import {
   RefreshCw,
   Save,
   Globe,
+  RotateCcw,
 } from 'lucide-react';
 import { ChronicleLogo } from '../Common/ChronicleLogo';
 import { markdownToHtml } from '../../services/epub/markdownImporter';
@@ -47,6 +48,54 @@ import {
   UpdateCheckResult,
 } from '../../services/update/updateChecker';
 import { useTranslation } from '../../i18n/I18nContext';
+import { DEFAULT_CUSTOM_PAPER_TONE } from '../../types/project';
+
+interface PaperPreset {
+  id: string;
+  name: string;
+  paperColor: string;
+  textColor: string;
+  canvasColor: string;
+}
+
+const CUSTOM_PAPER_PRESETS: PaperPreset[] = [
+  { id: 'cream', name: 'Warm Cream', paperColor: '#FBF7EE', textColor: '#24211D', canvasColor: '#E8E0D0' },
+  { id: 'parchment', name: 'Classic Parchment', paperColor: '#F4ECD8', textColor: '#2B2319', canvasColor: '#DDD0B8' },
+  { id: 'mint', name: 'Mint & Sage', paperColor: '#EBF4EE', textColor: '#1B2E24', canvasColor: '#D3E2D8' },
+  { id: 'rose', name: 'Rose Quartz', paperColor: '#FAF0F2', textColor: '#362228', canvasColor: '#E8D5D9' },
+  { id: 'solarized-light', name: 'Solarized Light', paperColor: '#FDF6E3', textColor: '#073642', canvasColor: '#EEE8D5' },
+  { id: 'solarized-dark', name: 'Solarized Dark', paperColor: '#002B36', textColor: '#93A1A1', canvasColor: '#073642' },
+  { id: 'nordic', name: 'Nordic Slate', paperColor: '#202630', textColor: '#DDE2E8', canvasColor: '#161A22' },
+  { id: 'midnight', name: 'Velvet Midnight', paperColor: '#12121A', textColor: '#E4E4EE', canvasColor: '#09090E' },
+];
+
+function isHexLight(hexColor: string): boolean {
+  const hex = hexColor.replace('#', '');
+  if (hex.length < 6) return true;
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 >= 128;
+}
+
+function computeAutoContrast(paperHex: string): string {
+  return isHexLight(paperHex) ? '#24211D' : '#F1F5F9';
+}
+
+function computeAutoDesk(paperHex: string): string {
+  const hex = paperHex.replace('#', '');
+  if (hex.length < 6) return '#e5e7eb';
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const isLight = (r * 299 + g * 587 + b * 114) / 1000 >= 128;
+  const factor = isLight ? 0.90 : 0.65;
+  const dr = Math.max(0, Math.min(255, Math.round(r * factor)));
+  const dg = Math.max(0, Math.min(255, Math.round(g * factor)));
+  const db = Math.max(0, Math.min(255, Math.round(b * factor)));
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+  return `#${toHex(dr)}${toHex(dg)}${toHex(db)}`.toUpperCase();
+}
 
 export type SettingsTab = 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates';
 
@@ -74,6 +123,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     showNotification,
     readerTheme,
     setReaderTheme,
+    customPaperTone,
+    setCustomPaperTone,
     readerFont,
     setReaderFont,
     readerMarginWidth,
@@ -1071,8 +1122,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      {(['light', 'sepia', 'dark', 'obsidian'] as const).map(itemTheme => {
+                      {(['light', 'sepia', 'dark', 'obsidian', 'custom'] as const).map(itemTheme => {
                         const isToneActive = readerTheme === itemTheme;
+                        const swatchColor =
+                          itemTheme === 'light'
+                            ? '#f8fafc'
+                            : itemTheme === 'sepia'
+                              ? '#fbf0d9'
+                              : itemTheme === 'dark'
+                                ? '#1e293b'
+                                : itemTheme === 'obsidian'
+                                  ? '#09090b'
+                                  : customPaperTone?.paperColor || '#FBF7EE';
                         return (
                           <button
                             key={itemTheme}
@@ -1093,14 +1154,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 width: 9,
                                 height: 9,
                                 borderRadius: '50%',
-                                backgroundColor:
-                                  itemTheme === 'light'
-                                    ? '#f8fafc'
-                                    : itemTheme === 'sepia'
-                                      ? '#fbf0d9'
-                                      : itemTheme === 'dark'
-                                        ? '#1e293b'
-                                        : '#09090b',
+                                backgroundColor: swatchColor,
                                 border: '1px solid rgba(128,128,128,0.4)',
                               }}
                             />
@@ -1111,6 +1165,314 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       })}
                     </div>
                   </div>
+
+                  {/* Custom Manuscript Canvas Paper Tone Customizer */}
+                  {readerTheme === 'custom' && (
+                    <div
+                      style={{
+                        marginTop: '0.65rem',
+                        padding: '1.1rem',
+                        borderRadius: '10px',
+                        backgroundColor: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-default)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                            {t('settings.customPaperTone')}
+                          </div>
+                          <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            {t('settings.customPaperToneDesc')}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => setCustomPaperTone(DEFAULT_CUSTOM_PAPER_TONE)}
+                          style={{
+                            fontSize: '0.74rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '0.3rem 0.65rem',
+                          }}
+                          title={t('settings.resetDefaultTone')}
+                        >
+                          <RotateCcw size={12} />
+                          {t('settings.resetDefaultTone')}
+                        </button>
+                      </div>
+
+                      {/* Presets Chips */}
+                      <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {t('settings.presetsTitle')}
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                          {CUSTOM_PAPER_PRESETS.map(preset => {
+                            const isSelected =
+                              customPaperTone?.paperColor?.toLowerCase() === preset.paperColor.toLowerCase() &&
+                              customPaperTone?.textColor?.toLowerCase() === preset.textColor.toLowerCase();
+                            return (
+                              <button
+                                key={preset.id}
+                                type="button"
+                                className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                                onClick={() =>
+                                  setCustomPaperTone({
+                                    paperColor: preset.paperColor,
+                                    textColor: preset.textColor,
+                                    canvasColor: preset.canvasColor,
+                                  })
+                                }
+                                style={{
+                                  fontSize: '0.76rem',
+                                  padding: '0.3rem 0.65rem',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    width: 10,
+                                    height: 10,
+                                    borderRadius: '50%',
+                                    backgroundColor: preset.paperColor,
+                                    border: `1px solid ${isHexLight(preset.paperColor) ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)'}`,
+                                    display: 'inline-block',
+                                  }}
+                                />
+                                {preset.name}
+                                {isSelected && <Check size={11} />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* 3 Color Pickers & Live Preview Grid */}
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                          gap: '1rem',
+                          alignItems: 'stretch',
+                        }}
+                      >
+                        {/* Color Controls */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                          {/* Paper Page Surface */}
+                          <div
+                            style={{
+                              padding: '0.65rem 0.85rem',
+                              borderRadius: '8px',
+                              backgroundColor: 'var(--bg-surface)',
+                              border: '1px solid var(--border-subtle)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '0.75rem',
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                {t('settings.paperPageColor')}
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                                {customPaperTone?.paperColor || '#FBF7EE'}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <input
+                                type="color"
+                                value={customPaperTone?.paperColor || '#FBF7EE'}
+                                onChange={e => setCustomPaperTone({ paperColor: e.target.value })}
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  padding: 0,
+                                  border: '1px solid var(--border-default)',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  backgroundColor: 'transparent',
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Prose Text / Ink */}
+                          <div
+                            style={{
+                              padding: '0.65rem 0.85rem',
+                              borderRadius: '8px',
+                              backgroundColor: 'var(--bg-surface)',
+                              border: '1px solid var(--border-subtle)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '0.75rem',
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                {t('settings.textColorLabel')}
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                                {customPaperTone?.textColor || '#24211D'}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  const autoColor = computeAutoContrast(customPaperTone?.paperColor || '#FBF7EE');
+                                  setCustomPaperTone({ textColor: autoColor });
+                                }}
+                                style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                title="Automatically select high-contrast ink color for this paper tone"
+                              >
+                                <Sparkles size={11} />
+                                {t('settings.autoContrastBtn')}
+                              </button>
+                              <input
+                                type="color"
+                                value={customPaperTone?.textColor || '#24211D'}
+                                onChange={e => setCustomPaperTone({ textColor: e.target.value })}
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  padding: 0,
+                                  border: '1px solid var(--border-default)',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  backgroundColor: 'transparent',
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Desk / Canvas Surround */}
+                          <div
+                            style={{
+                              padding: '0.65rem 0.85rem',
+                              borderRadius: '8px',
+                              backgroundColor: 'var(--bg-surface)',
+                              border: '1px solid var(--border-subtle)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '0.75rem',
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                {t('settings.deskCanvasColor')}
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                                {customPaperTone?.canvasColor || '#E8E0D0'}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  const autoDesk = computeAutoDesk(customPaperTone?.paperColor || '#FBF7EE');
+                                  setCustomPaperTone({ canvasColor: autoDesk });
+                                }}
+                                style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                title="Automatically derive matching workspace desk tone"
+                              >
+                                <Sparkles size={11} />
+                                {t('settings.autoDeskBtn')}
+                              </button>
+                              <input
+                                type="color"
+                                value={customPaperTone?.canvasColor || '#E8E0D0'}
+                                onChange={e => setCustomPaperTone({ canvasColor: e.target.value })}
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  padding: 0,
+                                  border: '1px solid var(--border-default)',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  backgroundColor: 'transparent',
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Miniature Manuscript Canvas Preview */}
+                        <div
+                          style={{
+                            backgroundColor: customPaperTone?.canvasColor || '#E8E0D0',
+                            borderRadius: '8px',
+                            padding: '1.25rem 1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '1px solid rgba(128,128,128,0.2)',
+                            boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.15)',
+                            minHeight: '170px',
+                            transition: 'background-color 0.2s ease',
+                          }}
+                        >
+                          <div
+                            style={{
+                              backgroundColor: customPaperTone?.paperColor || '#FBF7EE',
+                              color: customPaperTone?.textColor || '#24211D',
+                              borderRadius: '4px',
+                              padding: '1rem 1.15rem',
+                              width: '100%',
+                              maxWidth: '280px',
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.08)',
+                              transition: 'background-color 0.2s ease, color 0.2s ease',
+                              fontFamily: 'serif',
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: '0.84rem',
+                                fontWeight: 700,
+                                marginBottom: '0.35rem',
+                                letterSpacing: '-0.2px',
+                                lineHeight: 1.25,
+                              }}
+                            >
+                              {t('settings.previewHeading')}
+                            </div>
+                            <div
+                              style={{
+                                width: '24px',
+                                height: '1.5px',
+                                backgroundColor: customPaperTone?.textColor || '#24211D',
+                                opacity: 0.35,
+                                marginBottom: '0.5rem',
+                              }}
+                            />
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: '0.72rem',
+                                lineHeight: 1.55,
+                                opacity: 0.9,
+                              }}
+                            >
+                              {t('settings.previewSampleText')}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Information Callout */}
@@ -1369,15 +1731,40 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="form-group">
                   <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{t('settings.paperTone')}</label>
                   <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.3rem' }}>
-                    {(['light', 'sepia', 'dark', 'obsidian'] as const).map(itemTone => (
+                    {(['light', 'sepia', 'dark', 'obsidian', 'custom'] as const).map(itemTone => (
                       <button
                         key={itemTone}
                         type="button"
                         className={`btn btn-sm ${readerTheme === itemTone ? 'btn-primary' : 'btn-secondary'}`}
                         onClick={() => setReaderTheme(itemTone)}
-                        style={{ textTransform: 'capitalize', fontSize: '0.78rem' }}
+                        style={{
+                          textTransform: 'capitalize',
+                          fontSize: '0.78rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
                       >
+                        <span
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            backgroundColor:
+                              itemTone === 'light'
+                                ? '#f8fafc'
+                                : itemTone === 'sepia'
+                                  ? '#fbf0d9'
+                                  : itemTone === 'dark'
+                                    ? '#1e293b'
+                                    : itemTone === 'obsidian'
+                                      ? '#09090b'
+                                      : customPaperTone?.paperColor || '#FBF7EE',
+                            border: '1px solid rgba(128,128,128,0.4)',
+                          }}
+                        />
                         {itemTone}
+                        {readerTheme === itemTone && <Check size={11} />}
                       </button>
                     ))}
                   </div>

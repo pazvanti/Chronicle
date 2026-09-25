@@ -11,6 +11,8 @@ import {
   EditorSubMode,
   ReaderTheme,
   ReaderFont,
+  CustomPaperTone,
+  DEFAULT_CUSTOM_PAPER_TONE,
   EpubTocItem,
   EpubManifestItem,
   CharacterProfile,
@@ -111,6 +113,7 @@ interface EpubContextType {
   viewMode: AppViewMode;
   editorSubMode: EditorSubMode;
   readerTheme: ReaderTheme;
+  customPaperTone: CustomPaperTone;
   readerFont: ReaderFont;
   readerFontSize: number;
   readerLineHeight: number;
@@ -141,6 +144,7 @@ interface EpubContextType {
   setViewMode: (mode: AppViewMode) => void;
   setEditorSubMode: (mode: EditorSubMode) => void;
   setReaderTheme: (theme: ReaderTheme) => void;
+  setCustomPaperTone: (tone: Partial<CustomPaperTone>) => void;
   setReaderFont: (font: ReaderFont) => void;
   setReaderFontSize: (size: number) => void;
   setReaderLineHeight: (lh: number) => void;
@@ -339,6 +343,9 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [viewMode]);
   const [editorSubMode, setEditorSubModeState] = useState<EditorSubMode>(initialSettings.editorSubMode);
   const [readerTheme, setReaderThemeState] = useState<ReaderTheme>(initialSettings.readerTheme);
+  const [customPaperTone, setCustomPaperToneState] = useState<CustomPaperTone>(
+    initialSettings.customPaperTone || DEFAULT_CUSTOM_PAPER_TONE
+  );
   const [readerFont, setReaderFontState] = useState<ReaderFont>(initialSettings.readerFont);
   const [readerFontSize, setReaderFontSizeState] = useState<number>(initialSettings.readerFontSize);
   const [readerLineHeight, setReaderLineHeightState] = useState<number>(initialSettings.readerLineHeight);
@@ -591,6 +598,9 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
 
         setReaderThemeState(settings.readerTheme);
+        if (settings.customPaperTone) {
+          setCustomPaperToneState(settings.customPaperTone);
+        }
         setReaderFontState(settings.readerFont);
         setReaderFontSizeState(settings.readerFontSize);
         setReaderLineHeightState(settings.readerLineHeight);
@@ -747,6 +757,30 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setReaderThemeState(theme);
     updateStoredSettings({ readerTheme: theme });
     saveSetting('readerTheme', theme);
+  }, []);
+
+  // Sync custom paper tone CSS variables to documentElement
+  useEffect(() => {
+    const tone = customPaperTone || DEFAULT_CUSTOM_PAPER_TONE;
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--custom-paper-color', tone.paperColor);
+      document.documentElement.style.setProperty('--custom-text-color', tone.textColor);
+      document.documentElement.style.setProperty('--custom-canvas-color', tone.canvasColor);
+    }
+  }, [customPaperTone]);
+
+  const setCustomPaperTone = useCallback((toneUpdate: Partial<CustomPaperTone>) => {
+    setCustomPaperToneState(prev => {
+      const updated = { ...prev, ...toneUpdate };
+      updateStoredSettings({ customPaperTone: updated });
+      saveSetting('customPaperTone' as any, updated);
+      if (typeof document !== 'undefined') {
+        document.documentElement.style.setProperty('--custom-paper-color', updated.paperColor);
+        document.documentElement.style.setProperty('--custom-text-color', updated.textColor);
+        document.documentElement.style.setProperty('--custom-canvas-color', updated.canvasColor);
+      }
+      return updated;
+    });
   }, []);
 
   const setReaderFont = useCallback((font: ReaderFont) => {
@@ -3472,6 +3506,8 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setEditorSubMode,
         readerTheme,
         setReaderTheme,
+        customPaperTone,
+        setCustomPaperTone,
         readerFont,
         setReaderFont,
         readerFontSize,

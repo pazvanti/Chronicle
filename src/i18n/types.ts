@@ -133,6 +133,17 @@ export interface TranslationDictionary {
     appUiThemesDesc: string;
     defaultPaperTone: string;
     defaultPaperToneDesc: string;
+    customPaperTone: string;
+    customPaperToneDesc: string;
+    paperPageColor: string;
+    textColorLabel: string;
+    deskCanvasColor: string;
+    autoContrastBtn: string;
+    autoDeskBtn: string;
+    resetDefaultTone: string;
+    presetsTitle: string;
+    previewHeading: string;
+    previewSampleText: string;
     chromeVsPaperCallout: string;
 
     // Cloud WebDAV

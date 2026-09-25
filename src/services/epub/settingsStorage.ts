@@ -1,7 +1,8 @@
-import { AppViewMode, EditorSubMode, ReaderTheme, ReaderFont } from '../../types/project';
+import { AppViewMode, EditorSubMode, ReaderTheme, ReaderFont, CustomPaperTone, DEFAULT_CUSTOM_PAPER_TONE } from '../../types/project';
 
 export interface AppSettings {
   readerTheme: ReaderTheme;
+  customPaperTone?: CustomPaperTone;
   readerFont: ReaderFont;
   readerFontSize: number;
   readerLineHeight: number;
@@ -38,6 +39,7 @@ export interface AppSettings {
 
 const DEFAULT_SETTINGS: AppSettings = {
   readerTheme: 'light',
+  customPaperTone: DEFAULT_CUSTOM_PAPER_TONE,
   readerFont: 'serif',
   readerFontSize: 18,
   readerLineHeight: 1.75,

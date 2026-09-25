@@ -26,6 +26,7 @@ export const StatusBar: React.FC = () => {
     activeChapter,
     readerTheme,
     setReaderTheme,
+    customPaperTone,
     sidebarCollapsed,
     toggleSidebar,
     totalWordCount,
@@ -48,7 +49,7 @@ export const StatusBar: React.FC = () => {
   };
 
   const cycleTheme = () => {
-    const themes: ('light' | 'sepia' | 'dark' | 'obsidian')[] = ['light', 'sepia', 'dark', 'obsidian'];
+    const themes: ('light' | 'sepia' | 'dark' | 'obsidian' | 'custom')[] = ['light', 'sepia', 'dark', 'obsidian', 'custom'];
     const nextIdx = (themes.indexOf(readerTheme) + 1) % themes.length;
     setReaderTheme(themes[nextIdx]);
   };
@@ -229,6 +230,17 @@ export const StatusBar: React.FC = () => {
             <Sun size={12} style={{ color: '#f59e0b' }} />
           ) : readerTheme === 'sepia' ? (
             <span style={{ fontSize: '10px', fontWeight: 700, color: '#d97706' }}>SEP</span>
+          ) : readerTheme === 'custom' ? (
+            <span
+              style={{
+                width: 9,
+                height: 9,
+                borderRadius: '50%',
+                backgroundColor: customPaperTone?.paperColor || '#FBF7EE',
+                border: '1px solid rgba(128,128,128,0.5)',
+                display: 'inline-block',
+              }}
+            />
           ) : (
             <Moon size={12} style={{ color: '#818cf8' }} />
           )}
