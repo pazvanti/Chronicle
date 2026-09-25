@@ -318,8 +318,20 @@ export const PRIMARY_DEFAULT_VIEWS: Record<PrimaryAppMode, AppViewMode> = {
 };
 
 export type EditorSubMode = 'visual' | 'code' | 'split';
-export type ReaderTheme = 'light' | 'sepia' | 'dark' | 'obsidian';
+export type ReaderTheme = 'light' | 'sepia' | 'dark' | 'obsidian' | 'custom';
 export type ReaderFont = 'serif' | 'sans' | 'literata' | 'opendyslexic' | 'mono';
+
+export interface CustomPaperTone {
+  paperColor: string;
+  textColor: string;
+  canvasColor: string;
+}
+
+export const DEFAULT_CUSTOM_PAPER_TONE: CustomPaperTone = {
+  paperColor: '#FBF7EE',
+  textColor: '#24211D',
+  canvasColor: '#E8E0D0',
+};
 
 export type PresenceEntityType = 'character' | 'location';
 

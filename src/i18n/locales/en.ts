@@ -133,6 +133,17 @@ export const en: TranslationDictionary = {
     appUiThemesDesc: 'Switch the visual atmosphere across all studio headers, sidebars, cards, modals, and workspace chrome.',
     defaultPaperTone: 'Default Manuscript Canvas Paper Tone',
     defaultPaperToneDesc: 'Set the default paper background for your manuscript editor and reading canvas.',
+    customPaperTone: 'Custom Manuscript Canvas Paper Tone',
+    customPaperToneDesc: 'Personalize the exact paper surface, ink typography, and workspace desk colors for your canvas.',
+    paperPageColor: 'Paper (Page Surface)',
+    textColorLabel: 'Prose Text (Ink)',
+    deskCanvasColor: 'Workspace (Desk Surround)',
+    autoContrastBtn: 'Auto Contrast',
+    autoDeskBtn: 'Auto Desk',
+    resetDefaultTone: 'Reset to Default',
+    presetsTitle: 'Artisanal Paper Presets',
+    previewHeading: 'Chapter One: The Open Road',
+    previewSampleText: 'The morning sun filtered through the high canopy, casting dappled amber light across the weathered trail. Every word felt grounded on this canvas.',
     chromeVsPaperCallout: 'Studio Chrome vs Manuscript Paper: Chronicle completely decouples your application chrome theme from your writing canvas paper tone. You can compose in a sleek, focused dark or cyberpunk studio while keeping your manuscript on warm sepia or high-contrast crisp white paper.',
 
     // Cloud WebDAV

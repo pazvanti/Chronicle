@@ -133,6 +133,17 @@ export const ptBR: TranslationDictionary = {
     appUiThemesDesc: 'Alterne a atmosfera visual em todos os cabeçalhos, barras laterais, cartões, modais e molduras do espaço de trabalho.',
     defaultPaperTone: 'Tom de Papel Padrão da Tela do Manuscrito',
     defaultPaperToneDesc: 'Defina a cor de fundo padrão do papel para o editor de manuscrito e tela de leitura.',
+    customPaperTone: 'Tom de Papel Personalizado da Tela do Manuscrito',
+    customPaperToneDesc: 'Personalize a superfície exata do papel, a tipografia da tinta e as cores da mesa do seu espaço de trabalho.',
+    paperPageColor: 'Papel (Superfície da Página)',
+    textColorLabel: 'Texto da Prosa (Tinta)',
+    deskCanvasColor: 'Espaço de Trabalho (Mesa)',
+    autoContrastBtn: 'Contraste Automático',
+    autoDeskBtn: 'Mesa Automática',
+    resetDefaultTone: 'Restaurar Padrão',
+    presetsTitle: 'Predefinições de Papel Artesanal',
+    previewHeading: 'Capítulo Um: A Estrada Aberta',
+    previewSampleText: 'O sol da manhã filtrava-se pelo dossel alto, lançando luz âmbar salpicada pela trilha desgastada. Cada palavra parecia viva nesta tela.',
     chromeVsPaperCallout: 'Moldura do Estúdio vs Papel do Manuscrito: O Chronicle desacopla totalmente o tema da interface do aplicativo do tom de papel da sua tela de escrita. Você pode compor em um estúdio escuro ou cyberpunk enquanto mantém seu manuscrito em um papel sépia acolhedor ou branco de alto contraste.',
 
     // Cloud WebDAV
