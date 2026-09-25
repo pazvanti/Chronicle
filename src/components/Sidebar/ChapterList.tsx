@@ -16,6 +16,7 @@ import {
   BookOpen,
   Music2,
   MoreHorizontal,
+  GripVertical,
 } from 'lucide-react';
 import { SplitChapterModal } from '../Editor/SplitChapterModal';
 import { useTts } from '../../context/TtsContext';
@@ -44,6 +45,12 @@ export const ChapterList: React.FC = () => {
   const [menuChapterId, setMenuChapterId] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const activeItemRef = useRef<HTMLDivElement>(null);
+  const listScrollRef = useRef<HTMLDivElement>(null);
+
+  // Drag and Drop reordering state
+  const [draggedChapterId, setDraggedChapterId] = useState<string | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+  const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null);
 
   // Smoothly scroll active chapter into view when chapter changes or on restore
   useEffect(() => {
@@ -90,6 +97,23 @@ export const ChapterList: React.FC = () => {
       ch => ch.title.toLowerCase().includes(q) || ch.content.toLowerCase().includes(q)
     );
   }, [book, searchQuery]);
+
+  const resetDragState = () => {
+    setDraggedChapterId(null);
+    setDropTargetId(null);
+    setDropPosition(null);
+  };
+
+  // Window dragend fallback to ensure drag state always resets even if dropped outside
+  useEffect(() => {
+    const handleWindowDragEnd = () => {
+      resetDragState();
+    };
+    window.addEventListener('dragend', handleWindowDragEnd);
+    return () => {
+      window.removeEventListener('dragend', handleWindowDragEnd);
+    };
+  }, []);
 
   if (!book) {
     return null;
@@ -189,6 +213,171 @@ export const ChapterList: React.FC = () => {
     }
   };
 
+  const isReorderingAllowed = !editingChapterId && !searchQuery.trim() && book.chapters.length > 1;
+
+
+  const handleDragStart = (chapterId: string, e: React.DragEvent) => {
+    if (!isReorderingAllowed) {
+      e.preventDefault();
+      return;
+    }
+    e.dataTransfer.setData('application/x-chronicle-chapter', chapterId);
+    e.dataTransfer.setData('text/plain', chapterId);
+    e.dataTransfer.effectAllowed = 'move';
+
+    // Apply dragging state asynchronously so native drag preview isn't captured as dimmed
+    requestAnimationFrame(() => {
+      setDraggedChapterId(chapterId);
+    });
+  };
+
+  const handleDragOverItem = (chapterId: string, index: number, e: React.DragEvent) => {
+    if (!draggedChapterId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+
+    if (draggedChapterId === chapterId) {
+      if (dropTargetId !== null) {
+        setDropTargetId(null);
+        setDropPosition(null);
+      }
+      return;
+    }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const position: 'before' | 'after' = e.clientY < midY ? 'before' : 'after';
+
+    // Prevent showing drop indicator for no-op moves (e.g. moving directly before next item or after prev item)
+    const fromIndex = book.chapters.findIndex(c => c.id === draggedChapterId);
+    if (fromIndex !== -1) {
+      if (fromIndex < index && index === fromIndex + 1 && position === 'before') {
+        if (dropTargetId !== null) {
+          setDropTargetId(null);
+          setDropPosition(null);
+        }
+        return;
+      }
+      if (fromIndex > index && index === fromIndex - 1 && position === 'after') {
+        if (dropTargetId !== null) {
+          setDropTargetId(null);
+          setDropPosition(null);
+        }
+        return;
+      }
+    }
+
+    if (dropTargetId !== chapterId || dropPosition !== position) {
+      setDropTargetId(chapterId);
+      setDropPosition(position);
+    }
+  };
+
+  const handleDropOnItem = (targetChapterId: string, targetIndex: number, e: React.DragEvent) => {
+    if (!draggedChapterId || draggedChapterId === targetChapterId) {
+      resetDragState();
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+
+    const fromIndex = book.chapters.findIndex(c => c.id === draggedChapterId);
+    if (fromIndex === -1) {
+      resetDragState();
+      return;
+    }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pos = dropPosition || (e.clientY < rect.top + rect.height / 2 ? 'before' : 'after');
+
+    let insertAt: number;
+    if (pos === 'before') {
+      insertAt = fromIndex < targetIndex ? targetIndex - 1 : targetIndex;
+    } else {
+      insertAt = fromIndex < targetIndex ? targetIndex : targetIndex + 1;
+    }
+
+    if (insertAt !== fromIndex && insertAt >= 0 && insertAt < book.chapters.length) {
+      reorderChapters(fromIndex, insertAt);
+    }
+
+    resetDragState();
+  };
+
+  const handleDragEnd = () => {
+    resetDragState();
+  };
+
+  const handleContainerDragOver = (e: React.DragEvent) => {
+    if (!draggedChapterId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+
+    // Edge auto-scrolling
+    if (listScrollRef.current) {
+      const rect = listScrollRef.current.getBoundingClientRect();
+      const threshold = 40;
+      const maxScroll = 12;
+
+      if (e.clientY < rect.top + threshold) {
+        const ratio = 1 - Math.max(0, e.clientY - rect.top) / threshold;
+        listScrollRef.current.scrollTop -= Math.max(2, Math.round(ratio * maxScroll));
+      } else if (e.clientY > rect.bottom - threshold) {
+        const ratio = 1 - Math.max(0, rect.bottom - e.clientY) / threshold;
+        listScrollRef.current.scrollTop += Math.max(2, Math.round(ratio * maxScroll));
+      }
+    }
+
+    // If hovering below the last item in the list
+    if (listScrollRef.current && book.chapters.length > 0) {
+      const lastItem = listScrollRef.current.querySelector('.chapter-item:last-of-type');
+      if (lastItem) {
+        const lastRect = lastItem.getBoundingClientRect();
+        if (e.clientY > lastRect.bottom) {
+          const lastChapter = book.chapters[book.chapters.length - 1];
+          if (lastChapter.id !== draggedChapterId) {
+            if (dropTargetId !== lastChapter.id || dropPosition !== 'after') {
+              setDropTargetId(lastChapter.id);
+              setDropPosition('after');
+            }
+          }
+        }
+      }
+    }
+  };
+
+  const handleContainerDragLeave = (e: React.DragEvent) => {
+    e.stopPropagation();
+    if (listScrollRef.current && !listScrollRef.current.contains(e.relatedTarget as Node)) {
+      setDropTargetId(null);
+      setDropPosition(null);
+    }
+  };
+
+  const handleContainerDrop = (e: React.DragEvent) => {
+    if (!draggedChapterId) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (listScrollRef.current && book.chapters.length > 0) {
+      const lastItem = listScrollRef.current.querySelector('.chapter-item:last-of-type');
+      if (lastItem) {
+        const lastRect = lastItem.getBoundingClientRect();
+        if (e.clientY > lastRect.bottom) {
+          const fromIndex = book.chapters.findIndex(c => c.id === draggedChapterId);
+          const lastIndex = book.chapters.length - 1;
+          if (fromIndex !== -1 && fromIndex !== lastIndex) {
+            reorderChapters(fromIndex, lastIndex);
+          }
+        }
+      }
+    }
+
+    resetDragState();
+  };
+
   const menuChapter = menuChapterId ? book.chapters.find(c => c.id === menuChapterId) : null;
   const menuIndex = menuChapterId ? book.chapters.findIndex(c => c.id === menuChapterId) : -1;
 
@@ -237,7 +426,13 @@ export const ChapterList: React.FC = () => {
       </div>
 
       {/* Chapter List Scrollable Binder */}
-      <div className="chapter-list-scroll">
+      <div
+        ref={listScrollRef}
+        className="chapter-list-scroll"
+        onDragOver={handleContainerDragOver}
+        onDragLeave={handleContainerDragLeave}
+        onDrop={handleContainerDrop}
+      >
         {filteredChapters.length === 0 ? (
           <div className="sidebar-empty-search">
             <p>{searchQuery ? `"${searchQuery}"` : t('sidebar.noChapters')}</p>
@@ -255,6 +450,8 @@ export const ChapterList: React.FC = () => {
             const isActive = chapter.id === activeChapterId;
             const isEditing = editingChapterId === chapter.id;
             const isMenuOpen = menuChapterId === chapter.id;
+            const isDragging = draggedChapterId === chapter.id;
+            const isDropTarget = dropTargetId === chapter.id;
 
             // Formatted 2-digit index (01, 02, etc.)
             const displayIndex = String(originalIndex + 1).padStart(2, '0');
@@ -263,13 +460,38 @@ export const ChapterList: React.FC = () => {
               <div
                 key={chapter.id}
                 ref={isActive ? activeItemRef : undefined}
-                className={`chapter-item ${isActive ? 'active' : ''} ${isMenuOpen ? 'menu-open' : ''}`}
+                className={`chapter-item ${isActive ? 'active' : ''} ${isMenuOpen ? 'menu-open' : ''} ${isDragging ? 'is-dragging' : ''} ${isReorderingAllowed ? 'reorderable' : ''}`}
+                draggable={isReorderingAllowed}
+                onDragStart={e => handleDragStart(chapter.id, e)}
+                onDragOver={e => handleDragOverItem(chapter.id, originalIndex, e)}
+                onDrop={e => handleDropOnItem(chapter.id, originalIndex, e)}
+                onDragEnd={handleDragEnd}
                 onClick={() => setActiveChapterId(chapter.id)}
                 onDoubleClick={e => !isEditing && startRenaming(chapter.id, chapter.title, e)}
                 onContextMenu={e => !isEditing && handleContextMenu(chapter.id, e)}
               >
+                {isDropTarget && dropPosition && (
+                  <div
+                    className={`chapter-drop-indicator ${dropPosition}`}
+                    aria-hidden="true"
+                  />
+                )}
+
                 <div className="chapter-item-left">
-                  <span className="chapter-num">{displayIndex}</span>
+                  <div
+                    className="chapter-num-slot"
+                    title={isReorderingAllowed ? t('sidebar.reorder') : undefined}
+                  >
+                    <span className="chapter-num">{displayIndex}</span>
+                    {isReorderingAllowed && (
+                      <span
+                        className="chapter-drag-handle"
+                        aria-label={t('sidebar.reorder')}
+                      >
+                        <GripVertical size={13} />
+                      </span>
+                    )}
+                  </div>
                   {isActive && isAudioActive && isPlaying ? (
                     <Music2
                       size={14}
@@ -289,12 +511,14 @@ export const ChapterList: React.FC = () => {
                     <form
                       onSubmit={e => saveRename(chapter.id, e)}
                       onClick={e => e.stopPropagation()}
+                      onMouseDown={e => e.stopPropagation()}
                       style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: 1 }}
                     >
                       <input
                         type="text"
                         value={editTitle}
                         onChange={e => setEditTitle(e.target.value)}
+                        onMouseDown={e => e.stopPropagation()}
                         autoFocus
                         className="form-input"
                         style={{ padding: '0.2rem 0.4rem', fontSize: '0.8rem', height: '26px' }}
@@ -332,6 +556,8 @@ export const ChapterList: React.FC = () => {
                     <button
                       className={`btn-icon btn-sm chapter-more-btn ${isMenuOpen ? 'active' : ''}`}
                       onClick={e => openMenuForButton(chapter.id, e)}
+                      onMouseDown={e => e.stopPropagation()}
+                      draggable={false}
                       title={t('sidebar.chapterActions')}
                       aria-label={t('sidebar.chapterActions')}
                     >

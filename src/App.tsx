@@ -135,19 +135,30 @@ const AppContent: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [book, saveProject, isSaving, showNotification, toggleSidebar, openSettings, setIsSnapshotsModalOpen]);
 
+  const isExternalFileDrag = (e: React.DragEvent) => {
+    const types = e.dataTransfer?.types;
+    if (!types) return false;
+    const typeList = Array.from(types);
+    return typeList.includes('Files') && !typeList.includes('application/x-chronicle-chapter');
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
+    if (!isExternalFileDrag(e)) return;
     e.preventDefault();
     setIsDraggingOver(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDraggingOver(false);
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDraggingOver(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDraggingOver(false);
+    if (!isExternalFileDrag(e)) return;
     const file = e.dataTransfer.files?.[0];
     if (file) {
       const lower = file.name.toLowerCase();
