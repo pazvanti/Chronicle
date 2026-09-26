@@ -133,7 +133,7 @@ export const GhostHud: React.FC = () => {
       {/* Chapter Dropdown Popover (Floating above HUD) */}
       {isChapterMenuOpen && (
         <div
-          className="ghost-chapter-popover"
+          className="ghost-hud-chapter-menu"
           onMouseEnter={clearMenuCloseTimer}
           onMouseLeave={() => {
             clearMenuCloseTimer();
@@ -143,44 +143,65 @@ export const GhostHud: React.FC = () => {
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Popover Header with Search */}
-          <div className="ghost-chapter-header">
-            <div className="ghost-chapter-search-box">
-              <Search size={13} className="ghost-chapter-search-icon" />
-              <input
-                type="text"
-                className="ghost-chapter-search-input"
-                placeholder={t('zen.searchChapters')}
-                value={chapterSearch}
-                onChange={(e) => setChapterSearch(e.target.value)}
-                autoFocus
-              />
-              {chapterSearch && (
-                <button
-                  type="button"
-                  className="ghost-chapter-search-clear"
-                  onClick={() => setChapterSearch('')}
-                >
-                  <X size={12} />
-                </button>
-              )}
+          {/* Popover Header with Title and Count */}
+          <div className="ghost-chapter-menu-header">
+            <div className="ghost-chapter-menu-header-title">
+              <BookOpen size={13} />
+              <span>{t('sidebar.chapters')}</span>
             </div>
+            <span className="ghost-chapter-menu-count">
+              {book.chapters.length}
+            </span>
+          </div>
+
+          {/* Search Box */}
+          <div className="ghost-chapter-search-wrap">
+            <Search size={13} className="ghost-search-icon" />
+            <input
+              type="text"
+              className="ghost-chapter-search-input"
+              placeholder={t('zen.searchChapters')}
+              value={chapterSearch}
+              onChange={(e) => setChapterSearch(e.target.value)}
+              autoFocus
+            />
+            {chapterSearch && (
+              <button
+                type="button"
+                className="ghost-search-clear"
+                onClick={() => setChapterSearch('')}
+                title={t('sidebar.clearSearch')}
+              >
+                <X size={12} />
+              </button>
+            )}
           </div>
 
           {/* Chapters Scrollable List */}
-          <div className="ghost-chapter-list">
+          <div className="ghost-chapter-menu-list">
             {filteredChapters.length === 0 ? (
-              <div className="ghost-chapter-empty">
+              <div
+                className="ghost-chapter-empty"
+                style={{
+                  padding: '12px',
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  fontSize: '0.76rem',
+                }}
+              >
                 {t('zen.noChaptersFound')}
               </div>
             ) : (
               filteredChapters.map((ch, index) => {
                 const isActive = ch.id === activeChapter?.id;
+                const parentFolder = ch.folderId ? book.folders?.find(f => f.id === ch.folderId) : null;
+                const displayNum = String(index + 1).padStart(2, '0');
+
                 return (
                   <button
                     key={ch.id}
                     type="button"
-                    className={`ghost-chapter-item ${isActive ? 'active' : ''}`}
+                    className={`ghost-chapter-menu-item ${isActive ? 'active' : ''}`}
                     onClick={() => {
                       setActiveChapterId(ch.id);
                       setIsChapterMenuOpen(false);
@@ -188,8 +209,13 @@ export const GhostHud: React.FC = () => {
                     }}
                   >
                     <div className="ghost-chapter-item-left">
-                      <span className="ghost-chapter-number">{index + 1}.</span>
-                      <span className="ghost-chapter-item-title">
+                      <span className="ghost-chapter-number">{displayNum}.</span>
+                      <span className="ghost-chapter-item-title" title={ch.title}>
+                        {parentFolder && (
+                          <span className="ghost-chapter-folder-tag">
+                            {parentFolder.name}
+                          </span>
+                        )}
                         {ch.title || `${t('statusBar.activeChapter')} ${index + 1}`}
                       </span>
                     </div>

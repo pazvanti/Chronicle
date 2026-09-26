@@ -37,6 +37,16 @@ export interface EpubTocItem {
   children?: EpubTocItem[];
 }
 
+export interface ProjectFolder {
+  id: string;
+  name: string;
+  parentId?: string | null;
+  order: number;
+  isExpanded?: boolean;
+  color?: string;
+  itemOrder?: string[];
+}
+
 export interface EpubChapter {
   id: string; // Manifest ID
   href: string;
@@ -46,6 +56,7 @@ export interface EpubChapter {
   originalXhtml: string;
   order: number;
   wordCount: number;
+  folderId?: string | null;
 }
 
 export interface EpubAsset {
@@ -212,6 +223,7 @@ export interface StorySnapshotData {
   metadata: EpubMetadata;
   toc: EpubTocItem[];
   chapters: EpubChapter[];
+  folders?: ProjectFolder[];
   characters: CharacterProfile[];
   locations: LocationCodexEntry[];
   timelines: StoryTimeline[];
@@ -268,6 +280,7 @@ export interface EpubBook {
   manifest: Record<string, EpubManifestItem>;
   spine: EpubSpineItem[];
   chapters: EpubChapter[];
+  folders?: ProjectFolder[];
   toc: EpubTocItem[];
   tocPath?: string; // NCX path
   navPath?: string; // EPUB3 Nav path

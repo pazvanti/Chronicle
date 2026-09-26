@@ -27,6 +27,7 @@ import {
   StorySnapshot,
   StorySnapshotData,
   SnapshotRestoreOptions,
+  ProjectFolder,
 } from '../types/project';
 import { analyzeCastPresence, AnalysisProgress } from '../services/analysis/presenceAnalysisService';
 import {
@@ -42,6 +43,13 @@ import { splitChapter, splitChapterAtHeadingIndex, splitChapterAtText } from '..
 import { calculateWordCount, wrapInXhtml, restoreAssetUrls } from '../services/epub/htmlUtils';
 import { getDirectory } from '../services/epub/pathUtils';
 import { CSS_PRESETS } from '../services/epub/cssPresets';
+import {
+  buildBinderTree,
+  flattenBinderTree,
+  moveBinderItem,
+  moveItemToEndOfRoot,
+  deleteFolderFromTree,
+} from '../services/epub/binderTree';
 import { getStoredSettings, updateStoredSettings } from '../services/epub/settingsStorage';
 import {
   saveChronicleProject,
@@ -164,11 +172,24 @@ interface EpubContextType {
   autoSaveInterval: number;
   setAutoSaveInterval: (interval: number) => Promise<void>;
   lastAutoSavedAt: Date | null;
+  folders: ProjectFolder[];
+  createFolder: (name?: string, parentId?: string | null, targetIndex?: number) => string;
+  updateFolder: (folderId: string, updates: Partial<ProjectFolder>) => void;
+  deleteFolder: (folderId: string, deleteChapters?: boolean) => void;
+  toggleFolderExpanded: (folderId: string) => void;
+  reorderBinderItem: (
+    sourceId: string,
+    sourceType: 'folder' | 'chapter',
+    targetId: string,
+    targetType: 'folder' | 'chapter',
+    position: 'before' | 'after' | 'inside'
+  ) => void;
+  moveItemToRootEnd: (sourceId: string, sourceType: 'folder' | 'chapter') => void;
   updateChapterContent: (chapterId: string, newContent: string) => void;
   updateChapterTitle: (chapterId: string, newTitle: string) => void;
   reorderChapters: (fromIndex: number, toIndex: number) => void;
   deleteChapter: (chapterId: string) => void;
-  addBlankChapter: (title?: string, insertAfterChapterId?: string) => void;
+  addBlankChapter: (title?: string, insertAfterChapterId?: string, folderId?: string | null) => void;
   splitCurrentChapter: (part1: string, part2: string, newTitle: string) => void;
   splitAtHeading: (chapterId: string, headingIndex: number, newTitle?: string) => void;
   splitAtTextMarker: (chapterId: string, textMarker: string, newTitle?: string) => void;
@@ -1595,9 +1616,215 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Update spine according to new chapter order
       const newSpine = newChapters.map(c => ({ idref: c.id }));
 
-      const updatedBook = {
+      const updatedBook: EpubBook = {
         ...currentBook,
         chapters: newChapters,
+        spine: newSpine,
+      };
+
+      bookRef.current = updatedBook;
+      setBook(updatedBook);
+      setIsDirty(true);
+    },
+    [setIsDirty]
+  );
+
+  const createFolder = useCallback(
+    (name?: string, parentId?: string | null, targetIndex?: number): string => {
+      const currentBook = bookRef.current;
+      if (!currentBook) return '';
+      const folderId = `folder_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const cleanName = (name || 'New Section').trim();
+      const currentFolders = currentBook.folders || [];
+
+      const newFolder: ProjectFolder = {
+        id: folderId,
+        name: cleanName,
+        parentId: parentId || null,
+        order: typeof targetIndex === 'number'
+          ? targetIndex
+          : currentFolders.filter(f => (f.parentId || null) === (parentId || null)).length,
+        isExpanded: true,
+      };
+
+      const updatedFolders = [...currentFolders, newFolder];
+      const tree = buildBinderTree(updatedFolders, currentBook.chapters);
+      const { chapters: finalChapters, folders: finalFolders } = flattenBinderTree(tree);
+
+      const updatedBook: EpubBook = {
+        ...currentBook,
+        folders: finalFolders,
+        chapters: finalChapters,
+      };
+
+      bookRef.current = updatedBook;
+      setBook(updatedBook);
+      setIsDirty(true);
+      showNotification('success', `Created folder "${cleanName}"`);
+      return folderId;
+    },
+    [setIsDirty, showNotification]
+  );
+
+  const updateFolder = useCallback(
+    (folderId: string, updates: Partial<ProjectFolder>) => {
+      const currentBook = bookRef.current;
+      if (!currentBook) return;
+      const currentFolders = currentBook.folders || [];
+      const exists = currentFolders.some(f => f.id === folderId);
+      if (!exists) return;
+
+      const updatedFolders = currentFolders.map(f =>
+        f.id === folderId ? { ...f, ...updates } : f
+      );
+
+      const updatedBook: EpubBook = {
+        ...currentBook,
+        folders: updatedFolders,
+      };
+
+      bookRef.current = updatedBook;
+      setBook(updatedBook);
+      setIsDirty(true);
+    },
+    [setIsDirty]
+  );
+
+  const deleteFolder = useCallback(
+    (folderId: string, deleteChapters: boolean = false) => {
+      const currentBook = bookRef.current;
+      if (!currentBook) return;
+      const targetFolder = (currentBook.folders || []).find(f => f.id === folderId);
+      if (!targetFolder) return;
+
+      const { updatedFolders, updatedChapters, deletedChapterIds } = deleteFolderFromTree(
+        currentBook.folders || [],
+        currentBook.chapters,
+        folderId,
+        deleteChapters
+      );
+
+      let nextActiveId = activeChapterId;
+      if (deletedChapterIds.includes(activeChapterId || '')) {
+        nextActiveId = updatedChapters[0]?.id || null;
+        setActiveChapterId(nextActiveId);
+      }
+
+      let updatedSpine = currentBook.spine;
+      let updatedManifest = currentBook.manifest;
+      let updatedToc = currentBook.toc;
+      let updatedComments = currentBook.writerData?.comments || [];
+
+      if (deletedChapterIds.length > 0) {
+        const deletedSet = new Set(deletedChapterIds);
+        updatedSpine = currentBook.spine.filter(s => !deletedSet.has(s.idref));
+        updatedManifest = { ...currentBook.manifest };
+        deletedChapterIds.forEach(id => {
+          delete updatedManifest[id];
+        });
+        function removeDeletedFromToc(items: EpubTocItem[]): EpubTocItem[] {
+          return items
+            .filter(i => !deletedSet.has(i.chapterId || '') && !deletedSet.has(i.id))
+            .map(i => ({
+              ...i,
+              children: i.children ? removeDeletedFromToc(i.children) : undefined,
+            }));
+        }
+        updatedToc = removeDeletedFromToc(currentBook.toc);
+        updatedComments = updatedComments.filter(c => !deletedSet.has(c.chapterId));
+      }
+
+      const updatedBook: EpubBook = {
+        ...currentBook,
+        folders: updatedFolders,
+        chapters: updatedChapters,
+        spine: updatedSpine,
+        manifest: updatedManifest,
+        toc: updatedToc,
+        writerData: {
+          ...currentBook.writerData,
+          comments: updatedComments,
+        },
+      };
+
+      bookRef.current = updatedBook;
+      setBook(updatedBook);
+      setIsDirty(true);
+      showNotification('info', `Deleted folder "${targetFolder.name}"`);
+    },
+    [activeChapterId, setIsDirty, showNotification]
+  );
+
+  const toggleFolderExpanded = useCallback((folderId: string) => {
+    const currentBook = bookRef.current;
+    if (!currentBook) return;
+    const currentFolders = currentBook.folders || [];
+    const updatedFolders = currentFolders.map(f =>
+      f.id === folderId ? { ...f, isExpanded: f.isExpanded === false } : f
+    );
+    const updatedBook: EpubBook = {
+      ...currentBook,
+      folders: updatedFolders,
+    };
+    bookRef.current = updatedBook;
+    setBook(updatedBook);
+  }, []);
+
+  const reorderBinderItem = useCallback(
+    (
+      sourceId: string,
+      sourceType: 'folder' | 'chapter',
+      targetId: string,
+      targetType: 'folder' | 'chapter',
+      position: 'before' | 'after' | 'inside'
+    ) => {
+      const currentBook = bookRef.current;
+      if (!currentBook) return;
+
+      const { updatedFolders, updatedChapters } = moveBinderItem(
+        currentBook.folders || [],
+        currentBook.chapters,
+        sourceId,
+        sourceType,
+        targetId,
+        targetType,
+        position
+      );
+
+      const newSpine = updatedChapters.map(c => ({ idref: c.id }));
+
+      const updatedBook: EpubBook = {
+        ...currentBook,
+        folders: updatedFolders,
+        chapters: updatedChapters,
+        spine: newSpine,
+      };
+
+      bookRef.current = updatedBook;
+      setBook(updatedBook);
+      setIsDirty(true);
+    },
+    [setIsDirty]
+  );
+
+  const moveItemToRootEnd = useCallback(
+    (sourceId: string, sourceType: 'folder' | 'chapter') => {
+      const currentBook = bookRef.current;
+      if (!currentBook) return;
+
+      const { updatedFolders, updatedChapters } = moveItemToEndOfRoot(
+        currentBook.folders || [],
+        currentBook.chapters,
+        sourceId,
+        sourceType
+      );
+
+      const newSpine = updatedChapters.map(c => ({ idref: c.id }));
+
+      const updatedBook: EpubBook = {
+        ...currentBook,
+        folders: updatedFolders,
+        chapters: updatedChapters,
         spine: newSpine,
       };
 
@@ -1666,19 +1893,28 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 
   const addBlankChapter = useCallback(
-    (title: string = 'New Chapter', insertAfterChapterId?: string) => {
-      if (!book) return;
+    (title: string = 'New Chapter', insertAfterChapterId?: string, folderId?: string | null) => {
+      const currentBook = bookRef.current;
+      if (!currentBook) return;
       const timestamp = Date.now().toString(36);
       const newId = `chapter_${timestamp}`;
-      const baseDir = book.chapters[0] ? getDirectory(book.chapters[0].href) : 'Text/';
-      const ext = book.chapters[0]?.href.endsWith('.html') ? '.html' : '.xhtml';
+      const baseDir = currentBook.chapters[0] ? getDirectory(currentBook.chapters[0].href) : 'Text/';
+      const ext = currentBook.chapters[0]?.href.endsWith('.html') ? '.html' : '.xhtml';
       const newHref = `${baseDir}chapter_${timestamp}${ext}`;
-      const newFullPath = book.chapters[0]
-        ? `${getDirectory(book.chapters[0].fullPath)}chapter_${timestamp}${ext}`
+      const newFullPath = currentBook.chapters[0]
+        ? `${getDirectory(currentBook.chapters[0].fullPath)}chapter_${timestamp}${ext}`
         : `OEBPS/${newHref}`;
 
       const initialContent = `<h1>${title}</h1>\n<p>Write or paste your chapter text here...</p>`;
       const fullXhtml = wrapInXhtml(initialContent, title);
+
+      let targetFolderId: string | null = null;
+      if (folderId !== undefined) {
+        targetFolderId = folderId;
+      } else if (insertAfterChapterId) {
+        const prevCh = currentBook.chapters.find(c => c.id === insertAfterChapterId);
+        targetFolderId = prevCh?.folderId || null;
+      }
 
       const newChapter: EpubChapter = {
         id: newId,
@@ -1687,8 +1923,9 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         title,
         content: initialContent,
         originalXhtml: fullXhtml,
-        order: book.chapters.length,
+        order: currentBook.chapters.length,
         wordCount: calculateWordCount(initialContent),
+        folderId: targetFolderId,
       };
 
       const newManifestItem: EpubManifestItem = {
@@ -1698,19 +1935,19 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         mediaType: 'application/xhtml+xml',
       };
 
-      let insertIdx = book.chapters.length;
+      let insertIdx = currentBook.chapters.length;
       if (insertAfterChapterId) {
-        const foundIdx = book.chapters.findIndex(c => c.id === insertAfterChapterId);
+        const foundIdx = currentBook.chapters.findIndex(c => c.id === insertAfterChapterId);
         if (foundIdx !== -1) insertIdx = foundIdx + 1;
       }
 
-      const updatedChapters = [...book.chapters];
+      const updatedChapters = [...currentBook.chapters];
       updatedChapters.splice(insertIdx, 0, newChapter);
       updatedChapters.forEach((c, i) => {
         c.order = i;
       });
 
-      const updatedSpine = [...book.spine];
+      const updatedSpine = [...currentBook.spine];
       updatedSpine.splice(insertIdx, 0, { idref: newId });
 
       const newTocItem: EpubTocItem = {
@@ -1721,23 +1958,22 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         level: 1,
       };
 
-      setBook(prev =>
-        prev
-          ? {
-            ...prev,
-            chapters: updatedChapters,
-            spine: updatedSpine,
-            manifest: { ...prev.manifest, [newId]: newManifestItem },
-            toc: [...prev.toc, newTocItem],
-          }
-          : null
-      );
+      const updatedBook: EpubBook = {
+        ...currentBook,
+        chapters: updatedChapters,
+        spine: updatedSpine,
+        manifest: { ...currentBook.manifest, [newId]: newManifestItem },
+        toc: [...currentBook.toc, newTocItem],
+      };
+
+      bookRef.current = updatedBook;
+      setBook(updatedBook);
 
       setActiveChapterId(newId);
       setIsDirty(true);
       showNotification('success', `Created new chapter "${title}"`);
     },
-    [book, setIsDirty, showNotification]
+    [setIsDirty, showNotification]
   );
 
   const splitCurrentChapter = useCallback(
@@ -3098,6 +3334,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         metadata: JSON.parse(JSON.stringify(currentBook.metadata)),
         toc: JSON.parse(JSON.stringify(currentBook.toc)),
         chapters: JSON.parse(JSON.stringify(currentBook.chapters)),
+        folders: JSON.parse(JSON.stringify(currentBook.folders || [])),
         characters: JSON.parse(JSON.stringify(currentBook.writerData?.characters || [])),
         locations: JSON.parse(JSON.stringify(currentBook.writerData?.locations || [])),
         timelines: JSON.parse(JSON.stringify(currentBook.writerData?.timelines || [])),
@@ -3263,6 +3500,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           nextSpine = nextChapters.map((c: EpubChapter) => ({ idref: c.id }));
           restoredItemLabels.push('Chapters');
         }
+      }
+
+      // Folders
+      let nextFolders = currentBook.folders;
+      if (restoreChapters && target.data.folders) {
+        nextFolders = JSON.parse(JSON.stringify(target.data.folders));
       }
 
       // 2. Metadata
@@ -3436,6 +3679,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         metadata: nextMetadata,
         toc: nextToc,
         chapters: nextChapters,
+        folders: nextFolders,
         spine: nextSpine,
         writerData: {
           ...currentBook.writerData,
@@ -3577,6 +3821,13 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         checkForUpdatesManually,
         pendingUnsavedAction,
         setPendingUnsavedAction,
+        folders: book?.folders || [],
+        createFolder,
+        updateFolder,
+        deleteFolder,
+        toggleFolderExpanded,
+        reorderBinderItem,
+        moveItemToRootEnd,
         updateChapterContent,
         updateChapterTitle,
         reorderChapters,
