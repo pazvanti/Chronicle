@@ -1,6 +1,6 @@
 [package]
 name = "chronicle"
-version = "1.5.1"
+version = "1.6.0"
 description = "Chronicle - Authoring Suite"
 authors = ["Chronicle Team"]
 license = "AGPL-3.0-or-later"
