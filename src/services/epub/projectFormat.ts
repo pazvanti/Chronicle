@@ -18,6 +18,7 @@ import {
   LocationFeatureItem,
   AuthorComment,
   StorySnapshot,
+  ProjectFolder,
 } from '../../types/project';
 
 export const CHRONICLE_PROJECT_EXTENSION = '.chronicle';
@@ -27,9 +28,11 @@ export const CHRONICLE_PROJECT_MIME = 'application/x-chronicle+zip';
 export const STUDIO_PROJECT_EXTENSION = CHRONICLE_PROJECT_EXTENSION;
 export const STUDIO_PROJECT_MIME = CHRONICLE_PROJECT_MIME;
 
+export type ProjectFormatVersion = '1.0.0' | '1.1.0';
+
 export interface ChronicleProjectManifest {
   format: 'chronicle';
-  formatVersion: '1.0.0';
+  formatVersion: ProjectFormatVersion;
   app: string;
   appVersion: string;
   createdAt: string;
@@ -44,6 +47,7 @@ export interface ChronicleProjectManifest {
   coverMediaType?: string;
   navPath?: string;
   tocPath?: string;
+  foldersCount?: number;
 }
 
 export type StudioProjectManifest = ChronicleProjectManifest;
@@ -68,9 +72,10 @@ export async function saveChronicleProject(book: EpubBook): Promise<Blob> {
   const zip = new JSZip();
 
   // 1. Master project manifest
+  const folders = book.folders || [];
   const projectManifest: ChronicleProjectManifest = {
     format: 'chronicle',
-    formatVersion: '1.0.0',
+    formatVersion: '1.1.0',
     app: 'Chronicle',
     appVersion: CURRENT_VERSION,
     createdAt: new Date().toISOString(),
@@ -85,6 +90,7 @@ export async function saveChronicleProject(book: EpubBook): Promise<Blob> {
     coverMediaType: book.coverMediaType,
     navPath: book.navPath || undefined,
     tocPath: book.tocPath || undefined,
+    foldersCount: folders.length,
   };
 
   zip.file('project.json', JSON.stringify(projectManifest, null, 2));
@@ -99,7 +105,7 @@ export async function saveChronicleProject(book: EpubBook): Promise<Blob> {
   zip.file('manifest.json', JSON.stringify(book.manifest, null, 2));
   zip.file('spine.json', JSON.stringify(book.spine, null, 2));
 
-  // 5. Chapters (content, original xhtml, word count, and ordering)
+  // 5. Chapters (content, original xhtml, word count, ordering, and folderId)
   const chaptersFolder = zip.folder('chapters');
   book.chapters.forEach(chapter => {
     chaptersFolder?.file(
@@ -114,12 +120,18 @@ export async function saveChronicleProject(book: EpubBook): Promise<Blob> {
           wordCount: chapter.wordCount,
           content: chapter.content,
           originalXhtml: chapter.originalXhtml,
+          folderId: chapter.folderId || null,
         },
         null,
         2
       )
     );
   });
+
+  // 5b. Folders & Binder hierarchy structure (v1.1.0+)
+  if (folders.length > 0) {
+    zip.file('folders.json', JSON.stringify(folders, null, 2));
+  }
 
   // 6. Assets (Binary media, cover, fonts, images)
   const assetsFolder = zip.folder('assets');
@@ -248,7 +260,40 @@ export async function parseChronicleProject(
   const spineFile = zip.file('spine.json');
   const spine: EpubSpineItem[] = spineFile ? JSON.parse(await spineFile.async('string')) : [];
 
-  // 4. Read Chapters
+  // 4. Read Folders (v1.1.0+ with backward compatibility for v1.0.0)
+  let folders: ProjectFolder[] = [];
+  const foldersFile = zip.file('folders.json');
+  if (foldersFile) {
+    try {
+      const foldersStr = await foldersFile.async('string');
+      const parsedFolders = JSON.parse(foldersStr);
+      if (Array.isArray(parsedFolders)) {
+        folders = parsedFolders.map((f: any, idx: number) => ({
+          id: f.id || `folder_${Date.now()}_${idx}`,
+          name: f.name || 'Untitled Section',
+          parentId: f.parentId || null,
+          order: typeof f.order === 'number' ? f.order : idx,
+          isExpanded: typeof f.isExpanded === 'boolean' ? f.isExpanded : true,
+          color: f.color || undefined,
+          itemOrder: Array.isArray(f.itemOrder) ? f.itemOrder : undefined,
+        }));
+      } else if (parsedFolders && Array.isArray(parsedFolders.folders)) {
+        folders = parsedFolders.folders.map((f: any, idx: number) => ({
+          id: f.id || `folder_${Date.now()}_${idx}`,
+          name: f.name || 'Untitled Section',
+          parentId: f.parentId || null,
+          order: typeof f.order === 'number' ? f.order : idx,
+          isExpanded: typeof f.isExpanded === 'boolean' ? f.isExpanded : true,
+          color: f.color || undefined,
+          itemOrder: Array.isArray(f.itemOrder) ? f.itemOrder : undefined,
+        }));
+      }
+    } catch (err) {
+      console.warn('Failed to parse folders.json:', err);
+    }
+  }
+
+  // 5. Read Chapters
   const chapters: EpubChapter[] = [];
   const chaptersFolder = zip.folder('chapters');
   if (chaptersFolder) {
@@ -256,12 +301,19 @@ export async function parseChronicleProject(
       path => path.startsWith('chapters/') && path.endsWith('.json')
     );
 
+    const folderIdSet = new Set(folders.map(f => f.id));
+
     for (const chPath of chapterFiles) {
       const file = zip.file(chPath);
       if (file) {
         const chStr = await file.async('string');
         const chData = JSON.parse(chStr);
-        chapters.push(chData);
+        // Normalize folderId (fallback to null for v1.0.0 or orphaned references)
+        const validFolderId = chData.folderId && folderIdSet.has(chData.folderId) ? chData.folderId : null;
+        chapters.push({
+          ...chData,
+          folderId: validFolderId,
+        });
       }
     }
     chapters.sort((a, b) => a.order - b.order);
@@ -534,6 +586,7 @@ export async function parseChronicleProject(
               metadata: raw.data.metadata || metadata,
               toc: Array.isArray(raw.data.toc) ? raw.data.toc : [],
               chapters: Array.isArray(raw.data.chapters) ? raw.data.chapters : [],
+              folders: Array.isArray(raw.data.folders) ? raw.data.folders : [],
               characters: Array.isArray(raw.data.characters) ? raw.data.characters : [],
               locations: Array.isArray(raw.data.locations) ? raw.data.locations : [],
               timelines: Array.isArray(raw.data.timelines) ? raw.data.timelines : [],
@@ -570,6 +623,7 @@ export async function parseChronicleProject(
     manifest,
     spine,
     chapters,
+    folders,
     toc,
     tocPath: project.tocPath,
     navPath: project.navPath,

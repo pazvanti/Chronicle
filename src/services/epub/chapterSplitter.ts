@@ -60,6 +60,7 @@ export function splitChapter(
     ),
     order: currentChapter.order + 1,
     wordCount: part2WordCount,
+    folderId: currentChapter.folderId || null,
   };
 
   // 1. Update Chapters array

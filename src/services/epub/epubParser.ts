@@ -275,6 +275,7 @@ export async function parseEpub(data: ArrayBuffer | Uint8Array, fileName: string
     manifest,
     spine,
     chapters,
+    folders: [],
     toc,
     tocPath,
     navPath,

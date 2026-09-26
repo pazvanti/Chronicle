@@ -212,6 +212,17 @@ export interface TranslationDictionary {
     addChapterTitle: string;
     splitChapterTitle: string;
     confirmDelete: string;
+    addFolder: string;
+    addFolderTitle: string;
+    addSubFolder: string;
+    addChapterInside: string;
+    renameFolder: string;
+    deleteFolder: string;
+    confirmDeleteFolder: string;
+    emptyFolder: string;
+    folderActions: string;
+    newFolder: string;
+    newSubFolder: string;
   };
   welcome: {
     title: string;

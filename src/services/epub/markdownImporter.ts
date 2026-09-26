@@ -833,6 +833,7 @@ export async function parseMarkdownToBook(
     manifest,
     spine,
     chapters,
+    folders: [],
     toc,
     tocPath: 'OEBPS/toc.ncx',
     navPath: 'OEBPS/nav.xhtml',
