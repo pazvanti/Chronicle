@@ -58,7 +58,8 @@ import {
 } from '../services/epub/projectFormat';
 import { isMarkdownFile, parseMarkdownToBook } from '../services/epub/markdownImporter';
 import { WebDavConfig, StorageTarget } from '../types/cloud';
-import { UiTheme } from '../types/theme';
+import { UiTheme, CustomTheme } from '../types/theme';
+import { applyActiveTheme, resolvePaletteSecondary } from '../services/theme/customThemeService';
 import { saveWebDavConfig, deleteWebDavConfig } from '../services/cloud/webdavStorage';
 import {
   loadAllSettings,
@@ -243,6 +244,11 @@ interface EpubContextType {
 
   uiTheme: UiTheme;
   setUiTheme: (theme: UiTheme) => void;
+  customThemes: CustomTheme[];
+  saveCustomTheme: (theme: CustomTheme) => void;
+  deleteCustomTheme: (id: string) => void;
+  duplicateCustomTheme: (id: string) => CustomTheme | null;
+  applyCustomTheme: (theme: CustomTheme) => void;
 
   minimalistMode: boolean;
   setMinimalistMode: (minimalist: boolean | ((prev: boolean) => boolean)) => void;
@@ -471,13 +477,68 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsSettingsOpen(false);
   }, []);
 
+  const [customThemes, setCustomThemes] = useState<CustomTheme[]>([]);
+
   const setUiTheme = useCallback((theme: UiTheme) => {
     setUiThemeState(theme);
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', theme);
-    }
+    applyActiveTheme(theme, customThemes);
     saveSetting('uiTheme', theme);
+  }, [customThemes]);
+
+  const saveCustomTheme = useCallback((theme: CustomTheme) => {
+    setCustomThemes(prev => {
+      const idx = prev.findIndex(t => t.id === theme.id);
+      let updated: CustomTheme[];
+      if (idx >= 0) {
+        updated = [...prev];
+        updated[idx] = { ...theme, updatedAt: new Date().toISOString() };
+      } else {
+        updated = [...prev, theme];
+      }
+      saveSetting('customThemes' as any, updated);
+      return updated;
+    });
   }, []);
+
+  const deleteCustomTheme = useCallback((id: string) => {
+    setCustomThemes(prev => {
+      const updated = prev.filter(t => t.id !== id);
+      saveSetting('customThemes' as any, updated);
+      return updated;
+    });
+    setUiThemeState(current => {
+      if (current === id) {
+        applyActiveTheme('classic-dark', []);
+        saveSetting('uiTheme', 'classic-dark');
+        return 'classic-dark';
+      }
+      return current;
+    });
+  }, []);
+
+  const duplicateCustomTheme = useCallback((id: string): CustomTheme | null => {
+    const source = customThemes.find(t => t.id === id);
+    if (!source) return null;
+    const copy: CustomTheme = {
+      ...source,
+      id: `custom-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      name: `${source.name} (Copy)`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    saveCustomTheme(copy);
+    return copy;
+  }, [customThemes, saveCustomTheme]);
+
+  const applyCustomTheme = useCallback((theme: CustomTheme) => {
+    saveCustomTheme(theme);
+    setUiThemeState(theme.id);
+    const updatedList = customThemes.some(t => t.id === theme.id)
+      ? customThemes.map(t => t.id === theme.id ? theme : t)
+      : [...customThemes, theme];
+    applyActiveTheme(theme.id, updatedList);
+    saveSetting('uiTheme', theme.id);
+  }, [customThemes, saveCustomTheme]);
 
   const [showWelcomeOnStartup, setShowWelcomeOnStartupState] = useState<boolean>(() => {
     try {
@@ -575,11 +636,26 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     async function initSettings() {
       try {
         const settings = await loadAllSettings();
-
-        setUiThemeState(settings.uiTheme);
-        if (typeof document !== 'undefined') {
-          document.documentElement.setAttribute('data-theme', settings.uiTheme);
+        let activeThemes = settings.customThemes || [];
+        if (settings.customThemes && Array.isArray(settings.customThemes)) {
+          const sanitizedThemes = settings.customThemes.map(theme => {
+            const effectiveSec = resolvePaletteSecondary(theme.starterId, theme.palette);
+            if (theme.palette.accentSecondary !== effectiveSec) {
+              return {
+                ...theme,
+                palette: {
+                  ...theme.palette,
+                  accentSecondary: effectiveSec,
+                },
+              };
+            }
+            return theme;
+          });
+          setCustomThemes(sanitizedThemes);
+          activeThemes = sanitizedThemes;
         }
+        setUiThemeState(settings.uiTheme);
+        applyActiveTheme(settings.uiTheme, activeThemes);
 
         const loadedMinimalist = settings.minimalistMode;
         if (typeof loadedMinimalist === 'boolean') {
@@ -3800,6 +3876,11 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLocationSidebarOpen,
         uiTheme,
         setUiTheme,
+        customThemes,
+        saveCustomTheme,
+        deleteCustomTheme,
+        duplicateCustomTheme,
+        applyCustomTheme,
         minimalistMode,
         setMinimalistMode,
         toggleMinimalistMode,

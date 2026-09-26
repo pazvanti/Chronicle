@@ -1,7 +1,35 @@
-export type UiTheme = 'classic-dark' | 'classic-light' | 'modernx-dark' | 'modernx-light' | 'glass-dark' | 'glass-light';
+export type StarterThemeId = 'classic-dark' | 'classic-light' | 'modernx-dark' | 'modernx-light' | 'glass-dark' | 'glass-light';
+
+export type UiTheme = StarterThemeId | string;
+
+export interface CustomThemePalette {
+  accentPrimary: string;
+  accentPrimaryHover?: string;
+  accentPrimaryGlow?: string;
+  accentSecondary?: string;
+  bgApp: string;
+  bgSidebar: string;
+  bgSurface: string;
+  bgSurfaceElevated: string;
+  bgInput?: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted?: string;
+  borderSubtle?: string;
+  borderMedium?: string;
+}
+
+export interface CustomTheme {
+  id: string;
+  name: string;
+  starterId: StarterThemeId;
+  palette: CustomThemePalette;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface ThemeOption {
-  id: UiTheme;
+  id: StarterThemeId;
   name: string;
   tagline: string;
   description: string;
