@@ -530,13 +530,18 @@ export const Header: React.FC = () => {
 
             {/* Smart Typography Cleanup */}
             <button
-              className="btn btn-ghost btn-sm header-btn-collapsible"
+              className="btn btn-ghost btn-sm header-btn-collapsible header-typography-btn"
               onClick={() => setIsTypographyOpen(true)}
               title={t('header.typographyTooltip')}
               disabled={isLoading || !book}
-              style={{ color: 'var(--accent-secondary)' }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                color: !book ? 'var(--text-muted)' : 'var(--accent-secondary, var(--accent-primary))',
+              }}
             >
-              <Wand2 size={14} />
+              <Wand2 size={14} style={{ color: !book ? 'inherit' : 'var(--accent-primary)' }} />
               <span>{t('headerActions.typography')}</span>
             </button>
 
@@ -728,7 +733,7 @@ export const Header: React.FC = () => {
                         width: '100%',
                       }}
                     >
-                      <FolderArchive size={14} color="var(--accent-secondary)" />
+                      <FolderArchive size={14} color="var(--accent-primary)" />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600 }}>{t('headerActions.saveAs')}</div>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
@@ -988,7 +993,7 @@ export const Header: React.FC = () => {
                         width: '100%',
                       }}
                     >
-                      <Wand2 size={15} color="var(--accent-secondary)" />
+                      <Wand2 size={15} color="var(--accent-primary)" />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600 }}>{t('headerActions.smartTypography')}</div>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('headerActions.smartTypographyDesc')}</div>

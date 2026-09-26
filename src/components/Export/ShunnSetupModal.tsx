@@ -183,7 +183,7 @@ export const ShunnSetupModal: React.FC<ShunnSetupModalProps> = ({ onClose }) => 
           {/* Section 2: Chapter & Structure Options */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.6rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>
-              <Settings size={15} color="var(--accent-secondary)" />
+              <Settings size={15} color="var(--accent-primary)" />
               <span>Chapter Separation & Layout Options</span>
             </div>
 

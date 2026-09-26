@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
-import { UI_THEMES } from '../../types/theme';
+import { UI_THEMES, StarterThemeId, CustomTheme } from '../../types/theme';
+import { ThemeCustomizerModal } from './ThemeCustomizerModal';
+import { exportCustomThemeToJson, parseCustomThemeFromJson } from '../../services/theme/customThemeService';
 import { testConnection, isTauri } from '../../services/cloud/webdavClient';
 import { WebDavConfig } from '../../types/cloud';
 import {
@@ -39,6 +41,11 @@ import {
   Save,
   Globe,
   RotateCcw,
+  Plus,
+  Edit2,
+  Copy,
+  Download,
+  Upload,
 } from 'lucide-react';
 import { ChronicleLogo } from '../Common/ChronicleLogo';
 import { markdownToHtml } from '../../services/epub/markdownImporter';
@@ -112,6 +119,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const {
     uiTheme,
     setUiTheme,
+    customThemes,
+    saveCustomTheme,
+    deleteCustomTheme,
+    duplicateCustomTheme,
     minimalistMode,
     setMinimalistMode,
     isZenMode,
@@ -143,6 +154,42 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     autoSaveInterval,
     setAutoSaveInterval,
   } = useEpub();
+
+  // Theme Studio Customizer state
+  const [isThemeStudioOpen, setIsThemeStudioOpen] = useState<boolean>(false);
+  const [studioStarterId, setStudioStarterId] = useState<StarterThemeId>('modernx-dark');
+  const [editingCustomTheme, setEditingCustomTheme] = useState<CustomTheme | null>(null);
+  const importThemeInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleOpenStudioForStarter = (starterId: StarterThemeId) => {
+    setStudioStarterId(starterId);
+    setEditingCustomTheme(null);
+    setIsThemeStudioOpen(true);
+  };
+
+  const handleOpenStudioForEdit = (theme: CustomTheme) => {
+    setStudioStarterId(theme.starterId);
+    setEditingCustomTheme(theme);
+    setIsThemeStudioOpen(true);
+  };
+
+  const handleImportThemeFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const parsed = parseCustomThemeFromJson(content);
+      if (parsed) {
+        saveCustomTheme(parsed);
+        showNotification('success', `Imported custom theme "${parsed.name}"!`);
+      } else {
+        showNotification('error', 'Invalid theme file format');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   const { t, language, setLanguage } = useTranslation();
 
@@ -980,7 +1027,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       flexShrink: 0,
                     }}
                   >
-                    {t('settings.activeBadge')}: {UI_THEMES.find(t => t.id === uiTheme)?.name || 'Classic - Dark'}
+                    {t('settings.activeBadge')}: {
+                      UI_THEMES.find(t => t.id === uiTheme)?.name ||
+                      customThemes.find(t => t.id === uiTheme)?.name ||
+                      'Classic - Dark'
+                    }
                   </span>
                 </div>
 
@@ -1096,9 +1147,300 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
                           {theme.description}
                         </p>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '4px' }}>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenStudioForStarter(theme.id);
+                            }}
+                            className="btn-secondary"
+                            style={{
+                              fontSize: '0.74rem',
+                              padding: '4px 10px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              borderRadius: '6px',
+                            }}
+                            title="Create a custom theme starting from this preset"
+                          >
+                            <Palette size={13} /> {t('settings.customizeStarterBtn')}
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
+                </div>
+
+                {/* Custom Themes Section */}
+                <div style={{ marginTop: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Sparkles size={18} color="var(--accent-primary)" />
+                        {t('settings.customThemesTitle')}
+                      </h3>
+                      <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                        {t('settings.customThemesDesc')}
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input
+                        type="file"
+                        ref={importThemeInputRef}
+                        accept=".json"
+                        style={{ display: 'none' }}
+                        onChange={handleImportThemeFile}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => importThemeInputRef.current?.click()}
+                        className="btn-secondary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', padding: '6px 12px' }}
+                      >
+                        <Upload size={13} /> {t('settings.importThemeBtn')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenStudioForStarter('modernx-dark')}
+                        className="btn-primary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', padding: '6px 14px' }}
+                      >
+                        <Plus size={14} /> {t('settings.createCustomThemeBtn')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {customThemes.length === 0 ? (
+                    <div
+                      style={{
+                        padding: '2rem 1.5rem',
+                        borderRadius: '12px',
+                        border: '1.5px dashed var(--border-medium)',
+                        backgroundColor: 'var(--bg-surface)',
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: '12px',
+                          backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                          color: 'var(--accent-primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Palette size={22} />
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-secondary)', maxWidth: '420px', lineHeight: 1.5 }}>
+                        {t('settings.noCustomThemesYet')}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenStudioForStarter('modernx-dark')}
+                        className="btn-secondary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', marginTop: '4px' }}
+                      >
+                        <Plus size={13} /> {t('settings.createCustomThemeBtn')}
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                      {customThemes.map(customTheme => {
+                        const isSelected = uiTheme === customTheme.id;
+                        const { palette, starterId } = customTheme;
+
+                        return (
+                          <div
+                            key={customTheme.id}
+                            onClick={() => setUiTheme(customTheme.id)}
+                            style={{
+                              borderRadius: '12px',
+                              border: isSelected
+                                ? '2px solid var(--accent-primary)'
+                                : '1px solid var(--border-medium)',
+                              backgroundColor: 'var(--bg-surface)',
+                              boxShadow: isSelected ? 'var(--shadow-glow)' : 'var(--shadow-sm)',
+                              cursor: 'pointer',
+                              padding: '1rem',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.75rem',
+                              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                              position: 'relative',
+                            }}
+                          >
+                            {/* Preview Mockup Card */}
+                            <div
+                              style={{
+                                height: '115px',
+                                borderRadius: '8px',
+                                backgroundColor: palette.bgApp,
+                                border: `1px solid ${palette.borderMedium || 'rgba(255,255,255,0.1)'}`,
+                                overflow: 'hidden',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
+                              }}
+                            >
+                              {/* Mini Header */}
+                              <div
+                                style={{
+                                  height: '26px',
+                                  backgroundColor: palette.bgSidebar,
+                                  borderBottom: `1px solid ${palette.borderSubtle || 'rgba(255,255,255,0.08)'}`,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  padding: '0 10px',
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                  <div style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: palette.accentPrimary }} />
+                                  <div style={{ width: 40, height: 5, borderRadius: 2, backgroundColor: palette.textPrimary, opacity: 0.6 }} />
+                                </div>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                  <div style={{ width: 16, height: 6, borderRadius: 2, backgroundColor: palette.accentPrimary }} />
+                                  <div style={{ width: 16, height: 6, borderRadius: 2, backgroundColor: palette.textSecondary, opacity: 0.2 }} />
+                                </div>
+                              </div>
+
+                              {/* Mini Workspace */}
+                              <div style={{ flex: 1, display: 'flex', padding: '8px', gap: '8px' }}>
+                                <div style={{ width: '44px', borderRadius: '4px', backgroundColor: palette.bgSidebar, padding: '5px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  <div style={{ width: '100%', height: 5, borderRadius: 2, backgroundColor: palette.accentPrimary, opacity: 0.8 }} />
+                                  <div style={{ width: '75%', height: 4, borderRadius: 2, backgroundColor: palette.textSecondary, opacity: 0.25 }} />
+                                </div>
+                                <div style={{ flex: 1, borderRadius: '4px', backgroundColor: palette.bgSurface, padding: '7px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  <div style={{ width: '45%', height: 6, borderRadius: 2, backgroundColor: palette.textPrimary, opacity: 0.8 }} />
+                                  <div style={{ width: '92%', height: 4, borderRadius: 2, backgroundColor: palette.textSecondary, opacity: 0.3 }} />
+                                  <div style={{ width: '82%', height: 4, borderRadius: 2, backgroundColor: palette.textSecondary, opacity: 0.3 }} />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Title & Badge */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span
+                                  style={{
+                                    width: 10,
+                                    height: 10,
+                                    borderRadius: '50%',
+                                    backgroundColor: palette.accentPrimary,
+                                    boxShadow: `0 0 6px ${palette.accentPrimary}`,
+                                  }}
+                                />
+                                <span style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                                  {customTheme.name}
+                                </span>
+                              </div>
+
+                              {isSelected && (
+                                <span
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    backgroundColor: 'rgba(124, 58, 237, 0.12)',
+                                    color: 'var(--accent-primary)',
+                                    padding: '2px 8px',
+                                    borderRadius: '9999px',
+                                  }}
+                                >
+                                  <Check size={11} /> {t('settings.activeBadge')}
+                                </span>
+                              )}
+                            </div>
+
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                              Based on {starterId}
+                            </div>
+
+                            {/* Custom Theme Card Actions */}
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                marginTop: 'auto',
+                                paddingTop: '4px',
+                                borderTop: '1px solid var(--border-subtle)',
+                              }}
+                              onClick={e => e.stopPropagation()}
+                            >
+                              <div style={{ display: 'flex', gap: '4px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenStudioForEdit(customTheme)}
+                                  className="btn-secondary"
+                                  style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                  title="Edit theme in Theme Studio"
+                                >
+                                  <Edit2 size={12} /> {t('settings.editThemeBtn')}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => duplicateCustomTheme(customTheme.id)}
+                                  className="btn-secondary"
+                                  style={{ padding: '4px 7px', fontSize: '0.72rem', borderRadius: '6px' }}
+                                  title="Duplicate theme"
+                                >
+                                  <Copy size={12} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const json = exportCustomThemeToJson(customTheme);
+                                    const blob = new Blob([json], { type: 'application/json' });
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `${customTheme.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-theme.json`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(url);
+                                  }}
+                                  className="btn-secondary"
+                                  style={{ padding: '4px 7px', fontSize: '0.72rem', borderRadius: '6px' }}
+                                  title="Export JSON"
+                                >
+                                  <Download size={12} />
+                                </button>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (confirm(`Delete custom theme "${customTheme.name}"?`)) {
+                                    deleteCustomTheme(customTheme.id);
+                                  }
+                                }}
+                                className="btn-secondary"
+                                style={{ padding: '4px 7px', fontSize: '0.72rem', borderRadius: '6px', color: 'var(--accent-danger)' }}
+                                title="Delete theme"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Manuscript Canvas Paper Tone Integration */}
@@ -2391,6 +2733,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         </div>
       </div>
+
+      {isThemeStudioOpen && (
+        <ThemeCustomizerModal
+          initialStarterId={studioStarterId}
+          editingTheme={editingCustomTheme}
+          onClose={() => setIsThemeStudioOpen(false)}
+        />
+      )}
     </div>
   );
 };

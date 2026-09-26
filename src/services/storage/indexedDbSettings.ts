@@ -1,10 +1,12 @@
-import { UiTheme } from '../../types/theme';
+import { UiTheme, CustomTheme } from '../../types/theme';
 import { WebDavConfig } from '../../types/cloud';
 import { AppViewMode, EditorSubMode, ReaderTheme, ReaderFont, CustomPaperTone, DEFAULT_CUSTOM_PAPER_TONE } from '../../types/project';
 import { loadWebDavConfig as loadLegacyWebDavConfig } from '../cloud/webdavStorage';
 
 export interface ChronicleSettings {
   uiTheme: UiTheme;
+  customThemes?: CustomTheme[];
+  activeCustomThemeId?: string | null;
   webdavConfig: WebDavConfig | null;
   showWelcomeOnStartup: boolean;
   readerTheme: ReaderTheme;
@@ -62,6 +64,8 @@ export const DEFAULT_ZEN_SETTINGS: ZenModeSettings = {
 
 export const DEFAULT_CHRONICLE_SETTINGS: ChronicleSettings = {
   uiTheme: 'classic-dark',
+  customThemes: [],
+  activeCustomThemeId: null,
   webdavConfig: null,
   showWelcomeOnStartup: true,
   checkUpdatesOnStartup: true,

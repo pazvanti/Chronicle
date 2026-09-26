@@ -253,7 +253,7 @@ export const PdfSetupModal: React.FC<PdfSetupModalProps> = ({ onClose }) => {
                 fontWeight: 600,
               }}
             >
-              <Settings size={15} color="var(--accent-secondary)" />
+              <Settings size={15} color="var(--accent-primary)" />
               <span>Chapter Headings &amp; Styling</span>
             </div>
 

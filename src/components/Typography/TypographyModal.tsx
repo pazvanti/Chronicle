@@ -103,7 +103,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
                 width: '34px',
                 height: '34px',
                 borderRadius: '8px',
-                background: 'rgba(99, 102, 241, 0.15)',
+                background: 'var(--accent-primary-glow, rgba(16, 185, 129, 0.15))',
                 color: 'var(--accent-primary)',
                 display: 'flex',
                 alignItems: 'center',
@@ -289,7 +289,7 @@ export const TypographyModal: React.FC<TypographyModalProps> = ({ onClose }) => 
                 onChange={() => toggleOption('addDropCaps')}
                 style={{ accentColor: 'var(--accent-primary)' }}
               />
-              <Type size={16} color="var(--accent-secondary)" />
+              <Type size={16} color="var(--accent-primary)" />
               <div>
                 <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Chapter Drop Caps</div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Style initial letter of first paragraph</div>
