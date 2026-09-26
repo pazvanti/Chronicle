@@ -3,44 +3,34 @@
 /**
  * Chronicle Native Desktop Application Dev Server (Tauri)
  * 
- * Works cross-platform on Windows and macOS.
+ * Works cross-platform on Windows, macOS, and Linux.
  */
 
-import fs from 'fs';
-import path from 'path';
 import { spawn } from 'child_process';
 import { syncVersion } from './sync-version.js';
+import { isWindows, isLinux, ensureCargoInPath, checkLinuxPrerequisites } from './build-tauri.js';
 
 syncVersion();
-
-const platform = process.platform;
-const isWindows = platform === 'win32';
-
 
 console.log('\n========================================================');
 console.log('   Chronicle • Starting Tauri Desktop Dev Server');
 console.log('========================================================\n');
 
 // Ensure Cargo / Rust is in PATH
-const homeDir = process.env.USERPROFILE || process.env.HOME || '';
-const cargoBinCandidates = [
-  path.join(homeDir, '.cargo', 'bin'),
-  '/opt/homebrew/bin',
-  '/usr/local/bin',
-];
+ensureCargoInPath({ exitOnError: true });
 
-for (const candidate of cargoBinCandidates) {
-  if (fs.existsSync(candidate)) {
-    if (!process.env.PATH.includes(candidate)) {
-      process.env.PATH = `${candidate}${path.delimiter}${process.env.PATH}`;
-    }
+// Check Linux system dependencies if on Linux
+if (isLinux) {
+  checkLinuxPrerequisites();
+  if (!process.env.WEBKIT_DISABLE_DMABUF_RENDERER) {
+    process.env.WEBKIT_DISABLE_DMABUF_RENDERER = '1';
   }
 }
 
 const npxCmd = isWindows ? 'npx.cmd' : 'npx';
 const child = spawn(npxCmd, ['@tauri-apps/cli', 'dev'], {
   stdio: 'inherit',
-  shell: true,
+  shell: isWindows,
   env: process.env,
 });
 
