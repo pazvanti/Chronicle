@@ -461,5 +461,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
   applyTheme(initialTheme);
+
+  // --------------------------------------------------------------------------
+  // 10. Visitor OS Detection & Platform Card Highlighting
+  // --------------------------------------------------------------------------
+  (() => {
+    const userAgent = navigator.userAgent || '';
+    let visitorOS = 'web';
+    if (/Windows/i.test(userAgent)) visitorOS = 'windows';
+    else if (/Macintosh|Mac OS X/i.test(userAgent)) visitorOS = 'macos';
+    else if (/Linux/i.test(userAgent) && !/Android/i.test(userAgent)) visitorOS = 'linux';
+
+    const platformCards = document.querySelectorAll('.platform-pill-card');
+    platformCards.forEach(card => {
+      if (card.getAttribute('data-platform') === visitorOS) {
+        card.classList.add('detected-os');
+      }
+    });
+  })();
 });
 

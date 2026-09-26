@@ -40,7 +40,7 @@ const viteResult = spawnSync(
   {
     cwd: projectRoot,
     stdio: 'inherit',
-    shell: true,
+    shell: process.platform === 'win32',
   }
 );
 

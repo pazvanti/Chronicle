@@ -5,7 +5,7 @@
  * 
  * Compiles BOTH:
  * 1. The in-browser Web Studio into docs/app/
- * 2. The Native Desktop Executables (Windows or macOS) into docs/downloads/
+ * 2. The Native Desktop Executables (Windows, macOS, or Linux) into docs/downloads/
  * 3. Ensures docs/.nojekyll and validates all presentation files.
  */
 
@@ -33,6 +33,7 @@ if (nodeMajor < 18) {
 
 const isWindows = process.platform === 'win32';
 const isMac = process.platform === 'darwin';
+const isLinux = process.platform === 'linux';
 
 // Step 1: Build the in-browser Web App into docs/app/
 console.log('==> [1/4] Building In-Browser Web Application into docs/app/ ...');
@@ -45,7 +46,7 @@ const webBuildResult = spawnSync(
   {
     cwd: projectRoot,
     stdio: 'inherit',
-    shell: true,
+    shell: isWindows,
   }
 );
 

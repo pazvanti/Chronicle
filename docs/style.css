@@ -67,7 +67,9 @@
   --container-narrow: 920px;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -144,8 +146,13 @@ body {
 }
 
 @keyframes floatOrb {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(-40px, 50px) scale(1.1); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(-40px, 50px) scale(1.1);
+  }
 }
 
 /* Container */
@@ -507,8 +514,13 @@ body {
 }
 
 @keyframes floatBadge {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-8px); }
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-8px);
+  }
 }
 
 @media (max-width: 1024px) {
@@ -548,9 +560,20 @@ body {
   border-radius: 50%;
 }
 
-.dot-close { background: #e06c75; opacity: 0.85; }
-.dot-min { background: #e5c07b; opacity: 0.85; }
-.dot-max { background: #98c379; opacity: 0.85; }
+.dot-close {
+  background: #e06c75;
+  opacity: 0.85;
+}
+
+.dot-min {
+  background: #e5c07b;
+  opacity: 0.85;
+}
+
+.dot-max {
+  background: #98c379;
+  opacity: 0.85;
+}
 
 .folio-title {
   font-family: var(--font-serif-title);
@@ -768,8 +791,15 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .showcase-grid {
@@ -949,8 +979,15 @@ body {
 }
 
 @keyframes pinPulse {
-  0% { transform: scale(1); opacity: 0.9; }
-  100% { transform: scale(1.7); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
 }
 
 .hotspot-tooltip {
@@ -1151,12 +1188,40 @@ body {
   border: 1px solid var(--border-starlight);
 }
 
-.swatch-classic-dark { background: #080a10; color: #fae19c; border-color: rgba(230, 190, 117, 0.4); }
-.swatch-classic-light { background: #f8f8f7; color: #18181b; border-color: #d1d1cd; }
-.swatch-modern-dark { background: #0c0e14; color: #f7f4ec; }
-.swatch-modern-light { background: #f8fafc; color: #0f172a; border-color: #cbd5e1; }
-.swatch-glass-dark { background: rgba(15, 23, 42, 0.85); color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); }
-.swatch-glass-light { background: rgba(255, 255, 255, 0.85); color: #0284c7; border-color: rgba(2, 132, 199, 0.3); }
+.swatch-classic-dark {
+  background: #080a10;
+  color: #fae19c;
+  border-color: rgba(230, 190, 117, 0.4);
+}
+
+.swatch-classic-light {
+  background: #f8f8f7;
+  color: #18181b;
+  border-color: #d1d1cd;
+}
+
+.swatch-modern-dark {
+  background: #0c0e14;
+  color: #f7f4ec;
+}
+
+.swatch-modern-light {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.swatch-glass-dark {
+  background: rgba(15, 23, 42, 0.85);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.swatch-glass-light {
+  background: rgba(255, 255, 255, 0.85);
+  color: #0284c7;
+  border-color: rgba(2, 132, 199, 0.3);
+}
 
 /* Zen Mode Preview Card in Craft Grid */
 .zen-preview-card {
@@ -1795,6 +1860,7 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
 .ledger-wrap {
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-starlight);
@@ -1941,7 +2007,7 @@ body {
   display: block;
 }
 
-.faq-answer p + p {
+.faq-answer p+p {
   margin-top: 0.75rem;
 }
 
@@ -2183,8 +2249,15 @@ body {
 }
 
 @keyframes modalPop {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .lightbox-topbar {
@@ -2284,8 +2357,13 @@ body {
   border-color: var(--gold-bright);
 }
 
-.lightbox-nav-btn.prev { left: 1.5rem; }
-.lightbox-nav-btn.next { right: 1.5rem; }
+.lightbox-nav-btn.prev {
+  left: 1.5rem;
+}
+
+.lightbox-nav-btn.next {
+  right: 1.5rem;
+}
 
 .lightbox-footer {
   padding: 0.85rem 1.6rem;
@@ -2306,15 +2384,19 @@ body {
     grid-template-columns: 1fr;
     gap: 2.5rem;
   }
+
   .craft-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .craft-card-span-2 {
     grid-column: span 2;
   }
+
   .craft-card-span-3 {
     grid-column: span 2;
   }
+
   .pillars-strip {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2324,31 +2406,39 @@ body {
   .nav-menu {
     display: none;
   }
+
   .hero-section {
     padding-top: 130px;
     padding-bottom: 60px;
   }
+
   .craft-grid {
     grid-template-columns: 1fr;
   }
+
   .craft-card-span-2,
   .craft-card-span-3 {
     grid-column: span 1;
   }
+
   .pillars-strip {
     grid-template-columns: 1fr;
   }
+
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
+
   .download-sanctuary-card {
     padding: 2.5rem 1.5rem;
   }
+
   .gumroad-btn-content {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .gumroad-arrow {
     margin-top: 0.5rem;
     align-self: flex-end;
@@ -2415,9 +2505,21 @@ body {
 }
 
 @keyframes pulseTabDot {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 16px #f43f5e; }
-  100% { transform: scale(0.9); opacity: 0.8; }
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+    box-shadow: 0 0 16px #f43f5e;
+  }
+
+  100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
 }
 
 .theme-tab-text {
