@@ -489,3 +489,31 @@
   caret-color: #000000 !important;
   font-weight: 500;
 }
+
+/* Classic Light Timeline Timescale Controls */
+[data-theme="classic-light"] .timeline-timescale-segmented {
+  border-radius: 4px !important;
+  background: #f0f0ee !important;
+  border: 1px solid #e5e5e2 !important;
+}
+
+[data-theme="classic-light"] .timescale-label {
+  color: #786048 !important;
+}
+
+[data-theme="classic-light"] .timescale-pill {
+  border-radius: 3px !important;
+  color: #4b4b52 !important;
+}
+
+[data-theme="classic-light"] .timescale-pill:hover {
+  color: #18181b !important;
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="classic-light"] .timescale-pill.active {
+  background: #ffffff !important;
+  color: #925b18 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}

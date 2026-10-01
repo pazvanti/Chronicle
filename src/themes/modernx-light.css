@@ -81,6 +81,14 @@
   border-color: rgba(124, 58, 237, 0.3);
 }
 
+[data-theme="modernx-light"] .brand-badge .brand-text,
+[data-theme="modernx-light"] .brand-text {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #0f172a !important;
+  color: #0f172a !important;
+}
+
 [data-theme="modernx-light"] .btn-secondary {
   background: #f1f5f9;
   color: var(--text-primary);

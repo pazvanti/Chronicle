@@ -400,6 +400,14 @@ export function injectCustomTheme(theme: CustomTheme): void {
       background: ${palette.accentPrimary} !important;
       box-shadow: 0 0 6px ${palette.accentPrimaryGlow || rgba(palette.accentPrimary, 0.6)} !important;
     }
+
+    [data-custom-theme="true"] .brand-badge .brand-text,
+    [data-custom-theme="true"] .brand-text {
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      -webkit-text-fill-color: ${palette.textPrimary} !important;
+      color: ${palette.textPrimary} !important;
+    }
   `;
 
   // 3. Update or create the <style> element in head

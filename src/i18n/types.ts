@@ -605,7 +605,9 @@ export interface TranslationDictionary {
     timescaleLabel: string;
     timescaleHours: string;
     timescaleDays: string;
+    timescaleWeeks: string;
     timescaleMonths: string;
+    timescaleYears: string;
     noEvents: string;
     eventModalTitle: string;
     eventTitleLabel: string;
