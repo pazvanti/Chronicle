@@ -92,6 +92,7 @@ docs/downloads/*
 # 6. Scratch, Temporary & Test Artifacts
 # ------------------------------------------------------------------------------
 promo_video/
+promo_video_2/
 scratch/
 temp/
 tmp/

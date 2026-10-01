@@ -79,7 +79,48 @@ export const en: TranslationDictionary = {
     tabEditor: 'Editor & Reading',
     tabGeneral: 'General & Storage',
     tabUpdates: 'Updates',
+    tabHelpChronicle: 'Help Chronicle',
     updateAvailable: 'Update Available',
+
+    // Help Chronicle
+    helpChronicleTitle: 'Help Chronicle Grow',
+    helpChronicleDesc: 'Support independent craft software for authors. Share, review, star, or donate to keep Chronicle 100% free and open-source.',
+    helpChronicleBadge: 'Support',
+    helpBannerTitle: 'Every Star, Review & Donation Keeps Chronicle Thriving',
+    helpBannerSubtitle: 'Chronicle is an independent, distraction-free literary atelier built for authors. We rely on community passion rather than corporate venture capital.',
+    helpBadgeOpenSource: '100% Free & Open-Source (AGPL-3.0)',
+    helpBadgePrivacy: 'Local-First & Private',
+    helpBadgeNoAds: 'Zero Trackers or Paywalls',
+
+    // Donate / Gumroad
+    donateCardTitle: 'Support on Gumroad',
+    donateCardDesc: 'Chronicle is completely free to download and use. If Chronicle elevates your writing journey, consider leaving a tip to help fund ongoing development and server costs.',
+    donateCardButton: 'Donate on Gumroad',
+    donateBadge: 'Pay What You Want',
+    donateCategory: 'Financial Support',
+
+    // AlternativeTo
+    alternativeToCardTitle: 'Review on AlternativeTo',
+    alternativeToCardDesc: 'Recommend Chronicle to writers seeking private, offline alternatives to Scrivener, Ulysses, Dabble, and Novlr. Upvotes help new novelists discover us.',
+    alternativeToCardButton: 'Review on AlternativeTo',
+    alternativeToBadge: 'Discover Alternatives',
+    alternativeToCategory: 'Community Discovery',
+
+    // Product Hunt
+    productHuntCardTitle: 'Upvote on Product Hunt',
+    productHuntCardDesc: 'Explore our launch page on Product Hunt! Leave a comment, share your favorite features, and join the global launch discussion.',
+    productHuntCardButton: 'Upvote on Product Hunt',
+    productHuntBadge: 'Featured Launch',
+    productHuntCategory: 'Global Launchpad',
+
+    // GitHub Star
+    githubCardTitle: 'Star the Repository',
+    githubCardDesc: 'Starring our repository on GitHub is one of the highest-impact free ways to help. It boosts repository rank, attracts contributors, and showcases community trust.',
+    githubStarButton: 'Star on GitHub',
+    githubBadge: 'Open Source',
+    githubCategory: 'GitHub Community',
+    githubStarsCount: 'Stars',
+    githubStarsLoading: 'Fetching...',
 
     // Language
     languageTitle: 'Interface Language',

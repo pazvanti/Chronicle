@@ -30,7 +30,8 @@
     "tauri:build:deb": "node scripts/build-tauri.js --deb",
     "tauri:build:rpm": "node scripts/build-tauri.js --rpm",
     "version": "node scripts/sync-version.js && git add src-tauri/Cargo.toml",
-    "set-version": "node scripts/sync-version.js"
+    "set-version": "node scripts/sync-version.js",
+    "record:2k": "node promo_video_2/record_2k.js"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",

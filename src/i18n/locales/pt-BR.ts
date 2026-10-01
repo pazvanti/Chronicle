@@ -79,7 +79,48 @@ export const ptBR: TranslationDictionary = {
     tabEditor: 'Editor e Leitura',
     tabGeneral: 'Geral e Armazenamento',
     tabUpdates: 'Atualizações',
+    tabHelpChronicle: 'Ajudar o Chronicle',
     updateAvailable: 'Atualização Disponível',
+
+    // Help Chronicle
+    helpChronicleTitle: 'Ajude o Chronicle a Crescer',
+    helpChronicleDesc: 'Apoie um software artesanal e independente para autores. Compartilhe, avalie, favorite ou doe para manter o Chronicle 100% gratuito e de código aberto.',
+    helpChronicleBadge: 'Apoiar',
+    helpBannerTitle: 'Cada Estrela, Avaliação e Doação Mantém o Chronicle Vivo',
+    helpBannerSubtitle: 'O Chronicle é um ateliê literário independente e focado, feito para escritores. Contamos com o carinho da comunidade em vez de capital de risco corporativo.',
+    helpBadgeOpenSource: '100% Gratuito e Código Aberto (AGPL-3.0)',
+    helpBadgePrivacy: 'Local-First e Seguro',
+    helpBadgeNoAds: 'Zero Rastreadores ou Barreiras Pagas',
+
+    // Donate / Gumroad
+    donateCardTitle: 'Apoiar no Gumroad',
+    donateCardDesc: 'O Chronicle é totalmente gratuito para baixar e usar. Se ele ajuda sua jornada de escrita, considere deixar uma contribuição voluntária para apoiar o desenvolvimento.',
+    donateCardButton: 'Doar no Gumroad',
+    donateBadge: 'Pague o Quanto Quiser',
+    donateCategory: 'Apoio Financeiro',
+
+    // AlternativeTo
+    alternativeToCardTitle: 'Avaliar no AlternativeTo',
+    alternativeToCardDesc: 'Recomende o Chronicle para autores que buscam alternativas privadas e offline ao Scrivener, Ulysses, Dabble e Novlr. Votos ajudam novos escritores a nos encontrar.',
+    alternativeToCardButton: 'Avaliar no AlternativeTo',
+    alternativeToBadge: 'Descubra Alternativas',
+    alternativeToCategory: 'Descoberta Comunitária',
+
+    // Product Hunt
+    productHuntCardTitle: 'Votar no Product Hunt',
+    productHuntCardDesc: 'Visite nossa página de lançamento no Product Hunt! Deixe um comentário, compartilhe seus recursos favoritos e participe da conversa global de lançamento.',
+    productHuntCardButton: 'Votar no Product Hunt',
+    productHuntBadge: 'Lançamento em Destaque',
+    productHuntCategory: 'Lançamento Global',
+
+    // GitHub Star
+    githubCardTitle: 'Dar Estrela no GitHub',
+    githubCardDesc: 'Dar uma estrela no repositório do GitHub é uma das melhores maneiras gratuitas de ajudar. Aumenta a visibilidade e atrai mais colaboradores.',
+    githubStarButton: 'Estrelar no GitHub',
+    githubBadge: 'Código Aberto',
+    githubCategory: 'Comunidade GitHub',
+    githubStarsCount: 'Estrelas',
+    githubStarsLoading: 'Carregando...',
 
     // Language
     languageTitle: 'Idioma da Interface',

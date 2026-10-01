@@ -79,7 +79,48 @@ export interface TranslationDictionary {
     tabEditor: string;
     tabGeneral: string;
     tabUpdates: string;
+    tabHelpChronicle: string;
     updateAvailable: string;
+
+    // Help Chronicle
+    helpChronicleTitle: string;
+    helpChronicleDesc: string;
+    helpChronicleBadge: string;
+    helpBannerTitle: string;
+    helpBannerSubtitle: string;
+    helpBadgeOpenSource: string;
+    helpBadgePrivacy: string;
+    helpBadgeNoAds: string;
+
+    // Donate / Gumroad
+    donateCardTitle: string;
+    donateCardDesc: string;
+    donateCardButton: string;
+    donateBadge: string;
+    donateCategory: string;
+
+    // AlternativeTo
+    alternativeToCardTitle: string;
+    alternativeToCardDesc: string;
+    alternativeToCardButton: string;
+    alternativeToBadge: string;
+    alternativeToCategory: string;
+
+    // Product Hunt
+    productHuntCardTitle: string;
+    productHuntCardDesc: string;
+    productHuntCardButton: string;
+    productHuntBadge: string;
+    productHuntCategory: string;
+
+    // GitHub Star
+    githubCardTitle: string;
+    githubCardDesc: string;
+    githubStarButton: string;
+    githubBadge: string;
+    githubCategory: string;
+    githubStarsCount: string;
+    githubStarsLoading: string;
 
     // Language
     languageTitle: string;

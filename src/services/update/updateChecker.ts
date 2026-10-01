@@ -2,7 +2,19 @@ import { isTauri } from '../cloud/webdavClient';
 
 export const CURRENT_VERSION = '1.6.0';
 export const GUMROAD_DOWNLOAD_URL = 'https://pazvanti.gumroad.com/l/Chronicle';
+export const GUMROAD_DONATE_URL = 'https://pazvanti.gumroad.com/l/Chronicle';
+export const ALTERNATIVETO_URL = 'https://alternativeto.net/software/chronicle--a-better-way-to-write/about/';
+export const PRODUCTHUNT_URL = 'https://www.producthunt.com/products/chronicle-the-all-in-one-novel-studio?launch=chronicle-the-all-in-one-novel-studio';
+export const GITHUB_REPO_URL = 'https://github.com/pazvanti/Chronicle';
+export const GITHUB_API_REPO_URL = 'https://api.github.com/repos/pazvanti/Chronicle';
 export const GITHUB_API_LATEST_RELEASE_URL = 'https://api.github.com/repos/pazvanti/Chronicle/releases/latest';
+
+export interface RepoStats {
+  stars: number;
+  forks: number;
+  subscribers?: number;
+  cachedAt?: number;
+}
 
 
 export interface ReleaseAsset {
@@ -179,4 +191,54 @@ export async function checkForUpdates(forceRefresh = false): Promise<UpdateCheck
     };
     return errorResult;
   }
+}
+
+const REPO_STATS_CACHE_KEY = 'chronicle_repo_stats_cache';
+const REPO_STATS_CACHE_EXPIRY = 1000 * 60 * 30; // 30 minutes
+
+/**
+ * Fetches repository metadata including live star count from GitHub API.
+ * Uses local caching to prevent rate-limit throttling.
+ */
+export async function fetchGitHubRepoStats(forceRefresh = false): Promise<RepoStats | null> {
+  if (!forceRefresh) {
+    try {
+      const cached = localStorage.getItem(REPO_STATS_CACHE_KEY);
+      if (cached) {
+        const parsed: RepoStats = JSON.parse(cached);
+        if (parsed.cachedAt && (Date.now() - parsed.cachedAt < REPO_STATS_CACHE_EXPIRY)) {
+          return parsed;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  try {
+    const data = await fetchReleaseData(GITHUB_API_REPO_URL);
+    if (data && typeof data.stargazers_count === 'number') {
+      const stats: RepoStats = {
+        stars: data.stargazers_count,
+        forks: data.forks_count ?? 0,
+        subscribers: data.subscribers_count ?? 0,
+        cachedAt: Date.now(),
+      };
+      try {
+        localStorage.setItem(REPO_STATS_CACHE_KEY, JSON.stringify(stats));
+      } catch {
+        // ignore
+      }
+      return stats;
+    }
+  } catch (err) {
+    console.warn('Failed to fetch GitHub repo stats:', err);
+    try {
+      const cached = localStorage.getItem(REPO_STATS_CACHE_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch {
+      // ignore
+    }
+  }
+  return null;
 }

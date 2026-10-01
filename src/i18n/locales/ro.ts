@@ -79,7 +79,48 @@ export const ro: TranslationDictionary = {
     tabEditor: 'Editor & Lectură',
     tabGeneral: 'General & Stocare',
     tabUpdates: 'Actualizări',
+    tabHelpChronicle: 'Ajută Chronicle',
     updateAvailable: 'Actualizare Disponibilă',
+
+    // Help Chronicle
+    helpChronicleTitle: 'Ajută Chronicle să Crească',
+    helpChronicleDesc: 'Susțineți un software independent creat cu pasiune pentru scriitori. Recomandați, lăsați o recenzie, acordați o stea sau donați pentru a păstra Chronicle 100% gratuit și open-source.',
+    helpChronicleBadge: 'Susține',
+    helpBannerTitle: 'Fiecare Stea, Recenzie și Donație Păstrează Chronicle în Florire',
+    helpBannerSubtitle: 'Chronicle este un atelier literar independent, fără distrageri, creat pentru autori. Ne bazăm pe comunitate și pasiune.',
+    helpBadgeOpenSource: '100% Gratuit și Open-Source (AGPL-3.0)',
+    helpBadgePrivacy: 'Local-First și Sigur',
+    helpBadgeNoAds: 'Fără Urmăritori sau Bariere cu Plată',
+
+    // Donate / Gumroad
+    donateCardTitle: 'Susține pe Gumroad',
+    donateCardDesc: 'Chronicle este complet gratuit pentru descărcare și utilizare. Dacă vă ajută în procesul creativ, puteți lăsa o contribuție voluntară pentru dezvoltare.',
+    donateCardButton: 'Donează pe Gumroad',
+    donateBadge: 'Plătește Cât Dorești',
+    donateCategory: 'Susținere Financiară',
+
+    // AlternativeTo
+    alternativeToCardTitle: 'Recenzie pe AlternativeTo',
+    alternativeToCardDesc: 'Recomandați Chronicle autorilor care caută alternative private și offline la Scrivener, Ulysses, Dabble și Novlr. Voturile ajută noii scriitori să ne descopere.',
+    alternativeToCardButton: 'Recenzie pe AlternativeTo',
+    alternativeToBadge: 'Descoperă Alternative',
+    alternativeToCategory: 'Descoperire Comunitate',
+
+    // Product Hunt
+    productHuntCardTitle: 'Vot pe Product Hunt',
+    productHuntCardDesc: 'Vizitați pagina noastră de lansare pe Product Hunt! Lăsați un comentariu, împărtășiți funcțiile preferate și participați la discuție.',
+    productHuntCardButton: 'Votează pe Product Hunt',
+    productHuntBadge: 'Lansare Prezentată',
+    productHuntCategory: 'Lansare Globală',
+
+    // GitHub Star
+    githubCardTitle: 'Acordă o Stea pe GitHub',
+    githubCardDesc: 'Acordarea unei stele pe GitHub este una dintre cele mai valoroase modalități gratuite de ajutor. Crește vizibilitatea și încrederea comunității.',
+    githubStarButton: 'Acordă o Stea pe GitHub',
+    githubBadge: 'Open Source',
+    githubCategory: 'Comunitate GitHub',
+    githubStarsCount: 'Stele',
+    githubStarsLoading: 'Se încarcă...',
 
     // Language
     languageTitle: 'Limbă Interfață',

@@ -263,8 +263,8 @@ interface EpubContextType {
 
   isSettingsOpen: boolean;
   setIsSettingsOpen: (open: boolean) => void;
-  settingsInitialTab: 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates';
-  openSettings: (tab?: 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates') => void;
+  settingsInitialTab: 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates' | 'helpChronicle';
+  openSettings: (tab?: 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates' | 'helpChronicle') => void;
   closeSettings: () => void;
 
   checkUpdatesOnStartup: boolean;
@@ -437,7 +437,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-  const [settingsInitialTab, setSettingsInitialTab] = useState<'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates'>('appearance');
+  const [settingsInitialTab, setSettingsInitialTab] = useState<'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates' | 'helpChronicle'>('appearance');
 
   const [checkUpdatesOnStartup, setCheckUpdatesOnStartupState] = useState<boolean>(true);
   const [isUpdateAvailable, setIsUpdateAvailable] = useState<boolean>(false);
@@ -467,7 +467,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return res;
   }, []);
 
-  const openSettings = useCallback((tab: 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates' = 'appearance') => {
+  const openSettings = useCallback((tab: 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates' | 'helpChronicle' = 'appearance') => {
     const effectiveTab = (!isTauri() && tab === 'cloud') ? 'appearance' : tab;
     setSettingsInitialTab(effectiveTab);
     setIsSettingsOpen(true);

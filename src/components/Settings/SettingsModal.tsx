@@ -46,13 +46,23 @@ import {
   Copy,
   Download,
   Upload,
+  Heart,
+  Star,
+  ThumbsUp,
+  Rocket,
 } from 'lucide-react';
 import { ChronicleLogo } from '../Common/ChronicleLogo';
 import { markdownToHtml } from '../../services/epub/markdownImporter';
 import {
   CURRENT_VERSION,
   GUMROAD_DOWNLOAD_URL,
+  GUMROAD_DONATE_URL,
+  ALTERNATIVETO_URL,
+  PRODUCTHUNT_URL,
+  GITHUB_REPO_URL,
   UpdateCheckResult,
+  RepoStats,
+  fetchGitHubRepoStats,
 } from '../../services/update/updateChecker';
 import { useTranslation } from '../../i18n/I18nContext';
 import { SupportedLanguage } from '../../i18n/types';
@@ -105,7 +115,7 @@ function computeAutoDesk(paperHex: string): string {
   return `#${toHex(dr)}${toHex(dg)}${toHex(db)}`.toUpperCase();
 }
 
-export type SettingsTab = 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates';
+export type SettingsTab = 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates' | 'helpChronicle';
 
 interface SettingsModalProps {
   initialTab?: SettingsTab;
@@ -252,6 +262,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     showNotification('info', checked ? t('notifications.checkUpdatesEnabled') : t('notifications.checkUpdatesDisabled'));
   };
 
+  // GitHub Repo Stats State for Help Chronicle section
+  const [repoStats, setRepoStats] = useState<RepoStats | null>(() => {
+    try {
+      const cached = localStorage.getItem('chronicle_repo_stats_cache');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isLoadingRepoStats, setIsLoadingRepoStats] = useState<boolean>(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchGitHubRepoStats().then(stats => {
+      if (isMounted && stats) {
+        setRepoStats(stats);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleRefreshRepoStats = async () => {
+    setIsLoadingRepoStats(true);
+    try {
+      const stats = await fetchGitHubRepoStats(true);
+      if (stats) {
+        setRepoStats(stats);
+        showNotification('info', `GitHub star count refreshed (${stats.stars} ★)`);
+      }
+    } catch {
+      showNotification('error', 'Could not refresh GitHub star count');
+    } finally {
+      setIsLoadingRepoStats(false);
+    }
+  };
+
   useEffect(() => {
     if (!isDesktop && initialTab === 'cloud') {
       setActiveTab('appearance');
@@ -379,23 +427,42 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
-  const allNavTabs: { id: SettingsTab; label: string; icon: React.ReactNode; badge?: string; badgeColor?: string }[] = [
-    { id: 'appearance', label: t('settings.tabAppearance'), icon: <Layout size={16} /> },
-    { id: 'themes', label: t('settings.tabThemes'), icon: <Palette size={16} /> },
+  const allNavTabs: {
+    id: SettingsTab;
+    label: string;
+    icon: React.ReactNode;
+    badge?: string;
+    badgeColor?: string;
+    badgeBg?: string;
+    badgeBorder?: string;
+  }[] = [
+    { id: 'appearance', label: t('settings.tabAppearance'), icon: <Layout size={16} style={{ flexShrink: 0 }} /> },
+    { id: 'themes', label: t('settings.tabThemes'), icon: <Palette size={16} style={{ flexShrink: 0 }} /> },
     {
       id: 'cloud',
       label: t('settings.tabCloud'),
-      icon: <Cloud size={16} />,
+      icon: <Cloud size={16} style={{ flexShrink: 0 }} />,
       badge: isWebDavConnected ? 'Active' : undefined,
     },
-    { id: 'editor', label: t('settings.tabEditor'), icon: <Sliders size={16} /> },
-    { id: 'general', label: t('settings.tabGeneral'), icon: <Database size={16} /> },
+    { id: 'editor', label: t('settings.tabEditor'), icon: <Sliders size={16} style={{ flexShrink: 0 }} /> },
+    { id: 'general', label: t('settings.tabGeneral'), icon: <Database size={16} style={{ flexShrink: 0 }} /> },
     {
       id: 'updates',
       label: t('settings.tabUpdates'),
-      icon: <ArrowUpCircle size={16} />,
+      icon: <ArrowUpCircle size={16} style={{ flexShrink: 0 }} />,
       badge: isUpdateAvailable ? (latestRelease?.latestVersion || 'New') : undefined,
-      badgeColor: isUpdateAvailable ? '#e6be75' : undefined,
+      badgeColor: '#e6be75',
+      badgeBg: 'rgba(230, 190, 117, 0.2)',
+      badgeBorder: '1px solid rgba(230, 190, 117, 0.35)',
+    },
+    {
+      id: 'helpChronicle',
+      label: t('settings.tabHelpChronicle'),
+      icon: <Heart size={16} style={{ color: '#f43f5e', flexShrink: 0 }} />,
+      badge: repoStats?.stars ? `★${repoStats.stars}` : '❤️',
+      badgeColor: '#f43f5e',
+      badgeBg: 'rgba(244, 63, 94, 0.15)',
+      badgeBorder: '1px solid rgba(244, 63, 94, 0.3)',
     },
   ];
 
@@ -455,7 +522,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Left Navigation Sidebar */}
           <div
             style={{
-              width: '200px',
+              width: '215px',
               borderRight: '1px solid var(--border-subtle)',
               background: 'var(--bg-card)',
               display: 'flex',
@@ -488,21 +555,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       width: '100%',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
                     }}
                   >
                     {tab.icon}
-                    <span>{tab.label}</span>
+                    <span
+                      style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        flexShrink: 1,
+                        marginRight: 'auto',
+                      }}
+                    >
+                      {tab.label}
+                    </span>
                     {tab.badge && (
                       <span
                         style={{
-                          marginLeft: 'auto',
+                          marginLeft: '0.4rem',
                           fontSize: '0.66rem',
                           fontWeight: 700,
-                          backgroundColor: tab.badgeColor ? 'rgba(230, 190, 117, 0.2)' : 'rgba(16, 185, 129, 0.15)',
+                          backgroundColor: tab.badgeBg || (tab.badgeColor ? 'rgba(230, 190, 117, 0.2)' : 'rgba(16, 185, 129, 0.15)'),
                           color: tab.badgeColor || '#10b981',
                           padding: '1px 6px',
                           borderRadius: '9999px',
-                          border: tab.badgeColor ? '1px solid rgba(230, 190, 117, 0.35)' : 'none',
+                          border: tab.badgeBorder || (tab.badgeColor ? '1px solid rgba(230, 190, 117, 0.35)' : 'none'),
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '2px',
+                          lineHeight: 1.4,
                         }}
                       >
                         {tab.badge}
@@ -2728,6 +2813,606 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     )}
                   </>
                 )}
+              </div>
+            )}
+
+            {/* ---------------- Tab 7: Help Chronicle ---------------- */}
+            {activeTab === 'helpChronicle' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.4rem' }}>
+                {/* Header Title with Live Stats Badge */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.35rem 0', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                      <span>{t('settings.helpChronicleTitle')}</span>
+                      <span
+                        style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          backgroundColor: 'rgba(244, 63, 94, 0.15)',
+                          color: '#f43f5e',
+                          border: '1px solid rgba(244, 63, 94, 0.3)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                        }}
+                      >
+                        <Heart size={10} style={{ fill: '#f43f5e' }} />
+                        <span>{t('settings.helpChronicleBadge')}</span>
+                      </span>
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                      {t('settings.helpChronicleDesc')}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={handleRefreshRepoStats}
+                    disabled={isLoadingRepoStats}
+                    title="Refresh live GitHub stats"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      fontSize: '0.76rem',
+                      padding: '0.4rem 0.75rem',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <RefreshCw size={12} className={isLoadingRepoStats ? 'animate-spin' : ''} />
+                    <span>{repoStats ? `${repoStats.stars} GitHub Stars` : t('settings.githubStarsLoading')}</span>
+                  </button>
+                </div>
+
+                {/* Hero Community Banner */}
+                <div
+                  style={{
+                    padding: '1.3rem 1.5rem',
+                    borderRadius: '14px',
+                    background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, rgba(124, 58, 237, 0.08) 50%, rgba(230, 190, 117, 0.08) 100%)',
+                    border: '1px solid var(--border-starlight)',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '1.2rem',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: '-30px',
+                      top: '-30px',
+                      width: '140px',
+                      height: '140px',
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, rgba(230, 190, 117, 0.12) 0%, transparent 70%)',
+                      pointerEvents: 'none',
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(168, 85, 247, 0.2))',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid rgba(244, 63, 94, 0.35)',
+                      color: '#f43f5e',
+                      flexShrink: 0,
+                      boxShadow: '0 4px 16px rgba(244, 63, 94, 0.18)',
+                    }}
+                  >
+                    <Heart size={26} style={{ fill: 'rgba(244, 63, 94, 0.25)' }} />
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.96rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                      {t('settings.helpBannerTitle')}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '0.75rem' }}>
+                      {t('settings.helpBannerSubtitle')}
+                    </div>
+
+                    {/* Badges Pill Row */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                          color: '#10b981',
+                          border: '1px solid rgba(16, 185, 129, 0.25)',
+                        }}
+                      >
+                        <Sparkles size={11} />
+                        <span>{t('settings.helpBadgeOpenSource')}</span>
+                      </span>
+
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          backgroundColor: 'rgba(124, 58, 237, 0.12)',
+                          color: 'var(--accent-primary)',
+                          border: '1px solid rgba(124, 58, 237, 0.25)',
+                        }}
+                      >
+                        <Database size={11} />
+                        <span>{t('settings.helpBadgePrivacy')}</span>
+                      </span>
+
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          backgroundColor: 'rgba(14, 165, 233, 0.12)',
+                          color: '#0ea5e9',
+                          border: '1px solid rgba(14, 165, 233, 0.25)',
+                        }}
+                      >
+                        <Check size={11} />
+                        <span>{t('settings.helpBadgeNoAds')}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4 Community Support Cards Grid */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                    gap: '1.1rem',
+                  }}
+                >
+                  {/* Card 1: Gumroad Donate */}
+                  <div
+                    style={{
+                      borderRadius: '14px',
+                      backgroundColor: 'var(--bg-surface)',
+                      border: '1px solid rgba(244, 63, 94, 0.22)',
+                      padding: '1.3rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.85rem',
+                      boxShadow: 'var(--shadow-sm)',
+                      transition: 'all 0.2s ease',
+                      position: 'relative',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div
+                        style={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(244, 63, 94, 0.12)',
+                          color: '#f43f5e',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Heart size={20} style={{ fill: 'rgba(244, 63, 94, 0.25)' }} />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(244, 63, 94, 0.12)',
+                            color: '#f43f5e',
+                            border: '1px solid rgba(244, 63, 94, 0.3)',
+                          }}
+                        >
+                          {t('settings.donateCategory')}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(230, 190, 117, 0.15)',
+                            color: 'var(--gold-primary)',
+                            border: '1px solid rgba(230, 190, 117, 0.35)',
+                          }}
+                        >
+                          {t('settings.donateBadge')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 style={{ margin: '0 0 0.35rem 0', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {t('settings.donateCardTitle')}
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.55, minHeight: '3.6rem' }}>
+                        {t('settings.donateCardDesc')}
+                      </p>
+                    </div>
+
+                    <a
+                      href={GUMROAD_DONATE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary"
+                      style={{
+                        marginTop: 'auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.84rem',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        background: 'linear-gradient(135deg, #e11d48, #be185d)',
+                        border: '1px solid rgba(244, 63, 94, 0.4)',
+                        color: '#fff',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      <Heart size={15} style={{ fill: '#fff' }} />
+                      <span>{t('settings.donateCardButton')}</span>
+                      <ExternalLink size={13} style={{ opacity: 0.85 }} />
+                    </a>
+                  </div>
+
+                  {/* Card 2: AlternativeTo */}
+                  <div
+                    style={{
+                      borderRadius: '14px',
+                      backgroundColor: 'var(--bg-surface)',
+                      border: '1px solid rgba(2, 132, 199, 0.22)',
+                      padding: '1.3rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.85rem',
+                      boxShadow: 'var(--shadow-sm)',
+                      transition: 'all 0.2s ease',
+                      position: 'relative',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div
+                        style={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(2, 132, 199, 0.12)',
+                          color: '#0284c7',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <ThumbsUp size={20} />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(2, 132, 199, 0.12)',
+                            color: '#0284c7',
+                            border: '1px solid rgba(2, 132, 199, 0.3)',
+                          }}
+                        >
+                          {t('settings.alternativeToCategory')}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                            color: '#10b981',
+                            border: '1px solid rgba(16, 185, 129, 0.3)',
+                          }}
+                        >
+                          {t('settings.alternativeToBadge')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 style={{ margin: '0 0 0.35rem 0', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {t('settings.alternativeToCardTitle')}
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.55, minHeight: '3.6rem' }}>
+                        {t('settings.alternativeToCardDesc')}
+                      </p>
+                    </div>
+
+                    <a
+                      href={ALTERNATIVETO_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary"
+                      style={{
+                        marginTop: 'auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.84rem',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                        borderColor: 'rgba(2, 132, 199, 0.3)',
+                      }}
+                    >
+                      <ThumbsUp size={15} style={{ color: '#0284c7' }} />
+                      <span>{t('settings.alternativeToCardButton')}</span>
+                      <ExternalLink size={13} style={{ opacity: 0.85 }} />
+                    </a>
+                  </div>
+
+                  {/* Card 3: Product Hunt */}
+                  <div
+                    style={{
+                      borderRadius: '14px',
+                      backgroundColor: 'var(--bg-surface)',
+                      border: '1px solid rgba(234, 88, 12, 0.22)',
+                      padding: '1.3rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.85rem',
+                      boxShadow: 'var(--shadow-sm)',
+                      transition: 'all 0.2s ease',
+                      position: 'relative',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div
+                        style={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(234, 88, 12, 0.12)',
+                          color: '#ea580c',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Rocket size={20} />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(234, 88, 12, 0.12)',
+                            color: '#ea580c',
+                            border: '1px solid rgba(234, 88, 12, 0.3)',
+                          }}
+                        >
+                          {t('settings.productHuntCategory')}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                            color: '#f59e0b',
+                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                          }}
+                        >
+                          {t('settings.productHuntBadge')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 style={{ margin: '0 0 0.35rem 0', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {t('settings.productHuntCardTitle')}
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.55, minHeight: '3.6rem' }}>
+                        {t('settings.productHuntCardDesc')}
+                      </p>
+                    </div>
+
+                    <a
+                      href={PRODUCTHUNT_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary"
+                      style={{
+                        marginTop: 'auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.84rem',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                        borderColor: 'rgba(234, 88, 12, 0.3)',
+                      }}
+                    >
+                      <Rocket size={15} style={{ color: '#ea580c' }} />
+                      <span>{t('settings.productHuntCardButton')}</span>
+                      <ExternalLink size={13} style={{ opacity: 0.85 }} />
+                    </a>
+                  </div>
+
+                  {/* Card 4: Star GitHub */}
+                  <div
+                    style={{
+                      borderRadius: '14px',
+                      backgroundColor: 'var(--bg-surface)',
+                      border: '1px solid rgba(230, 190, 117, 0.3)',
+                      padding: '1.3rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.85rem',
+                      boxShadow: 'var(--shadow-sm)',
+                      transition: 'all 0.2s ease',
+                      position: 'relative',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div
+                        style={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(230, 190, 117, 0.15)',
+                          color: 'var(--gold-primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Star size={20} style={{ fill: '#e6be75' }} />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            padding: '2px 9px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(230, 190, 117, 0.18)',
+                            color: 'var(--gold-primary)',
+                            border: '1px solid rgba(230, 190, 117, 0.45)',
+                          }}
+                        >
+                          <Star size={11} style={{ fill: 'currentColor' }} />
+                          <span>
+                            {repoStats?.stars !== undefined ? `${repoStats.stars} ${t('settings.githubStarsCount')}` : t('settings.githubStarsLoading')}
+                          </span>
+                        </span>
+
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(124, 58, 237, 0.12)',
+                            color: 'var(--accent-primary)',
+                            border: '1px solid rgba(124, 58, 237, 0.3)',
+                          }}
+                        >
+                          {t('settings.githubBadge')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 style={{ margin: '0 0 0.35rem 0', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {t('settings.githubCardTitle')}
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.55, minHeight: '3.6rem' }}>
+                        {t('settings.githubCardDesc')}
+                      </p>
+                    </div>
+
+                    <a
+                      href={GITHUB_REPO_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary"
+                      style={{
+                        marginTop: 'auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.84rem',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      <Star size={15} style={{ fill: 'currentColor' }} />
+                      <span>
+                        {t('settings.githubStarButton')} {repoStats?.stars !== undefined ? `(${repoStats.stars} ★)` : ''}
+                      </span>
+                      <ExternalLink size={13} style={{ opacity: 0.85 }} />
+                    </a>
+                  </div>
+                </div>
+
+                {/* Bottom Community Quote Card */}
+                <div
+                  style={{
+                    padding: '0.9rem 1.2rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                    fontSize: '0.76rem',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Sparkles size={14} style={{ color: 'var(--gold-primary)', flexShrink: 0 }} />
+                    <span>Crafted with devotion for novelists, worldbuilders, and storytellers worldwide.</span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <span style={{ opacity: 0.8 }}>Chronicle v{appVersion}</span>
+                    <span>•</span>
+                    <a
+                      href={GITHUB_REPO_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: 'var(--accent-primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}
+                    >
+                      <span>pazvanti/Chronicle</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  </div>
+                </div>
               </div>
             )}
           </div>
