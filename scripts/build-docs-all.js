@@ -60,9 +60,10 @@ console.log('\n==> [2/4] Building Native Desktop App & Staging to docs/downloads
 const nodeCmd = process.execPath;
 const buildTauriScript = path.resolve(__dirname, 'build-tauri.js');
 
+const extraArgs = process.argv.slice(2);
 const tauriBuildResult = spawnSync(
   process.execPath,
-  [buildTauriScript, '--copy-to-docs'],
+  [buildTauriScript, '--copy-to-docs', ...extraArgs],
   {
     cwd: projectRoot,
     stdio: 'inherit',

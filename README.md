@@ -147,6 +147,11 @@ Compile the standalone native desktop application (outputs to `src-tauri/target/
 npm run tauri:build
 ```
 
+Compile universal Linux AppImage & packages (glibc 2.35+ compatibility for Ubuntu/Debian/Mint/Fedora via container):
+```bash
+npm run tauri:build:container
+```
+
 Compile the complete GitHub Pages suite (presentation site + online web app + desktop download binaries):
 ```bash
 npm run build:docs:all

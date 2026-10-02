@@ -42,6 +42,20 @@ export function getLinuxDistro() {
   return { id: '', name: 'Linux' };
 }
 
+export function getGlibcVersion() {
+  if (!isLinux) return null;
+  try {
+    const res = spawnSync('ldd', ['--version'], { encoding: 'utf8' });
+    if (res.status === 0) {
+      const match = res.stdout.match(/(?:GNU libc|GLIBC|ldd.*?)\s+([0-9]+\.[0-9]+)/i);
+      if (match) {
+        return parseFloat(match[1]);
+      }
+    }
+  } catch {}
+  return null;
+}
+
 // 2. Ensure Cargo / Rust is in PATH
 export function ensureCargoInPath({ exitOnError = true } = {}) {
   const homeDir = process.env.USERPROFILE || process.env.HOME || '';
@@ -151,6 +165,17 @@ export function checkLinuxPrerequisites() {
     return false;
   } else {
     console.log('[Linux Env] System libraries (WebKit2GTK, OpenSSL, RSVG, AppIndicator) verified ✓');
+    const isInsideContainer = fs.existsSync('/.dockerenv') || fs.existsSync('/run/.containerenv') || process.env.CONTAINER_BUILD === 'true';
+    if (!isInsideContainer) {
+      const glibcVer = getGlibcVersion();
+      if (glibcVer && glibcVer >= 2.40) {
+        console.warn(`\n⚠️  [Glibc Compatibility Notice] Host is running modern glibc ${glibcVer}.`);
+        console.warn(`   AppImages compiled natively on this host will require glibc >= ${glibcVer} and`);
+        console.warn(`   will NOT run on older distributions (Ubuntu 22.04/24.04, Debian 12, Mint, etc.).`);
+        console.warn(`   👉 To build a universally compatible AppImage (glibc 2.35+), run:`);
+        console.warn(`      npm run tauri:build:container   (or pass --container)\n`);
+      }
+    }
     return true;
   }
 }
@@ -418,6 +443,7 @@ Options:
   --debug             Build in debug mode (faster compilation, larger binary)
   --copy-to-docs      Copy and stage generated distributables into docs/downloads/
   --no-bundle         Compile standalone executable binary only (skip packaging)
+  --container         Build inside Ubuntu 22.04 LTS container (targets glibc 2.35 for universal compatibility)
   --appimage          Compile and package as Linux AppImage (.AppImage)
   --deb               Compile and package as Debian/Ubuntu package (.deb)
   --rpm               Compile and package as Fedora/RHEL/openSUSE RPM package (.rpm)
@@ -435,6 +461,19 @@ export function runBuild() {
   if (args.includes('--help') || args.includes('-h')) {
     printHelp();
     process.exit(0);
+  }
+
+  // Handle container build request
+  if (args.includes('--container') || args.includes('--podman') || args.includes('--docker')) {
+    const containerScript = path.resolve(__dirname, 'build-tauri-container.sh');
+    const forwardedArgs = args.filter(a => a !== '--container' && a !== '--podman' && a !== '--docker');
+    console.log('\n[Container] Forwarding build to Ubuntu 22.04 LTS container runtime...');
+    const result = spawnSync('bash', [containerScript, ...forwardedArgs], {
+      cwd: projectRoot,
+      stdio: 'inherit',
+      shell: false,
+    });
+    process.exit(result.status || 0);
   }
 
   // Sync Cargo.toml version with package.json

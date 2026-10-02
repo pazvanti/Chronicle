@@ -25,6 +25,8 @@
     "tauri": "tauri",
     "tauri:dev": "node scripts/dev-tauri.js",
     "tauri:build": "node scripts/build-tauri.js",
+    "tauri:build:container": "bash scripts/build-tauri-container.sh",
+    "tauri:build:container:all": "bash scripts/build-tauri-container.sh --copy-to-docs",
     "tauri:check": "node scripts/build-tauri.js --check-prereqs",
     "tauri:build:appimage": "node scripts/build-tauri.js --appimage",
     "tauri:build:deb": "node scripts/build-tauri.js --deb",
