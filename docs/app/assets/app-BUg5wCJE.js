@@ -1,0 +1,1 @@
+import{t as e}from"./index-DgPiQsSZ.js";async function t(){return e(`plugin:app|version`)}export{t as getVersion};

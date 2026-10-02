@@ -1,6 +1,6 @@
 import { isTauri } from '../cloud/webdavClient';
 
-export const CURRENT_VERSION = '1.6.0';
+export const CURRENT_VERSION = '1.6.1';
 export const GUMROAD_DOWNLOAD_URL = 'https://pazvanti.gumroad.com/l/Chronicle';
 export const GUMROAD_DONATE_URL = 'https://pazvanti.gumroad.com/l/Chronicle';
 export const ALTERNATIVETO_URL = 'https://alternativeto.net/software/chronicle--a-better-way-to-write/about/';
