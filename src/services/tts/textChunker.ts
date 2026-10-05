@@ -47,33 +47,177 @@ interface BlockUnit {
   text: string;
 }
 
-export function extractSemanticBlocks(htmlOrText: string): BlockUnit[] {
-  if (typeof DOMParser !== 'undefined' && htmlOrText.includes('<')) {
-    const doc = new DOMParser().parseFromString(htmlOrText, 'text/html');
-    const nodes = doc.body.querySelectorAll('h1, h2, h3, h4, h5, h6, p, blockquote, li, tr');
-    if (nodes.length > 0) {
-      return Array.from(nodes)
-        .map(n => ({
-          tag: n.tagName.toLowerCase(),
-          text: (n.textContent || '').replace(/[ \t\r\n]+/g, ' ').trim(),
-        }))
-        .filter(b => b.text.length > 0);
+function collectDomBlocks(root: Node): BlockUnit[] {
+  const blocks: BlockUnit[] = [];
+  const blockTagNames = new Set([
+    'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'blockquote', 'li', 'pre', 'tr', 'dt', 'dd', 'article', 'section', 'div',
+  ]);
+
+  function hasChildBlocks(el: Element): boolean {
+    return Array.from(el.children).some(child => {
+      const tag = child.tagName.toLowerCase();
+      return blockTagNames.has(tag) || tag === 'hr';
+    });
+  }
+
+  function addBlock(tag: string, rawText: string) {
+    const subParagraphs = rawText
+      .split(/\n\s*\n+/)
+      .map(p => p.replace(/[ \t\r\n]+/g, ' ').trim())
+      .filter(Boolean);
+
+    for (const p of subParagraphs) {
+      blocks.push({
+        tag: /^h[1-6]$/.test(tag) ? tag : (tag === 'blockquote' ? 'blockquote' : 'p'),
+        text: p,
+      });
     }
   }
 
-  // Regex fallback for node or non-browser environments
-  if (htmlOrText.includes('<')) {
-    const blockRegex = /<(h[1-6]|p|blockquote|li|tr)[^>]*>([\s\S]*?)<\/\1>/gi;
-    const blocks: BlockUnit[] = [];
-    let match;
-    while ((match = blockRegex.exec(htmlOrText)) !== null) {
-      const tag = match[1].toLowerCase();
-      const rawContent = match[2];
-      const text = rawContent.replace(/<[^>]*>/g, '').replace(/[ \t\r\n]+/g, ' ').trim();
-      if (text) {
-        blocks.push({ tag, text });
+  function traverse(node: Node) {
+    if (node.nodeType === 1 /* Node.ELEMENT_NODE */) {
+      const el = node as Element;
+      const tag = el.tagName.toLowerCase();
+
+      if (tag === 'script' || tag === 'style' || tag === 'svg' || tag === 'noscript') {
+        return;
+      }
+
+      if (tag === 'hr') {
+        return;
+      }
+
+      // Standalone blocks: headings, blockquotes, pre, li, tr
+      if (/^h[1-6]$/.test(tag) || tag === 'blockquote' || tag === 'pre' || tag === 'li' || tag === 'tr') {
+        const text = (el.textContent || '').replace(/[ \t\r\n]+/g, ' ').trim();
+        if (text) {
+          blocks.push({ tag, text });
+        }
+        return;
+      }
+
+      // Paragraphs, divs, or section containers without nested block children
+      if (tag === 'p' || tag === 'div' || tag === 'section' || tag === 'article') {
+        if (!hasChildBlocks(el)) {
+          addBlock(tag, el.textContent || '');
+          return;
+        }
+      }
+
+      // Process children for container elements (accumulate inline/text nodes)
+      let inlineAccumulator = '';
+      for (const child of Array.from(el.childNodes)) {
+        if (child.nodeType === 3 /* Node.TEXT_NODE */) {
+          inlineAccumulator += (child.textContent || ' ');
+        } else if (child.nodeType === 1 /* Node.ELEMENT_NODE */) {
+          const childEl = child as Element;
+          const childTag = childEl.tagName.toLowerCase();
+
+          if (childTag === 'hr' || blockTagNames.has(childTag)) {
+            // Flush any accumulated inline text before this boundary
+            if (inlineAccumulator.trim()) {
+              addBlock('p', inlineAccumulator);
+            }
+            inlineAccumulator = '';
+
+            // If it's a block (and not just an <hr> divider), traverse it
+            if (childTag !== 'hr') {
+              traverse(childEl);
+            }
+          } else {
+            // Inline tags (b, i, em, strong, span, a, etc.)
+            inlineAccumulator += (childEl.textContent || ' ');
+          }
+        }
+      }
+
+      // Flush any trailing inline text
+      if (inlineAccumulator.trim()) {
+        addBlock('p', inlineAccumulator);
       }
     }
+  }
+
+  traverse(root);
+  return blocks;
+}
+
+export function extractSemanticBlocks(htmlOrText: string): BlockUnit[] {
+  if (typeof DOMParser !== 'undefined' && htmlOrText.includes('<')) {
+    try {
+      const doc = new DOMParser().parseFromString(htmlOrText, 'text/html');
+
+      // Replace all <br> elements with a newline text node to avoid merging adjacent words
+      doc.body.querySelectorAll('br').forEach(br => {
+        br.replaceWith(doc.createTextNode('\n'));
+      });
+
+      const blocks = collectDomBlocks(doc.body);
+      if (blocks.length > 0) {
+        return blocks;
+      }
+    } catch {
+      // Fall through to regex if DOMParser encounters an issue
+    }
+  }
+
+  // Regex fallback for non-DOM environments
+  if (htmlOrText.includes('<')) {
+    const normalized = htmlOrText
+      .replace(/<hr\s*\/?>/gi, '\n\n<hr_marker>\n\n')
+      .replace(/<br\s*\/?>/gi, '\n');
+
+    const blockRegex = /<(h[1-6]|p|div|blockquote|li|tr|section|article)[^>]*>([\s\S]*?)<\/\1>/gi;
+    const blocks: BlockUnit[] = [];
+    let match: RegExpExecArray | null;
+    let lastIndex = 0;
+
+    while ((match = blockRegex.exec(normalized)) !== null) {
+      const precedingText = normalized.substring(lastIndex, match.index);
+      const cleanPreceding = precedingText
+        .replace(/<hr_marker>/g, '')
+        .replace(/<[^>]*>/g, '')
+        .replace(/[ \t\r\n]+/g, ' ')
+        .trim();
+      if (cleanPreceding) {
+        blocks.push({ tag: 'p', text: cleanPreceding });
+      }
+
+      const tag = match[1].toLowerCase();
+      const rawContent = match[2];
+
+      if (/<(h[1-6]|p|div|blockquote|li|tr|section|article|hr_marker)[^>]*>/i.test(rawContent)) {
+        const nestedBlocks = extractSemanticBlocks(rawContent);
+        blocks.push(...nestedBlocks);
+      } else {
+        const cleanContent = rawContent.replace(/<[^>]*>/g, '').trim();
+        const paragraphs = cleanContent
+          .split(/\n\s*\n+/)
+          .map(p => p.replace(/[ \t\r\n]+/g, ' ').trim())
+          .filter(Boolean);
+
+        for (const p of paragraphs) {
+          blocks.push({
+            tag: /^h[1-6]$/.test(tag) ? tag : (tag === 'blockquote' ? 'blockquote' : 'p'),
+            text: p,
+          });
+        }
+      }
+
+      lastIndex = blockRegex.lastIndex;
+    }
+
+    const trailingText = normalized.substring(lastIndex);
+    const cleanTrailing = trailingText
+      .replace(/<hr_marker>/g, '')
+      .replace(/<[^>]*>/g, '')
+      .replace(/[ \t\r\n]+/g, ' ')
+      .trim();
+    if (cleanTrailing) {
+      blocks.push({ tag: 'p', text: cleanTrailing });
+    }
+
     if (blocks.length > 0) {
       return blocks;
     }

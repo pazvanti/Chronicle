@@ -647,12 +647,20 @@ export function synthesizeSpeechChunk(
 
   // Case B: Genuine In-Browser Model (on-demand generation)
   if (kokoroInstance) {
+    let fallbackController: SpeechSynthesisController | null = null;
+
     (async () => {
       try {
         if (isCancelled) return;
 
         const blob = await generateNeuralAudioBlob(text, voice, speedMultiplier);
-        if (isCancelled || !blob) return;
+        if (isCancelled) return;
+
+        if (!blob) {
+          console.warn('In-browser synthesis returned null blob, falling back to browser voice');
+          fallbackController = fallbackToBrowserSpeech(text, voice, speedMultiplier, currentVolume, preferredVoiceName, onStart, onEnd, onError, onTimeUpdate);
+          return;
+        }
 
         const url = URL.createObjectURL(blob);
         activeAudio = new Audio(url);
@@ -691,11 +699,16 @@ export function synthesizeSpeechChunk(
           return;
         }
 
-        await activeAudio.play();
+        activeAudio.play().catch(err => {
+          if (!isCancelled) {
+            console.warn('Audio playback error, falling back to browser voice:', err);
+            fallbackController = fallbackToBrowserSpeech(text, voice, speedMultiplier, currentVolume, preferredVoiceName, onStart, onEnd, onError, onTimeUpdate);
+          }
+        });
       } catch (err) {
         if (!isCancelled) {
           console.warn('In-browser synthesis error, falling back to browser voice:', err);
-          fallbackToBrowserSpeech(text, voice, speedMultiplier, currentVolume, preferredVoiceName, onStart, onEnd, onError, onTimeUpdate);
+          fallbackController = fallbackToBrowserSpeech(text, voice, speedMultiplier, currentVolume, preferredVoiceName, onStart, onEnd, onError, onTimeUpdate);
         }
       }
     })();
@@ -708,22 +721,26 @@ export function synthesizeSpeechChunk(
           activeAudio.pause();
           activeAudio.src = '';
         }
+        fallbackController?.cancel?.();
       },
       setVolume: (vol: number) => {
         currentVolume = vol;
         if (activeAudio) {
           activeAudio.volume = Math.max(0, Math.min(1, vol));
         }
+        fallbackController?.setVolume?.(vol);
       },
       pause: () => {
         if (activeAudio && !activeAudio.paused) {
           activeAudio.pause();
         }
+        fallbackController?.pause?.();
       },
       resume: () => {
         if (activeAudio && activeAudio.paused) {
           activeAudio.play().catch(() => { });
         }
+        fallbackController?.resume?.();
       },
     };
   }
