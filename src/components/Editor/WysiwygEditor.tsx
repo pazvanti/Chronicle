@@ -35,7 +35,7 @@ import { TextColorPicker } from './TextColorPicker';
 import { scopeCssForContainer } from '../../services/epub/cssPresets';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { AuthorComment, ReaderFont } from '../../types/project';
-import { ZenFloatingToolbar } from '../Zen/ZenFloatingToolbar';
+import { ZenFloatingToolbar, ActiveFormats } from '../Zen/ZenFloatingToolbar';
 import {
   wrapSelectionWithComment,
   unwrapCommentHighlight,
@@ -178,6 +178,19 @@ export const WysiwygEditor: React.FC = () => {
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [selectedText, setSelectedText] = useState<string>('');
   const [currentAlign, setCurrentAlign] = useState<'left' | 'center' | 'right' | 'justify'>('left');
+  const [activeFormats, setActiveFormats] = useState<ActiveFormats>({
+    bold: false,
+    italic: false,
+    underline: false,
+    strikeThrough: false,
+    h1: false,
+    h2: false,
+    h3: false,
+    p: false,
+    ul: false,
+    ol: false,
+    blockquote: false,
+  });
   const [isSplitModalOpen, setIsSplitModalOpen] = useState<boolean>(false);
   const [showImageDialog, setShowImageDialog] = useState<boolean>(false);
   const [imageUrlInput, setImageUrlInput] = useState<string>('');
@@ -502,6 +515,155 @@ export const WysiwygEditor: React.FC = () => {
     });
   }, [activeChapter, updateChapterContent, updateParagraphFocusDimming, performTypewriterScroll, recordTypingSnapshot]);
 
+  // Inspect selection/caret to detect active inline & block formatting
+  const updateActiveFormats = useCallback(() => {
+    let isBold = false;
+    let isItalic = false;
+    let isUnderline = false;
+    let isStrikeThrough = false;
+    let isUl = false;
+    let isOl = false;
+    let isH1 = false;
+    let isH2 = false;
+    let isH3 = false;
+    let isBlockquote = false;
+
+    try {
+      isBold = document.queryCommandState('bold');
+      isItalic = document.queryCommandState('italic');
+      isUnderline = document.queryCommandState('underline');
+      isStrikeThrough = document.queryCommandState('strikeThrough');
+      isUl = document.queryCommandState('insertUnorderedList');
+      isOl = document.queryCommandState('insertOrderedList');
+    } catch {
+      // document.queryCommandState can throw in detached or non-rendered contexts
+    }
+
+    const sel = window.getSelection();
+    if (sel && sel.anchorNode && editorRef.current && editorRef.current.contains(sel.anchorNode)) {
+      let el: HTMLElement | null =
+        sel.anchorNode.nodeType === Node.ELEMENT_NODE
+          ? (sel.anchorNode as HTMLElement)
+          : sel.anchorNode.parentElement;
+
+      while (el && el !== editorRef.current) {
+        const tag = el.tagName.toUpperCase();
+        if (
+          tag === 'B' ||
+          tag === 'STRONG' ||
+          el.style.fontWeight === 'bold' ||
+          parseInt(el.style.fontWeight, 10) >= 700
+        ) {
+          isBold = true;
+        }
+        if (tag === 'I' || tag === 'EM' || el.style.fontStyle === 'italic') {
+          isItalic = true;
+        }
+        if (tag === 'U' || el.style.textDecoration?.includes('underline')) {
+          isUnderline = true;
+        }
+        if (
+          tag === 'S' ||
+          tag === 'STRIKE' ||
+          tag === 'DEL' ||
+          el.style.textDecoration?.includes('line-through')
+        ) {
+          isStrikeThrough = true;
+        }
+        if (tag === 'H1') isH1 = true;
+        if (tag === 'H2') isH2 = true;
+        if (tag === 'H3') isH3 = true;
+        if (tag === 'UL') isUl = true;
+        if (tag === 'OL') isOl = true;
+        if (tag === 'BLOCKQUOTE') isBlockquote = true;
+
+        el = el.parentElement;
+      }
+    }
+
+    const isP = !isH1 && !isH2 && !isH3 && !isBlockquote;
+
+    setActiveFormats({
+      bold: isBold,
+      italic: isItalic,
+      underline: isUnderline,
+      strikeThrough: isStrikeThrough,
+      h1: isH1,
+      h2: isH2,
+      h3: isH3,
+      p: isP,
+      ul: isUl,
+      ol: isOl,
+      blockquote: isBlockquote,
+    });
+  }, []);
+
+  // Inspect selection/caret to detect explicit text color
+  const updateActiveTextColor = useCallback(() => {
+    const sel = window.getSelection();
+    if (!sel || !sel.anchorNode || !editorRef.current || !editorRef.current.contains(sel.anchorNode)) {
+      return;
+    }
+    let el: HTMLElement | null =
+      sel.anchorNode.nodeType === Node.ELEMENT_NODE
+        ? (sel.anchorNode as HTMLElement)
+        : sel.anchorNode.parentElement;
+
+    while (el && el !== editorRef.current) {
+      if (el.tagName.toLowerCase() === 'font' && el.getAttribute('color')) {
+        setActiveTextColor(el.getAttribute('color') || 'auto');
+        return;
+      }
+      if (el.style && el.style.color && el.style.color !== 'inherit') {
+        setActiveTextColor(el.style.color);
+        return;
+      }
+      el = el.parentElement;
+    }
+    setActiveTextColor('auto');
+  }, []);
+
+  // Inspect selection/caret to detect active block alignment
+  const updateActiveAlignment = useCallback(() => {
+    try {
+      if (document.queryCommandState('justifyCenter')) {
+        setCurrentAlign('center');
+        return;
+      }
+      if (document.queryCommandState('justifyRight')) {
+        setCurrentAlign('right');
+        return;
+      }
+      if (document.queryCommandState('justifyFull')) {
+        setCurrentAlign('justify');
+        return;
+      }
+      if (document.queryCommandState('justifyLeft')) {
+        setCurrentAlign('left');
+        return;
+      }
+    } catch {
+      // document.queryCommandState can throw in detached or non-rendered contexts
+    }
+
+    const sel = window.getSelection();
+    if (sel && sel.anchorNode && editorRef.current && editorRef.current.contains(sel.anchorNode)) {
+      let el: HTMLElement | null =
+        sel.anchorNode.nodeType === Node.ELEMENT_NODE
+          ? (sel.anchorNode as HTMLElement)
+          : sel.anchorNode.parentElement;
+      while (el && el !== editorRef.current) {
+        const align = el.style?.textAlign;
+        if (align === 'center' || align === 'right' || align === 'justify' || align === 'left') {
+          setCurrentAlign(align as 'left' | 'center' | 'right' | 'justify');
+          return;
+        }
+        el = el.parentElement;
+      }
+    }
+    setCurrentAlign('left');
+  }, []);
+
   const execCommand = useCallback((command: string, value: string | undefined = undefined) => {
     document.execCommand(command, false, value);
     if (editorRef.current && activeChapter) {
@@ -510,7 +672,10 @@ export const WysiwygEditor: React.FC = () => {
     }
     recordImmediateSnapshot();
     editorRef.current?.focus();
-  }, [activeChapter, updateChapterContent, recordImmediateSnapshot]);
+    updateActiveFormats();
+    updateActiveAlignment();
+    updateActiveTextColor();
+  }, [activeChapter, updateChapterContent, recordImmediateSnapshot, updateActiveFormats, updateActiveAlignment, updateActiveTextColor]);
 
   const handleUndo = useCallback(() => {
     const h = historyRef.current;
@@ -550,31 +715,6 @@ export const WysiwygEditor: React.FC = () => {
     setCanRedo(h.index < h.entries.length - 1);
   }, [activeChapter, updateChapterContent]);
 
-  // Inspect selection/caret to detect explicit text color
-  const updateActiveTextColor = useCallback(() => {
-    const sel = window.getSelection();
-    if (!sel || !sel.anchorNode || !editorRef.current || !editorRef.current.contains(sel.anchorNode)) {
-      return;
-    }
-    let el: HTMLElement | null =
-      sel.anchorNode.nodeType === Node.ELEMENT_NODE
-        ? (sel.anchorNode as HTMLElement)
-        : sel.anchorNode.parentElement;
-
-    while (el && el !== editorRef.current) {
-      if (el.tagName.toLowerCase() === 'font' && el.getAttribute('color')) {
-        setActiveTextColor(el.getAttribute('color') || 'auto');
-        return;
-      }
-      if (el.style && el.style.color && el.style.color !== 'inherit') {
-        setActiveTextColor(el.style.color);
-        return;
-      }
-      el = el.parentElement;
-    }
-    setActiveTextColor('auto');
-  }, []);
-
   const handleSelectColor = useCallback((colorHex: string) => {
     if (!editorRef.current) return;
     editorRef.current.focus();
@@ -598,7 +738,8 @@ export const WysiwygEditor: React.FC = () => {
       updateChapterContent(activeChapter.id, cleanedHtml);
     }
     recordImmediateSnapshot();
-  }, [activeChapter, updateChapterContent, recordImmediateSnapshot]);
+    updateActiveFormats();
+  }, [activeChapter, updateChapterContent, recordImmediateSnapshot, updateActiveFormats]);
 
   const handleSetColorAuto = useCallback(() => {
     if (!editorRef.current) return;
@@ -665,48 +806,8 @@ export const WysiwygEditor: React.FC = () => {
       updateChapterContent(activeChapter.id, cleanedHtml);
     }
     recordImmediateSnapshot();
-  }, [activeChapter, updateChapterContent, recordImmediateSnapshot]);
-
-  // Inspect selection/caret to detect active block alignment
-  const updateActiveAlignment = useCallback(() => {
-    try {
-      if (document.queryCommandState('justifyCenter')) {
-        setCurrentAlign('center');
-        return;
-      }
-      if (document.queryCommandState('justifyRight')) {
-        setCurrentAlign('right');
-        return;
-      }
-      if (document.queryCommandState('justifyFull')) {
-        setCurrentAlign('justify');
-        return;
-      }
-      if (document.queryCommandState('justifyLeft')) {
-        setCurrentAlign('left');
-        return;
-      }
-    } catch {
-      // document.queryCommandState can throw in detached or non-rendered contexts
-    }
-
-    const sel = window.getSelection();
-    if (sel && sel.anchorNode && editorRef.current && editorRef.current.contains(sel.anchorNode)) {
-      let el: HTMLElement | null =
-        sel.anchorNode.nodeType === Node.ELEMENT_NODE
-          ? (sel.anchorNode as HTMLElement)
-          : sel.anchorNode.parentElement;
-      while (el && el !== editorRef.current) {
-        const align = el.style?.textAlign;
-        if (align === 'center' || align === 'right' || align === 'justify' || align === 'left') {
-          setCurrentAlign(align as 'left' | 'center' | 'right' | 'justify');
-          return;
-        }
-        el = el.parentElement;
-      }
-    }
-    setCurrentAlign('left');
-  }, []);
+    updateActiveFormats();
+  }, [activeChapter, updateChapterContent, recordImmediateSnapshot, updateActiveFormats]);
 
   const handleAlign = useCallback((alignment: 'left' | 'center' | 'right' | 'justify') => {
     const commandMap: Record<string, string> = {
@@ -965,13 +1066,14 @@ export const WysiwygEditor: React.FC = () => {
         setCommentPillPos(null);
       }
     }
+    updateActiveFormats();
     updateActiveAlignment();
     updateActiveTextColor();
     updateParagraphFocusDimming();
     if (isZenMode && zenSettings.typewriterScrolling) {
       requestAnimationFrame(performTypewriterScroll);
     }
-  }, [updateActiveAlignment, updateActiveTextColor, isCommentModalOpen, updateParagraphFocusDimming, isZenMode, zenSettings.typewriterScrolling, zenSettings.hideComments, performTypewriterScroll]);
+  }, [updateActiveFormats, updateActiveAlignment, updateActiveTextColor, isCommentModalOpen, updateParagraphFocusDimming, isZenMode, zenSettings.typewriterScrolling, zenSettings.hideComments, performTypewriterScroll]);
 
   // Handle clicking inside editor: detects if clicked on image or existing comment highlight
   const handleEditorClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -1356,6 +1458,7 @@ export const WysiwygEditor: React.FC = () => {
           onExecCommand={execCommand}
           onAlign={handleAlign}
           currentAlign={currentAlign}
+          activeFormats={activeFormats}
           activeTextColor={activeTextColor}
           onSelectColor={handleSelectColor}
           onSetAutoColor={handleSetColorAuto}
@@ -1394,28 +1497,28 @@ export const WysiwygEditor: React.FC = () => {
           <div className="toolbar-separator" />
 
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.p ? 'active' : ''}`}
             onClick={() => insertHeading('p')}
             title="Normal text size (Paragraph)"
           >
             <Pilcrow size={17} />
           </button>
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.h1 ? 'active' : ''}`}
             onClick={() => insertHeading('h1')}
             title={t('editor.h1')}
           >
             <Heading1 size={17} />
           </button>
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.h2 ? 'active' : ''}`}
             onClick={() => insertHeading('h2')}
             title={t('editor.h2')}
           >
             <Heading2 size={17} />
           </button>
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.h3 ? 'active' : ''}`}
             onClick={() => insertHeading('h3')}
             title={t('editor.h3')}
           >
@@ -1425,28 +1528,28 @@ export const WysiwygEditor: React.FC = () => {
           <div className="toolbar-separator" />
 
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.bold ? 'active' : ''}`}
             onClick={() => execCommand('bold')}
             title={t('editor.bold')}
           >
             <Bold size={16} />
           </button>
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.italic ? 'active' : ''}`}
             onClick={() => execCommand('italic')}
             title={t('editor.italic')}
           >
             <Italic size={16} />
           </button>
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.underline ? 'active' : ''}`}
             onClick={() => execCommand('underline')}
             title={t('editor.underline')}
           >
             <Underline size={16} />
           </button>
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.strikeThrough ? 'active' : ''}`}
             onClick={() => execCommand('strikeThrough')}
             title={t('editor.strikethrough')}
           >
@@ -1511,21 +1614,21 @@ export const WysiwygEditor: React.FC = () => {
           <div className="toolbar-separator" />
 
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.ul ? 'active' : ''}`}
             onClick={() => execCommand('insertUnorderedList')}
             title={t('editor.bulletList')}
           >
             <List size={16} />
           </button>
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.ol ? 'active' : ''}`}
             onClick={() => execCommand('insertOrderedList')}
             title={t('editor.numberedList')}
           >
             <ListOrdered size={16} />
           </button>
           <button
-            className="tool-btn"
+            className={`tool-btn ${activeFormats.blockquote ? 'active' : ''}`}
             onClick={() => execCommand('formatBlock', '<blockquote>')}
             title={t('editor.blockquote')}
           >

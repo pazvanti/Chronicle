@@ -25,6 +25,20 @@ import { ReaderTheme, ReaderFont } from '../../types/project';
 import { TextColorPicker } from '../Editor/TextColorPicker';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 
+export interface ActiveFormats {
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+  strikeThrough: boolean;
+  h1: boolean;
+  h2: boolean;
+  h3: boolean;
+  p: boolean;
+  ul: boolean;
+  ol: boolean;
+  blockquote: boolean;
+}
+
 export interface ZenFloatingToolbarProps {
   canUndo: boolean;
   canRedo: boolean;
@@ -34,6 +48,7 @@ export interface ZenFloatingToolbarProps {
   onExecCommand: (command: string, value?: string) => void;
   onAlign: (alignment: 'left' | 'center' | 'right' | 'justify') => void;
   currentAlign: 'left' | 'center' | 'right' | 'justify';
+  activeFormats?: ActiveFormats;
   activeTextColor: string;
   onSelectColor: (hex: string) => void;
   onSetAutoColor: () => void;
@@ -52,6 +67,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
   onExecCommand,
   onAlign,
   currentAlign,
+  activeFormats,
   activeTextColor,
   onSelectColor,
   onSetAutoColor,
@@ -184,7 +200,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         {/* Headings */}
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.p ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -197,7 +213,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         </button>
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.h1 ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -210,7 +226,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         </button>
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.h2 ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -223,7 +239,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         </button>
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.h3 ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -240,7 +256,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         {/* Inline Formatting */}
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.bold ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -253,7 +269,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         </button>
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.italic ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -266,7 +282,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         </button>
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.underline ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -279,7 +295,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         </button>
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.strikeThrough ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -383,7 +399,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         {/* Lists & Quotes */}
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.ul ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -396,7 +412,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         </button>
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.ol ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
@@ -409,7 +425,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
         </button>
         <button
           type="button"
-          className="zen-toolbar-btn"
+          className={`zen-toolbar-btn ${activeFormats?.blockquote ? 'active' : ''}`}
           onMouseDown={e => {
             e.preventDefault();
             onPreserveSelection?.();
