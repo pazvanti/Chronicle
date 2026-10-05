@@ -608,6 +608,21 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localFilePathRef.current = localFilePath;
   }, [localFilePath]);
 
+  const storageTargetRef = useRef<StorageTarget | null>(storageTarget);
+  useEffect(() => {
+    storageTargetRef.current = storageTarget;
+  }, [storageTarget]);
+
+  const cloudFileNameRef = useRef<string | null>(cloudFileName);
+  useEffect(() => {
+    cloudFileNameRef.current = cloudFileName;
+  }, [cloudFileName]);
+
+  const webdavConfigRef = useRef<WebDavConfig | null>(webdavConfig);
+  useEffect(() => {
+    webdavConfigRef.current = webdavConfig;
+  }, [webdavConfig]);
+
   // Keep stored desktop session chapter in sync whenever active chapter changes
   useEffect(() => {
     if (isTauri() && localFilePath && activeChapterId) {
@@ -2376,6 +2391,9 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             // If forced Save As, or no path known yet, prompt user with native Save File Dialog
             if (forceSaveAs || !destinationPath) {
+              if (isAutoSave) {
+                return;
+              }
               let defaultName = customFilename || (destinationPath ? destinationPath.split(/[\\/]/).pop() : `${cleanTitle}.chronicle`);
               if (!defaultName) defaultName = `${cleanTitle}.chronicle`;
               if (!defaultName.endsWith('.chronicle')) defaultName += '.chronicle';
@@ -2396,13 +2414,18 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             setStorageTarget('local');
             setLocalFilePath(destinationPath);
+            setCloudFileName(null);
             saveDesktopSession(destinationPath, activeChapterId);
             const savedFileName = destinationPath.split(/[\\/]/).pop() || `${cleanTitle}.chronicle`;
 
             if (bookRef.current === saveSnapshot) {
               setIsDirtyState(false);
             }
-            showNotification('success', `Saved project "${savedFileName}" locally!`);
+            if (isAutoSave) {
+              setLastAutoSavedAt(new Date());
+            } else {
+              showNotification('success', `Saved project "${savedFileName}" locally!`);
+            }
           } else {
             const downloadName = customFilename || `${cleanTitle}.chronicle`;
             const url = URL.createObjectURL(blob);
@@ -2425,10 +2448,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
           }
         } else if (target === 'cloud') {
-          if (!webdavConfig) {
+          if (!webdavConfig || (isAutoSave && !cloudFileName)) {
             if (!isAutoSave) {
-              setIsWebDavConfigOpen(true);
-              showNotification('info', 'Please configure your WebDAV server to save to cloud storage.');
+              if (!webdavConfig) {
+                setIsWebDavConfigOpen(true);
+                showNotification('info', 'Please configure your WebDAV server to save to cloud storage.');
+              }
             }
             return;
           }
@@ -2447,6 +2472,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
           setStorageTarget('cloud');
           setCloudFileName(uploadName);
+          setLocalFilePath(null);
           if (bookRef.current === saveSnapshot) {
             setIsDirtyState(false);
           }
@@ -2477,9 +2503,6 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsSaving(false);
         // Keep isSavingRef active for 500ms after saving to guard against download blur / refocus triggers
         setTimeout(() => {
-          if (bookRef.current === saveSnapshot) {
-            setIsDirtyState(false);
-          }
           isSavingRef.current = false;
         }, 500);
       }
@@ -2498,22 +2521,28 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     [saveProject]
   );
 
-  // Auto-save timer effect: persists manuscript changes in background exclusively on desktop with an existing file
+  // Auto-save timer effect: persists manuscript changes in background for local files (desktop) and cloud files (desktop & web)
   useEffect(() => {
-    // Web environment does not perform background filesystem auto-save to prevent unwanted download prompts
-    if (!isTauri() || !autoSaveEnabled || !book || autoSaveInterval <= 0) {
+    if (!autoSaveEnabled || !book || autoSaveInterval <= 0) {
       return;
     }
 
     const timer = setInterval(() => {
-      // Only auto-save if project already has an established file path on disk to avoid interrupting typing with a save dialog
-      if (isDirtyRef.current && !isSavingRef.current && bookRef.current && localFilePath) {
+      if (!isDirtyRef.current || isSavingRef.current || !bookRef.current) {
+        return;
+      }
+
+      const target = storageTargetRef.current;
+      const canSaveLocal = isTauri() && (target === 'local' || (!target && isTauri())) && Boolean(localFilePathRef.current);
+      const canSaveCloud = target === 'cloud' && Boolean(webdavConfigRef.current) && Boolean(cloudFileNameRef.current);
+
+      if (canSaveLocal || canSaveCloud) {
         saveProject(undefined, undefined, undefined, false, true);
       }
     }, autoSaveInterval * 1000);
 
     return () => clearInterval(timer);
-  }, [autoSaveEnabled, autoSaveInterval, book, localFilePath, saveProject]);
+  }, [autoSaveEnabled, autoSaveInterval, book, saveProject]);
 
   const exportAndDownload = useCallback(async () => {
     if (!book) return;

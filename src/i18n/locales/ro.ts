@@ -131,8 +131,8 @@ export const ro: TranslationDictionary = {
     romanian: 'Română',
 
     // Auto-save
-    autoSaveTitle: 'Salvare Automată (Desktop)',
-    autoSaveDesc: 'Salvează automat modificările manuscrisului în fișierul local din fundal, fără a întrerupe fluxul de scriere.',
+    autoSaveTitle: 'Salvare Automată (Desktop & Cloud)',
+    autoSaveDesc: 'Salvează automat modificările manuscrisului în fișierul local sau în stocarea cloud din fundal, fără a întrerupe fluxul de scriere.',
     autoSaveInterval: 'Interval Salvare Automată:',
     autoSaveIntervalDesc: 'Frecvența de salvare când sunt detectate modificări',
     interval30s: '30 secunde',
