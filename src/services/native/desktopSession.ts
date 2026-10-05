@@ -1,12 +1,17 @@
 /**
  * Native Desktop Session Storage Service
  *
- * Persists and restores the last opened manuscript file path and active chapter
- * for desktop application launches (Tauri).
+ * Persists and restores the last opened manuscript (local file path or cloud storage)
+ * and active chapter for desktop application launches (Tauri).
  */
 
+export type DesktopSessionTarget = 'local' | 'cloud';
+
 export interface DesktopSession {
-  filePath: string;
+  target?: DesktopSessionTarget;
+  filePath?: string;
+  cloudHref?: string;
+  cloudFileName?: string;
   activeChapterId: string | null;
   timestamp: number;
 }
@@ -14,12 +19,13 @@ export interface DesktopSession {
 const DESKTOP_SESSION_KEY = 'chronicle_desktop_last_session_v1';
 
 /**
- * Persists the current desktop editing session.
+ * Persists the current local desktop editing session.
  */
 export function saveDesktopSession(filePath: string, activeChapterId: string | null): void {
   if (typeof window === 'undefined' || !window.localStorage) return;
   try {
     const session: DesktopSession = {
+      target: 'local',
       filePath,
       activeChapterId,
       timestamp: Date.now(),
@@ -27,6 +33,25 @@ export function saveDesktopSession(filePath: string, activeChapterId: string | n
     localStorage.setItem(DESKTOP_SESSION_KEY, JSON.stringify(session));
   } catch (err) {
     console.warn('[DesktopSession] Failed to save session:', err);
+  }
+}
+
+/**
+ * Persists the current cloud storage desktop editing session.
+ */
+export function saveCloudDesktopSession(cloudHref: string, cloudFileName: string, activeChapterId: string | null): void {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    const session: DesktopSession = {
+      target: 'cloud',
+      cloudHref,
+      cloudFileName,
+      activeChapterId,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(DESKTOP_SESSION_KEY, JSON.stringify(session));
+  } catch (err) {
+    console.warn('[DesktopSession] Failed to save cloud session:', err);
   }
 }
 
@@ -39,8 +64,17 @@ export function getDesktopSession(): DesktopSession | null {
     const raw = localStorage.getItem(DESKTOP_SESSION_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.filePath === 'string' && parsed.filePath.trim().length > 0) {
+    if (!parsed) return null;
+
+    if (parsed.target === 'cloud' && (parsed.cloudHref || parsed.cloudFileName)) {
       return parsed as DesktopSession;
+    }
+
+    if (typeof parsed.filePath === 'string' && parsed.filePath.trim().length > 0) {
+      return {
+        ...parsed,
+        target: parsed.target || 'local',
+      } as DesktopSession;
     }
     return null;
   } catch (err) {
@@ -56,7 +90,7 @@ export function updateDesktopSessionChapter(activeChapterId: string | null): voi
   if (typeof window === 'undefined' || !window.localStorage) return;
   try {
     const current = getDesktopSession();
-    if (current && current.filePath) {
+    if (current && (current.filePath || current.cloudHref || current.cloudFileName)) {
       current.activeChapterId = activeChapterId;
       current.timestamp = Date.now();
       localStorage.setItem(DESKTOP_SESSION_KEY, JSON.stringify(current));
