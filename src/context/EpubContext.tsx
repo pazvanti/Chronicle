@@ -555,6 +555,13 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return true;
   });
 
+  const isMountedRef = useRef<boolean>(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const showWelcomeOnStartupRef = useRef<boolean>(showWelcomeOnStartup);
   useEffect(() => {
     showWelcomeOnStartupRef.current = showWelcomeOnStartup;
@@ -1350,6 +1357,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           targetName: targetDisplayName,
           onProceed: () => openLocalDocument(targetPath, true, initialChapterId, isRestore),
         });
+        setIsLoading(false);
         return;
       }
 
@@ -1357,9 +1365,13 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (!filePath) {
         if (isTauri()) {
           const picked = await pickFileToOpen();
-          if (!picked) return;
+          if (!picked) {
+            setIsLoading(false);
+            return;
+          }
           filePath = picked;
         } else {
+          setIsLoading(false);
           return;
         }
       }
@@ -1490,6 +1502,11 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     },
     [showNotification, refreshBookSession, extractCssFromBook]
   );
+
+  const openLocalDocumentRef = useRef(openLocalDocument);
+  useEffect(() => {
+    openLocalDocumentRef.current = openLocalDocument;
+  }, [openLocalDocument]);
 
 
   const loadEpubFile = loadAnyFile;
@@ -2206,10 +2223,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           targetName: filename,
           onProceed: () => loadFromCloud(href, filename, true, relativePath, restoreChapterId, isRestore),
         });
+        setIsLoading(false);
         return;
       }
       const activeConfig = webdavConfig || (await loadAllSettings()).webdavConfig;
       if (!activeConfig) {
+        setIsLoading(false);
         showNotification('error', 'WebDAV configuration not found.');
         return;
       }
@@ -2333,6 +2352,11 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     [webdavConfig, showNotification, refreshBookSession, extractCssFromBook]
   );
 
+  const loadFromCloudRef = useRef(loadFromCloud);
+  useEffect(() => {
+    loadFromCloudRef.current = loadFromCloud;
+  }, [loadFromCloud]);
+
   // Auto-restore previous desktop session on app launch (Tauri desktop: local file or cloud storage)
   const hasAttemptedDesktopRestoreRef = useRef<boolean>(false);
   useEffect(() => {
@@ -2340,17 +2364,18 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (hasAttemptedDesktopRestoreRef.current) return;
     hasAttemptedDesktopRestoreRef.current = true;
 
-    let isMounted = true;
-
     async function restorePreviousSession() {
       try {
         const session = getDesktopSession();
-        if (!session) return;
+        if (!session) {
+          setIsLoading(false);
+          return;
+        }
 
         // 1. Cloud storage session
         if (session.target === 'cloud' || (!session.filePath && (session.cloudHref || session.cloudFileName))) {
           const cfg = webdavConfigRef.current || (await loadAllSettings()).webdavConfig;
-          if (!isMounted) return;
+          if (!isMountedRef.current) return;
 
           if (!cfg) {
             console.warn('[Chronicle Desktop] Cannot restore cloud session: WebDAV is not configured');
@@ -2358,20 +2383,21 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (showWelcomeOnStartupRef.current) {
               setIsWelcomeModalOpen(true);
             }
+            setIsLoading(false);
             return;
           }
 
           const href = session.cloudHref || session.cloudFileName!;
           const filename = session.cloudFileName || session.cloudHref!.split('/').pop() || 'manuscript.chronicle';
 
-          await loadFromCloud(href, filename, true, session.cloudFileName || undefined, session.activeChapterId, true);
+          await loadFromCloudRef.current(href, filename, true, session.cloudFileName || undefined, session.activeChapterId, true);
           return;
         }
 
         // 2. Local disk file session
         if (session.filePath) {
           const fileExists = await checkLocalFileExists(session.filePath);
-          if (!isMounted) return;
+          if (!isMountedRef.current) return;
 
           if (!fileExists) {
             console.info('[Chronicle Desktop] Previous session file no longer exists on disk:', session.filePath);
@@ -2379,11 +2405,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (showWelcomeOnStartupRef.current) {
               setIsWelcomeModalOpen(true);
             }
+            setIsLoading(false);
             return;
           }
 
           // Restore previous document & chapter
-          await openLocalDocument(session.filePath, true, session.activeChapterId, true);
+          await openLocalDocumentRef.current(session.filePath, true, session.activeChapterId, true);
         }
       } catch (err) {
         console.warn('[Chronicle Desktop] Could not restore previous session:', err);
@@ -2391,15 +2418,15 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (showWelcomeOnStartupRef.current) {
           setIsWelcomeModalOpen(true);
         }
+      } finally {
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
       }
     }
 
     restorePreviousSession();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [openLocalDocument, loadFromCloud]);
+  }, []);
 
   const saveProject = useCallback(
     async (
