@@ -49,6 +49,10 @@ export interface TranslationDictionary {
     settingsTooltip: string;
     showSidebar: string;
     hideSidebar: string;
+    openManuscripts: string;
+    switchManuscript: string;
+    closeManuscript: string;
+    saveCurrent: string;
   };
   statusBar: {
     processing: string;

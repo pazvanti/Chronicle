@@ -49,6 +49,10 @@ export const ro: TranslationDictionary = {
     settingsTooltip: 'Setări (Ctrl+,)',
     showSidebar: 'Arată Bara Laterală de Capitole (Ctrl+\\)',
     hideSidebar: 'Ascunde Bara Laterală de Capitole (Ctrl+\\)',
+    openManuscripts: 'Manuscrisuri Deschise',
+    switchManuscript: 'Comută manuscrisul',
+    closeManuscript: 'Închide manuscrisul',
+    saveCurrent: 'Salvează Manuscrisul Curent',
   },
   statusBar: {
     processing: 'Se procesează...',

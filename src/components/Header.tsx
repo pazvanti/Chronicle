@@ -12,7 +12,6 @@ import {
   Save,
   Sidebar,
   PlusCircle,
-  Edit2,
   Cloud,
   ChevronDown,
   FolderTree,
@@ -31,6 +30,7 @@ import { PrimaryAppMode } from '../types/project';
 import { TypographyModal } from './Typography/TypographyModal';
 import { ExportModal } from './Export/ExportModal';
 import { TitleRenameModal } from './Header/TitleRenameModal';
+import { DocumentSwitcherDropdown } from './Header/DocumentSwitcherDropdown';
 import { ChronicleLogo } from './Common/ChronicleLogo';
 import { isTauri } from '../services/cloud/webdavClient';
 import { CURRENT_VERSION } from '../services/update/updateChecker';
@@ -170,22 +170,10 @@ export const Header: React.FC = () => {
             {book && (
               <>
                 <div className="header-divider" />
-                <div
-                  className="document-title-pill"
-                  onClick={() => setIsRenameOpen(true)}
-                  title="Click to edit manuscript title"
-                  style={{ maxWidth: '280px' }}
-                >
-                  <span
-                    className={`document-status-dot ${isDirty ? 'dot-dirty' : 'dot-clean'}`}
-                    title={isDirty ? t('header.unsavedChanges') : t('header.allChangesSaved')}
-                  />
-                  <div className="document-title-content">
-                    <span className="document-title-text" style={{ fontSize: '0.82rem' }}>
-                      {book.metadata.title || t('header.newManuscript')}
-                    </span>
-                  </div>
-                </div>
+                <DocumentSwitcherDropdown
+                  onOpenRenameModal={() => setIsRenameOpen(true)}
+                  minimalist
+                />
 
                 {activeChapter && (
                   <span
@@ -307,27 +295,9 @@ export const Header: React.FC = () => {
             {book && (
               <>
                 <div className="header-divider" />
-                <div
-                  className="document-title-pill"
-                  onClick={() => setIsRenameOpen(true)}
-                  title={t('headerActions.renameTitleAuthor')}
-                >
-                  <span
-                    className={`document-status-dot ${isDirty ? 'dot-dirty' : 'dot-clean'}`}
-                    title={isDirty ? t('header.unsavedChanges') : t('header.allChangesSaved')}
-                  />
-                  <div className="document-title-content">
-                    <span className="document-title-text">
-                      {book.metadata.title || 'Untitled Manuscript'}
-                    </span>
-                    {book.metadata.creator && (
-                      <span className="document-author-subtext">
-                        {t('headerActions.byAuthor')} {book.metadata.creator}
-                      </span>
-                    )}
-                  </div>
-                  <Edit2 size={11} className="title-edit-hint" />
-                </div>
+                <DocumentSwitcherDropdown
+                  onOpenRenameModal={() => setIsRenameOpen(true)}
+                />
               </>
             )}
           </div>

@@ -49,6 +49,10 @@ export const en: TranslationDictionary = {
     settingsTooltip: 'Settings (Ctrl+,)',
     showSidebar: 'Show Chapters Sidebar (Ctrl+\\)',
     hideSidebar: 'Hide Chapters Sidebar (Ctrl+\\)',
+    openManuscripts: 'Open Manuscripts',
+    switchManuscript: 'Switch manuscript',
+    closeManuscript: 'Close manuscript',
+    saveCurrent: 'Save Current Manuscript',
   },
   statusBar: {
     processing: 'Processing...',

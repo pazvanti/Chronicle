@@ -93,7 +93,7 @@ import {
 import { useTranslation } from '../i18n/I18nContext';
 
 export interface PendingUnsavedAction {
-  actionType: 'new' | 'open' | 'sample' | 'cloud';
+  actionType: 'new' | 'open' | 'sample' | 'cloud' | 'close';
   title: string;
   description: string;
   targetName?: string;
@@ -112,7 +112,29 @@ export interface NotificationState {
   action?: NotificationAction;
 }
 
+export interface OpenFileSession {
+  id: string;
+  book: EpubBook;
+  bookSessionId: string;
+  storageTarget: StorageTarget | null;
+  localFilePath: string | null;
+  cloudFileName: string | null;
+  isDirty: boolean;
+  activeChapterId: string | null;
+  activeTimelineId: string | null;
+  activeCommentId: string | null;
+  customCss: string;
+  lastAutoSavedAt: Date | null;
+  castPresenceData: CastPresenceMatrix | null;
+  isPresenceCacheValid: boolean;
+}
+
 interface EpubContextType {
+  openFiles: OpenFileSession[];
+  activeFileId: string | null;
+  switchOpenFile: (fileId: string) => void;
+  closeOpenFile: (fileId: string, force?: boolean) => Promise<void>;
+
   book: EpubBook | null;
   bookSessionId: string;
   refreshBookSession: () => void;
@@ -347,6 +369,19 @@ const EpubContext = createContext<EpubContextType | undefined>(undefined);
 export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { t } = useTranslation();
   const initialSettings = getStoredSettings();
+  const [openFiles, setOpenFiles] = useState<OpenFileSession[]>([]);
+  const [activeFileId, setActiveFileId] = useState<string | null>(null);
+  const openFilesRef = useRef<OpenFileSession[]>([]);
+  const activeFileIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    openFilesRef.current = openFiles;
+  }, [openFiles]);
+
+  useEffect(() => {
+    activeFileIdRef.current = activeFileId;
+  }, [activeFileId]);
+
   const [book, setBook] = useState<EpubBook | null>(null);
   const [bookSessionId, setBookSessionId] = useState<string>(() => `book_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
   const refreshBookSession = useCallback(() => {
@@ -611,6 +646,13 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     activeChapterIdRef.current = activeChapterId;
   }, [activeChapterId]);
 
+  const activeTimelineIdRef = useRef<string | null>(null);
+
+  const activeCommentIdRef = useRef<string | null>(activeCommentId);
+  useEffect(() => {
+    activeCommentIdRef.current = activeCommentId;
+  }, [activeCommentId]);
+
   const localFilePathRef = useRef<string | null>(localFilePath);
   useEffect(() => {
     localFilePathRef.current = localFilePath;
@@ -630,6 +672,61 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     webdavConfigRef.current = webdavConfig;
   }, [webdavConfig]);
+
+  const customCssRef = useRef<string>(customCss);
+  useEffect(() => {
+    customCssRef.current = customCss;
+  }, [customCss]);
+
+  const castPresenceDataRef = useRef<CastPresenceMatrix | null>(castPresenceData);
+  useEffect(() => {
+    castPresenceDataRef.current = castPresenceData;
+  }, [castPresenceData]);
+
+  const isPresenceCacheValidRef = useRef<boolean>(isPresenceCacheValid);
+  useEffect(() => {
+    isPresenceCacheValidRef.current = isPresenceCacheValid;
+  }, [isPresenceCacheValid]);
+
+  // Keep openFiles synchronously up to date for the active session
+  useEffect(() => {
+    const currentId = activeFileId;
+    if (!currentId || !book) return;
+    setOpenFiles(prev =>
+      prev.map(s =>
+        s.id === currentId
+          ? {
+            ...s,
+            book,
+            storageTarget,
+            localFilePath,
+            cloudFileName,
+            isDirty,
+            activeChapterId,
+            activeTimelineId: activeTimelineIdRef.current,
+            activeCommentId,
+            customCss,
+            castPresenceData,
+            isPresenceCacheValid,
+            lastAutoSavedAt,
+          }
+          : s
+      )
+    );
+  }, [
+    book,
+    storageTarget,
+    localFilePath,
+    cloudFileName,
+    isDirty,
+    activeChapterId,
+    activeCommentId,
+    customCss,
+    castPresenceData,
+    isPresenceCacheValid,
+    lastAutoSavedAt,
+    activeFileId,
+  ]);
 
   // Keep stored desktop session chapter in sync whenever active chapter changes
   useEffect(() => {
@@ -1110,24 +1207,206 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 
   // Helper to extract CSS from loaded book
-  const extractCssFromBook = (loadedBook: EpubBook) => {
+  const extractCssFromBook = useCallback((loadedBook: EpubBook): string => {
     const cssAsset = loadedBook.assets?.find(a => a.mediaType?.includes('css'));
     if (cssAsset && cssAsset.data) {
       const decoded = new TextDecoder('utf-8').decode(cssAsset.data);
       setCustomCss(decoded);
-      return;
+      customCssRef.current = decoded;
+      return decoded;
     }
     if (loadedBook.rawFiles) {
       for (const [path, bytes] of loadedBook.rawFiles.entries()) {
         if (path.toLowerCase().endsWith('.css') && bytes) {
           const decoded = new TextDecoder('utf-8').decode(bytes);
           setCustomCss(decoded);
-          return;
+          customCssRef.current = decoded;
+          return decoded;
         }
       }
     }
-    setCustomCss(CSS_PRESETS[0].css);
-  };
+    const defaultCss = CSS_PRESETS[0].css;
+    setCustomCss(defaultCss);
+    customCssRef.current = defaultCss;
+    return defaultCss;
+  }, []);
+
+  const createSessionFromBook = useCallback(
+    (
+      newBook: EpubBook,
+      target: StorageTarget | null = null,
+      localPath: string | null = null,
+      cloudName: string | null = null,
+      dirty: boolean = false,
+      chapterId?: string | null,
+      cssText?: string
+    ): OpenFileSession => {
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const bookSessId = `book_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      let extractedCss = cssText;
+      if (extractedCss === undefined) {
+        const cssAsset = newBook.assets?.find(a => a.mediaType?.includes('css'));
+        if (cssAsset && cssAsset.data) {
+          extractedCss = new TextDecoder('utf-8').decode(cssAsset.data);
+        } else if (newBook.rawFiles) {
+          for (const [path, bytes] of newBook.rawFiles.entries()) {
+            if (path.toLowerCase().endsWith('.css') && bytes) {
+              extractedCss = new TextDecoder('utf-8').decode(bytes);
+              break;
+            }
+          }
+        }
+        if (!extractedCss) {
+          extractedCss = CSS_PRESETS[0].css;
+        }
+      }
+
+      const targetChapterId = (chapterId && newBook.chapters.some(c => c.id === chapterId))
+        ? chapterId
+        : (newBook.chapters[0]?.id || null);
+
+      return {
+        id: sessionId,
+        book: newBook,
+        bookSessionId: bookSessId,
+        storageTarget: target,
+        localFilePath: localPath,
+        cloudFileName: cloudName,
+        isDirty: dirty,
+        activeChapterId: targetChapterId,
+        activeTimelineId: newBook.writerData?.timelines?.[0]?.id || null,
+        activeCommentId: null,
+        customCss: extractedCss,
+        lastAutoSavedAt: null,
+        castPresenceData: null,
+        isPresenceCacheValid: false,
+      };
+    },
+    []
+  );
+
+  const flushCurrentEditorContent = useCallback(() => {
+    let currentBook = bookRef.current;
+    if (!currentBook || typeof document === 'undefined') return currentBook;
+
+    const activeEl = document.activeElement;
+    if (activeEl && activeEl.classList.contains('wysiwyg-content')) {
+      const domContent = (activeEl as HTMLElement).innerHTML;
+      const currentActiveCh = currentBook.chapters.find(c => c.id === activeChapterIdRef.current) || currentBook.chapters[0];
+      if (currentActiveCh && currentActiveCh.content !== domContent) {
+        const updatedOriginalXhtml = wrapInXhtml(
+          restoreAssetUrls(domContent, currentActiveCh.fullPath, currentBook.assets),
+          currentActiveCh.title
+        );
+        const updatedChapters = currentBook.chapters.map(c =>
+          c.id === currentActiveCh.id
+            ? {
+              ...c,
+              content: domContent,
+              originalXhtml: updatedOriginalXhtml,
+              wordCount: calculateWordCount(domContent),
+            }
+            : c
+        );
+        currentBook = {
+          ...currentBook,
+          chapters: updatedChapters,
+        };
+        bookRef.current = currentBook;
+        setBook(currentBook);
+      }
+    }
+    return currentBook;
+  }, []);
+
+  const switchOpenFile = useCallback(
+    (fileId: string) => {
+      if (fileId === activeFileIdRef.current) return;
+      const currentBook = flushCurrentEditorContent();
+      const currentId = activeFileIdRef.current;
+
+      // Update current session in openFiles before switching
+      let updatedFiles = openFilesRef.current;
+      if (currentId && currentBook) {
+        updatedFiles = updatedFiles.map(s =>
+          s.id === currentId
+            ? {
+              ...s,
+              book: currentBook,
+              storageTarget: storageTargetRef.current,
+              localFilePath: localFilePathRef.current,
+              cloudFileName: cloudFileNameRef.current,
+              isDirty: isDirtyRef.current,
+              activeChapterId: activeChapterIdRef.current,
+              activeTimelineId: activeTimelineIdRef.current,
+              activeCommentId: activeCommentIdRef.current,
+              customCss: customCssRef.current,
+              castPresenceData: castPresenceDataRef.current,
+              isPresenceCacheValid: isPresenceCacheValidRef.current,
+            }
+            : s
+        );
+        openFilesRef.current = updatedFiles;
+        setOpenFiles(updatedFiles);
+      }
+
+      const target = updatedFiles.find(s => s.id === fileId);
+      if (!target) return;
+
+      setActiveFileId(target.id);
+      activeFileIdRef.current = target.id;
+
+      bookRef.current = target.book;
+      setBook(target.book);
+      setBookSessionId(target.bookSessionId);
+
+      storageTargetRef.current = target.storageTarget;
+      setStorageTarget(target.storageTarget);
+
+      localFilePathRef.current = target.localFilePath;
+      setLocalFilePath(target.localFilePath);
+
+      cloudFileNameRef.current = target.cloudFileName;
+      setCloudFileName(target.cloudFileName);
+
+      isDirtyRef.current = target.isDirty;
+      setIsDirtyState(target.isDirty);
+
+      const targetChapter = (target.activeChapterId && target.book.chapters.some(c => c.id === target.activeChapterId))
+        ? target.activeChapterId
+        : (target.book.chapters[0]?.id || null);
+      activeChapterIdRef.current = targetChapter;
+      setActiveChapterId(targetChapter);
+
+      activeTimelineIdRef.current = target.activeTimelineId;
+      setActiveTimelineId(target.activeTimelineId);
+
+      activeCommentIdRef.current = target.activeCommentId;
+      setActiveCommentId(target.activeCommentId);
+
+      customCssRef.current = target.customCss;
+      setCustomCss(target.customCss);
+
+      setLastAutoSavedAt(target.lastAutoSavedAt);
+
+      castPresenceDataRef.current = target.castPresenceData;
+      setCastPresenceData(target.castPresenceData);
+
+      isPresenceCacheValidRef.current = target.isPresenceCacheValid;
+      setIsPresenceCacheValid(target.isPresenceCacheValid);
+
+      if (isTauri()) {
+        if (target.storageTarget === 'local' && target.localFilePath) {
+          saveDesktopSession(target.localFilePath, targetChapter);
+        } else if (target.storageTarget === 'cloud' && target.cloudFileName) {
+          saveCloudDesktopSession(target.cloudFileName, target.cloudFileName, targetChapter);
+        }
+      }
+
+      showNotification('info', `Switched to "${target.book.metadata.title || 'Untitled Manuscript'}"`);
+    },
+    [flushCurrentEditorContent, showNotification]
+  );
 
   // Load sample book on initial startup
   useEffect(() => {
@@ -1142,11 +1421,19 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const settings = await loadAllSettings();
         const activeLang = settings.language || (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en');
         const sample = await createSampleEpubBook(activeLang);
+        const sampleSession = createSessionFromBook(sample, null, null, null, false);
+        openFilesRef.current = [sampleSession];
+        setOpenFiles([sampleSession]);
+        setActiveFileId(sampleSession.id);
+        activeFileIdRef.current = sampleSession.id;
+
         setBook(sample);
-        refreshBookSession();
+        bookRef.current = sample;
+        setBookSessionId(sampleSession.bookSessionId);
         extractCssFromBook(sample);
         if (sample.chapters.length > 0) {
           setActiveChapterId(sample.chapters[0].id);
+          activeChapterIdRef.current = sample.chapters[0].id;
         }
       } catch (err) {
         console.error('Failed to load initial demo book:', err);
@@ -1155,54 +1442,68 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     }
     init();
-  }, [refreshBookSession]);
+  }, [createSessionFromBook, extractCssFromBook]);
 
-  const loadSampleBook = useCallback(async (force: boolean = false) => {
-    if (isDirtyRef.current && !force) {
-      setPendingUnsavedAction({
-        actionType: 'sample',
-        title: 'Load Sample Manuscript',
-        description: 'Loading Alice’s Adventures in Wonderland will replace your current workspace. Any unsaved edits in your current manuscript will be permanently lost.',
-        targetName: 'Alice’s Adventures in Wonderland',
-        onProceed: () => loadSampleBook(true),
-      });
-      return;
-    }
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('epub-file-opening'));
-    }
-    try {
-      setIsLoading(true);
-      const settings = await loadAllSettings();
-      const activeLang = settings.language || (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en');
-      const sample = await createSampleEpubBook(activeLang);
-      bookRef.current = sample;
-      setBook(sample);
-      refreshBookSession();
-      extractCssFromBook(sample);
-      if (sample.chapters.length > 0) {
-        setActiveChapterId(sample.chapters[0].id);
+  const loadSampleBook = useCallback(
+    async (_force: boolean = false) => {
+      // Check if sample book is already open in openFiles
+      const existingSample = openFilesRef.current.find(
+        s => !s.localFilePath && !s.cloudFileName && s.book.metadata.title?.includes('Alice')
+      );
+      if (existingSample) {
+        switchOpenFile(existingSample.id);
+        showNotification('info', t('notifications.loadedSampleBook'));
+        return;
       }
-      if (isTauri()) {
-        clearDesktopSession();
+
+      try {
+        setIsLoading(true);
+        const settings = await loadAllSettings();
+        const activeLang = settings.language || (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en');
+        const sample = await createSampleEpubBook(activeLang);
+
+        const newSession = createSessionFromBook(sample, null, null, null, false);
+        const nextFiles = [...openFilesRef.current, newSession];
+        openFilesRef.current = nextFiles;
+        setOpenFiles(nextFiles);
+
+        setActiveFileId(newSession.id);
+        activeFileIdRef.current = newSession.id;
+
+        bookRef.current = sample;
+        setBook(sample);
+        setBookSessionId(newSession.bookSessionId);
+        extractCssFromBook(sample);
+        if (sample.chapters.length > 0) {
+          setActiveChapterId(sample.chapters[0].id);
+          activeChapterIdRef.current = sample.chapters[0].id;
+        }
+        setStorageTarget(null);
+        storageTargetRef.current = null;
+        setLocalFilePath(null);
+        localFilePathRef.current = null;
+        setCloudFileName(null);
+        cloudFileNameRef.current = null;
+        setCastPresenceData(null);
+        castPresenceDataRef.current = null;
+        setIsPresenceCacheValid(false);
+        isPresenceCacheValidRef.current = false;
+        setIsDirty(false);
+        isDirtyRef.current = false;
+
+        showNotification('success', t('notifications.loadedSampleBook'));
+      } catch (err) {
+        console.error(err);
+        showNotification('error', t('notifications.failedLoadSampleBook'));
+      } finally {
+        setIsLoading(false);
       }
-      setStorageTarget(null);
-      setLocalFilePath(null);
-      setCloudFileName(null);
-      setCastPresenceData(null);
-      setIsPresenceCacheValid(false);
-      setIsDirty(false);
-      showNotification('success', t('notifications.loadedSampleBook'));
-    } catch (err) {
-      console.error(err);
-      showNotification('error', t('notifications.failedLoadSampleBook'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [setIsDirty, showNotification, refreshBookSession, t]);
+    },
+    [createSessionFromBook, extractCssFromBook, setIsDirty, showNotification, switchOpenFile, t]
+  );
 
   const createNewBook = useCallback(
-    async (title?: string, author?: string, force: boolean = false) => {
+    async (title?: string, author?: string, _force: boolean = false) => {
       const settings = await loadAllSettings();
       const activeLang = settings.language || (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en');
       const defaultTitle = t('welcome.defaultTitle');
@@ -1210,39 +1511,40 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const finalTitle = title || defaultTitle;
       const finalAuthor = author || defaultAuthor;
 
-      if (isDirtyRef.current && !force) {
-        setPendingUnsavedAction({
-          actionType: 'new',
-          title: t('header.newManuscript'),
-          description: t('unsavedModal.newManuscriptDesc', { title: finalTitle }),
-          targetName: finalTitle,
-          onProceed: () => createNewBook(finalTitle, finalAuthor, true),
-        });
-        return;
-      }
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('epub-file-opening'));
-      }
       try {
         setIsLoading(true);
         const newBook = await createNewBlankEpubBook(finalTitle, finalAuthor, activeLang);
+
+        const newSession = createSessionFromBook(newBook, null, null, null, true);
+        const nextFiles = [...openFilesRef.current, newSession];
+        openFilesRef.current = nextFiles;
+        setOpenFiles(nextFiles);
+
+        setActiveFileId(newSession.id);
+        activeFileIdRef.current = newSession.id;
+
         bookRef.current = newBook;
         setBook(newBook);
-        refreshBookSession();
+        setBookSessionId(newSession.bookSessionId);
         extractCssFromBook(newBook);
         if (newBook.chapters.length > 0) {
           setActiveChapterId(newBook.chapters[0].id);
-        }
-        if (isTauri()) {
-          clearDesktopSession();
+          activeChapterIdRef.current = newBook.chapters[0].id;
         }
         setStorageTarget(null);
+        storageTargetRef.current = null;
         setLocalFilePath(null);
+        localFilePathRef.current = null;
         setCloudFileName(null);
+        cloudFileNameRef.current = null;
         setCastPresenceData(null);
+        castPresenceDataRef.current = null;
         setIsPresenceCacheValid(false);
+        isPresenceCacheValidRef.current = false;
         setIsDirty(true);
+        isDirtyRef.current = true;
         setViewModeState('editor');
+
         showNotification('success', t('notifications.createdNewManuscript', { title: finalTitle }));
       } catch (err: any) {
         console.error(err);
@@ -1251,62 +1553,203 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLoading(false);
       }
     },
-    [setIsDirty, showNotification, refreshBookSession, t]
+    [createSessionFromBook, extractCssFromBook, setIsDirty, showNotification, t]
   );
 
-  const loadAnyFile = useCallback(
-    async (file: File, force: boolean = false) => {
-      if (isDirtyRef.current && !force) {
+  const closeOpenFile = useCallback(
+    async (fileId: string, force: boolean = false) => {
+      const target = openFilesRef.current.find(s => s.id === fileId);
+      if (!target) return;
+
+      if (target.isDirty && !force) {
         setPendingUnsavedAction({
-          actionType: 'open',
-          title: 'Open Manuscript',
-          description: `Opening "${file.name}" will replace your current workspace. Any unsaved edits in your current manuscript will be permanently lost.`,
-          targetName: file.name,
-          onProceed: () => loadAnyFile(file, true),
+          actionType: 'close',
+          title: 'Close Manuscript',
+          description: `Closing "${target.book.metadata.title || 'Untitled Manuscript'}" will discard any unsaved edits in this manuscript.`,
+          targetName: target.book.metadata.title || 'Untitled Manuscript',
+          onProceed: () => closeOpenFile(fileId, true),
         });
         return;
       }
+
+      const remaining = openFilesRef.current.filter(s => s.id !== fileId);
+
+      if (remaining.length === 0) {
+        // Last file closed: create a new blank manuscript
+        await createNewBook(undefined, undefined, true);
+        return;
+      }
+
+      setOpenFiles(remaining);
+      openFilesRef.current = remaining;
+
+      if (fileId === activeFileIdRef.current) {
+        // Switch to adjacent file
+        const targetIdx = openFilesRef.current.findIndex(s => s.id === fileId);
+        const nextIdx = Math.max(0, targetIdx - 1);
+        const nextSession = remaining[nextIdx] || remaining[0];
+        if (nextSession) {
+          setActiveFileId(nextSession.id);
+          activeFileIdRef.current = nextSession.id;
+
+          bookRef.current = nextSession.book;
+          setBook(nextSession.book);
+          setBookSessionId(nextSession.bookSessionId);
+
+          storageTargetRef.current = nextSession.storageTarget;
+          setStorageTarget(nextSession.storageTarget);
+
+          localFilePathRef.current = nextSession.localFilePath;
+          setLocalFilePath(nextSession.localFilePath);
+
+          cloudFileNameRef.current = nextSession.cloudFileName;
+          setCloudFileName(nextSession.cloudFileName);
+
+          isDirtyRef.current = nextSession.isDirty;
+          setIsDirtyState(nextSession.isDirty);
+
+          const targetChapter = (nextSession.activeChapterId && nextSession.book.chapters.some(c => c.id === nextSession.activeChapterId))
+            ? nextSession.activeChapterId
+            : (nextSession.book.chapters[0]?.id || null);
+          activeChapterIdRef.current = targetChapter;
+          setActiveChapterId(targetChapter);
+
+          activeTimelineIdRef.current = nextSession.activeTimelineId;
+          setActiveTimelineId(nextSession.activeTimelineId);
+
+          activeCommentIdRef.current = nextSession.activeCommentId;
+          setActiveCommentId(nextSession.activeCommentId);
+
+          customCssRef.current = nextSession.customCss;
+          setCustomCss(nextSession.customCss);
+
+          setLastAutoSavedAt(nextSession.lastAutoSavedAt);
+
+          castPresenceDataRef.current = nextSession.castPresenceData;
+          setCastPresenceData(nextSession.castPresenceData);
+
+          isPresenceCacheValidRef.current = nextSession.isPresenceCacheValid;
+          setIsPresenceCacheValid(nextSession.isPresenceCacheValid);
+
+          if (isTauri()) {
+            if (nextSession.storageTarget === 'local' && nextSession.localFilePath) {
+              saveDesktopSession(nextSession.localFilePath, targetChapter);
+            } else if (nextSession.storageTarget === 'cloud' && nextSession.cloudFileName) {
+              saveCloudDesktopSession(nextSession.cloudFileName, nextSession.cloudFileName, targetChapter);
+            }
+          }
+        }
+      }
+      showNotification('info', `Closed "${target.book.metadata.title || 'Untitled Manuscript'}"`);
+    },
+    [createNewBook, showNotification]
+  );
+
+  const loadAnyFile = useCallback(
+    async (file: File, _force: boolean = false) => {
+      const nativePath = (file as any).path as string | undefined;
+
+      // Check if already open
+      if (nativePath) {
+        const existing = openFilesRef.current.find(s => s.localFilePath === nativePath);
+        if (existing) {
+          switchOpenFile(existing.id);
+          showNotification('info', `Switched to open manuscript "${existing.book.metadata.title}"`);
+          return;
+        }
+      }
+
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('epub-file-opening'));
       }
       try {
         setIsLoading(true);
         const buffer = await file.arrayBuffer();
-        const nativePath = (file as any).path as string | undefined;
 
         if (isChronicleProjectFile(file)) {
           const projectBook = await parseChronicleProject(buffer, file.name);
+          const newSession = createSessionFromBook(
+            projectBook,
+            'local',
+            nativePath || null,
+            null,
+            false,
+            projectBook.chapters[0]?.id || null
+          );
+          const nextFiles = [...openFilesRef.current, newSession];
+          openFilesRef.current = nextFiles;
+          setOpenFiles(nextFiles);
+
+          setActiveFileId(newSession.id);
+          activeFileIdRef.current = newSession.id;
+
           bookRef.current = projectBook;
           setBook(projectBook);
-          refreshBookSession();
+          setBookSessionId(newSession.bookSessionId);
           extractCssFromBook(projectBook);
           if (projectBook.chapters.length > 0) {
             setActiveChapterId(projectBook.chapters[0].id);
+            activeChapterIdRef.current = projectBook.chapters[0].id;
           }
           setStorageTarget('local');
+          storageTargetRef.current = 'local';
           setLocalFilePath(nativePath || null);
+          localFilePathRef.current = nativePath || null;
           setCloudFileName(null);
+          cloudFileNameRef.current = null;
           setCastPresenceData(null);
+          castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
+          isPresenceCacheValidRef.current = false;
           setIsDirty(false);
+          isDirtyRef.current = false;
+          if (isTauri() && nativePath) {
+            saveDesktopSession(nativePath, projectBook.chapters[0]?.id || null);
+          }
           showNotification('success', `Opened Chronicle "${projectBook.metadata.title}" successfully!`);
         } else if (isMarkdownFile(file)) {
           const text = await file.text();
           const mdBook = await parseMarkdownToBook(text, file.name);
+          const chroniclePath = nativePath ? nativePath.replace(/\.(md|markdown|mdown|mkd)$/i, '.chronicle') : null;
+          const newSession = createSessionFromBook(
+            mdBook,
+            'local',
+            chroniclePath,
+            null,
+            true,
+            mdBook.chapters[0]?.id || null
+          );
+          const nextFiles = [...openFilesRef.current, newSession];
+          openFilesRef.current = nextFiles;
+          setOpenFiles(nextFiles);
+
+          setActiveFileId(newSession.id);
+          activeFileIdRef.current = newSession.id;
+
           bookRef.current = mdBook;
           setBook(mdBook);
-          refreshBookSession();
+          setBookSessionId(newSession.bookSessionId);
           extractCssFromBook(mdBook);
           if (mdBook.chapters.length > 0) {
             setActiveChapterId(mdBook.chapters[0].id);
+            activeChapterIdRef.current = mdBook.chapters[0].id;
           }
           setStorageTarget('local');
-          setLocalFilePath(nativePath ? nativePath.replace(/\.(md|markdown|mdown|mkd)$/i, '.chronicle') : null);
+          storageTargetRef.current = 'local';
+          setLocalFilePath(chroniclePath);
+          localFilePathRef.current = chroniclePath;
           setCloudFileName(null);
+          cloudFileNameRef.current = null;
           setCastPresenceData(null);
+          castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
+          isPresenceCacheValidRef.current = false;
           setIsDirty(true);
+          isDirtyRef.current = true;
           setViewModeState('editor');
+          if (isTauri() && chroniclePath) {
+            saveDesktopSession(chroniclePath, mdBook.chapters[0]?.id || null);
+          }
           showNotification(
             'success',
             `Imported Markdown "${mdBook.metadata.title}" (${mdBook.chapters.length} chapter${mdBook.chapters.length === 1 ? '' : 's'
@@ -1314,19 +1757,45 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           );
         } else {
           const parsed = await parseEpub(buffer, file.name);
+          const chroniclePath = nativePath ? nativePath.replace(/\.epub$/i, '.chronicle') : null;
+          const newSession = createSessionFromBook(
+            parsed,
+            'local',
+            chroniclePath,
+            null,
+            false,
+            parsed.chapters[0]?.id || null
+          );
+          const nextFiles = [...openFilesRef.current, newSession];
+          openFilesRef.current = nextFiles;
+          setOpenFiles(nextFiles);
+
+          setActiveFileId(newSession.id);
+          activeFileIdRef.current = newSession.id;
+
           bookRef.current = parsed;
           setBook(parsed);
-          refreshBookSession();
+          setBookSessionId(newSession.bookSessionId);
           extractCssFromBook(parsed);
           if (parsed.chapters.length > 0) {
             setActiveChapterId(parsed.chapters[0].id);
+            activeChapterIdRef.current = parsed.chapters[0].id;
           }
           setStorageTarget('local');
-          setLocalFilePath(nativePath ? nativePath.replace(/\.epub$/i, '.chronicle') : null);
+          storageTargetRef.current = 'local';
+          setLocalFilePath(chroniclePath);
+          localFilePathRef.current = chroniclePath;
           setCloudFileName(null);
+          cloudFileNameRef.current = null;
           setCastPresenceData(null);
+          castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
+          isPresenceCacheValidRef.current = false;
           setIsDirty(false);
+          isDirtyRef.current = false;
+          if (isTauri() && chroniclePath) {
+            saveDesktopSession(chroniclePath, parsed.chapters[0]?.id || null);
+          }
           showNotification('success', `Imported EPUB "${parsed.metadata.title}" successfully!`);
         }
       } catch (err: any) {
@@ -1336,31 +1805,16 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLoading(false);
       }
     },
-    [setIsDirty, showNotification, refreshBookSession]
+    [createSessionFromBook, extractCssFromBook, setIsDirty, showNotification, switchOpenFile]
   );
 
   const openLocalDocument = useCallback(
     async (
       targetPath?: string,
-      force: boolean = false,
+      _force: boolean = false,
       initialChapterId?: string | null,
       isRestore: boolean = false
     ) => {
-      if (isDirtyRef.current && !force) {
-        const targetDisplayName = targetPath
-          ? targetPath.split(/[\\/]/).pop() || 'Manuscript'
-          : 'Selected Manuscript';
-        setPendingUnsavedAction({
-          actionType: 'open',
-          title: 'Open Manuscript',
-          description: `Opening "${targetDisplayName}" will replace your current workspace. Any unsaved edits in your current manuscript will be permanently lost.`,
-          targetName: targetDisplayName,
-          onProceed: () => openLocalDocument(targetPath, true, initialChapterId, isRestore),
-        });
-        setIsLoading(false);
-        return;
-      }
-
       let filePath = targetPath;
       if (!filePath) {
         if (isTauri()) {
@@ -1376,6 +1830,15 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
 
+      // Check if this file is already open in openFiles
+      const existing = openFilesRef.current.find(s => s.localFilePath === filePath);
+      if (existing) {
+        switchOpenFile(existing.id);
+        showNotification('info', `Switched to open manuscript "${existing.book.metadata.title}"`);
+        setIsLoading(false);
+        return;
+      }
+
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('epub-file-opening'));
       }
@@ -1388,22 +1851,45 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (lower.endsWith('.chronicle')) {
           const projectBook = await parseChronicleProject(uint8.buffer as ArrayBuffer, fileName);
-          bookRef.current = projectBook;
-          setBook(projectBook);
-          refreshBookSession();
-          extractCssFromBook(projectBook);
           const targetChapterId = (initialChapterId && projectBook.chapters.some(c => c.id === initialChapterId))
             ? initialChapterId
             : (projectBook.chapters[0]?.id || null);
+
+          const newSession = createSessionFromBook(
+            projectBook,
+            'local',
+            filePath,
+            null,
+            false,
+            targetChapterId
+          );
+          const nextFiles = [...openFilesRef.current, newSession];
+          openFilesRef.current = nextFiles;
+          setOpenFiles(nextFiles);
+
+          setActiveFileId(newSession.id);
+          activeFileIdRef.current = newSession.id;
+
+          bookRef.current = projectBook;
+          setBook(projectBook);
+          setBookSessionId(newSession.bookSessionId);
+          extractCssFromBook(projectBook);
           if (targetChapterId) {
             setActiveChapterId(targetChapterId);
+            activeChapterIdRef.current = targetChapterId;
           }
           setStorageTarget('local');
+          storageTargetRef.current = 'local';
           setLocalFilePath(filePath);
+          localFilePathRef.current = filePath;
           setCloudFileName(null);
+          cloudFileNameRef.current = null;
           setCastPresenceData(null);
+          castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
+          isPresenceCacheValidRef.current = false;
           setIsDirtyState(false);
+          isDirtyRef.current = false;
           if (isTauri()) {
             saveDesktopSession(filePath, targetChapterId);
           }
@@ -1423,23 +1909,46 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         ) {
           const text = new TextDecoder().decode(uint8);
           const mdBook = await parseMarkdownToBook(text, fileName);
-          bookRef.current = mdBook;
-          setBook(mdBook);
-          refreshBookSession();
-          extractCssFromBook(mdBook);
           const targetChapterId = (initialChapterId && mdBook.chapters.some(c => c.id === initialChapterId))
             ? initialChapterId
             : (mdBook.chapters[0]?.id || null);
+          const chroniclePath = filePath.replace(/\.(md|markdown|mdown|mkd)$/i, '.chronicle');
+
+          const newSession = createSessionFromBook(
+            mdBook,
+            'local',
+            chroniclePath,
+            null,
+            true,
+            targetChapterId
+          );
+          const nextFiles = [...openFilesRef.current, newSession];
+          openFilesRef.current = nextFiles;
+          setOpenFiles(nextFiles);
+
+          setActiveFileId(newSession.id);
+          activeFileIdRef.current = newSession.id;
+
+          bookRef.current = mdBook;
+          setBook(mdBook);
+          setBookSessionId(newSession.bookSessionId);
+          extractCssFromBook(mdBook);
           if (targetChapterId) {
             setActiveChapterId(targetChapterId);
+            activeChapterIdRef.current = targetChapterId;
           }
           setStorageTarget('local');
-          const chroniclePath = filePath.replace(/\.(md|markdown|mdown|mkd)$/i, '.chronicle');
+          storageTargetRef.current = 'local';
           setLocalFilePath(chroniclePath);
+          localFilePathRef.current = chroniclePath;
           setCloudFileName(null);
+          cloudFileNameRef.current = null;
           setCastPresenceData(null);
+          castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
+          isPresenceCacheValidRef.current = false;
           setIsDirtyState(true);
+          isDirtyRef.current = true;
           setViewModeState('editor');
           if (isTauri()) {
             saveDesktopSession(filePath, targetChapterId);
@@ -1458,23 +1967,46 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         } else {
           const parsed = await parseEpub(uint8.buffer as ArrayBuffer, fileName);
-          bookRef.current = parsed;
-          setBook(parsed);
-          refreshBookSession();
-          extractCssFromBook(parsed);
           const targetChapterId = (initialChapterId && parsed.chapters.some(c => c.id === initialChapterId))
             ? initialChapterId
             : (parsed.chapters[0]?.id || null);
+          const chroniclePath = filePath.replace(/\.epub$/i, '.chronicle');
+
+          const newSession = createSessionFromBook(
+            parsed,
+            'local',
+            chroniclePath,
+            null,
+            false,
+            targetChapterId
+          );
+          const nextFiles = [...openFilesRef.current, newSession];
+          openFilesRef.current = nextFiles;
+          setOpenFiles(nextFiles);
+
+          setActiveFileId(newSession.id);
+          activeFileIdRef.current = newSession.id;
+
+          bookRef.current = parsed;
+          setBook(parsed);
+          setBookSessionId(newSession.bookSessionId);
+          extractCssFromBook(parsed);
           if (targetChapterId) {
             setActiveChapterId(targetChapterId);
+            activeChapterIdRef.current = targetChapterId;
           }
           setStorageTarget('local');
-          const chroniclePath = filePath.replace(/\.epub$/i, '.chronicle');
+          storageTargetRef.current = 'local';
           setLocalFilePath(chroniclePath);
+          localFilePathRef.current = chroniclePath;
           setCloudFileName(null);
+          cloudFileNameRef.current = null;
           setCastPresenceData(null);
+          castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
+          isPresenceCacheValidRef.current = false;
           setIsDirtyState(false);
+          isDirtyRef.current = false;
           if (isTauri()) {
             saveDesktopSession(filePath, targetChapterId);
           }
@@ -1500,7 +2032,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLoading(false);
       }
     },
-    [showNotification, refreshBookSession, extractCssFromBook]
+    [createSessionFromBook, extractCssFromBook, showNotification, switchOpenFile]
   );
 
   const openLocalDocumentRef = useRef(openLocalDocument);
@@ -2215,18 +2747,17 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isRestore: boolean = false
     ) => {
       const storedPath = relativePath || filename;
-      if (isDirtyRef.current && !force) {
-        setPendingUnsavedAction({
-          actionType: 'cloud',
-          title: 'Open Cloud Manuscript',
-          description: `Opening "${filename}" from WebDAV cloud will replace your current workspace. Any unsaved edits in your current manuscript will be permanently lost.`,
-          targetName: filename,
-          onProceed: () => loadFromCloud(href, filename, true, relativePath, restoreChapterId, isRestore),
-        });
+
+      // Check if already open (unless force reload is requested)
+      const existing = openFilesRef.current.find(s => s.storageTarget === 'cloud' && s.cloudFileName === storedPath);
+      if (!force && existing) {
+        switchOpenFile(existing.id);
+        showNotification('info', `Switched to open cloud manuscript "${existing.book.metadata.title}"`);
         setIsLoading(false);
         return;
       }
-      const activeConfig = webdavConfig || (await loadAllSettings()).webdavConfig;
+
+      const activeConfig = webdavConfigRef.current || (await loadAllSettings()).webdavConfig;
       if (!activeConfig) {
         setIsLoading(false);
         showNotification('error', 'WebDAV configuration not found.');
@@ -2243,25 +2774,48 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (lower.endsWith('.chronicle')) {
           const projectBook = await parseChronicleProject(buffer, filename);
-          bookRef.current = projectBook;
-          setBook(projectBook);
-          refreshBookSession();
-          extractCssFromBook(projectBook);
           const targetChapterId = (restoreChapterId && projectBook.chapters.some(c => c.id === restoreChapterId))
             ? restoreChapterId
             : (projectBook.chapters[0]?.id || null);
+
+          const newSession = createSessionFromBook(
+            projectBook,
+            'cloud',
+            null,
+            storedPath,
+            false,
+            targetChapterId
+          );
+          const nextFiles = [...openFilesRef.current, newSession];
+          openFilesRef.current = nextFiles;
+          setOpenFiles(nextFiles);
+
+          setActiveFileId(newSession.id);
+          activeFileIdRef.current = newSession.id;
+
+          bookRef.current = projectBook;
+          setBook(projectBook);
+          setBookSessionId(newSession.bookSessionId);
+          extractCssFromBook(projectBook);
           if (targetChapterId) {
             setActiveChapterId(targetChapterId);
+            activeChapterIdRef.current = targetChapterId;
           }
           setStorageTarget('cloud');
+          storageTargetRef.current = 'cloud';
           setLocalFilePath(null);
+          localFilePathRef.current = null;
           setCloudFileName(storedPath);
+          cloudFileNameRef.current = storedPath;
           if (isTauri()) {
             saveCloudDesktopSession(href, storedPath, targetChapterId);
           }
           setCastPresenceData(null);
+          castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
+          isPresenceCacheValidRef.current = false;
           setIsDirtyState(false);
+          isDirtyRef.current = false;
           if (isRestore) {
             setViewModeState('editor');
             const ch = projectBook.chapters.find(c => c.id === targetChapterId);
@@ -2273,26 +2827,49 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } else if (isMarkdownFile(filename)) {
           const text = await blob.text();
           const mdBook = await parseMarkdownToBook(text, filename);
-          bookRef.current = mdBook;
-          setBook(mdBook);
-          refreshBookSession();
-          extractCssFromBook(mdBook);
           const targetChapterId = (restoreChapterId && mdBook.chapters.some(c => c.id === restoreChapterId))
             ? restoreChapterId
             : (mdBook.chapters[0]?.id || null);
+          const destCloudName = storedPath.replace(/\.(md|markdown|mdown|mkd)$/i, '.chronicle');
+
+          const newSession = createSessionFromBook(
+            mdBook,
+            'cloud',
+            null,
+            destCloudName,
+            true,
+            targetChapterId
+          );
+          const nextFiles = [...openFilesRef.current, newSession];
+          openFilesRef.current = nextFiles;
+          setOpenFiles(nextFiles);
+
+          setActiveFileId(newSession.id);
+          activeFileIdRef.current = newSession.id;
+
+          bookRef.current = mdBook;
+          setBook(mdBook);
+          setBookSessionId(newSession.bookSessionId);
+          extractCssFromBook(mdBook);
           if (targetChapterId) {
             setActiveChapterId(targetChapterId);
+            activeChapterIdRef.current = targetChapterId;
           }
           setStorageTarget('cloud');
+          storageTargetRef.current = 'cloud';
           setLocalFilePath(null);
-          const destCloudName = storedPath.replace(/\.(md|markdown|mdown|mkd)$/i, '.chronicle');
+          localFilePathRef.current = null;
           setCloudFileName(destCloudName);
+          cloudFileNameRef.current = destCloudName;
           if (isTauri()) {
             saveCloudDesktopSession(href, destCloudName, targetChapterId);
           }
           setCastPresenceData(null);
+          castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
+          isPresenceCacheValidRef.current = false;
           setIsDirtyState(true);
+          isDirtyRef.current = true;
           setViewModeState('editor');
           if (isRestore) {
             const ch = mdBook.chapters.find(c => c.id === targetChapterId);
@@ -2307,26 +2884,49 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         } else {
           const parsed = await parseEpub(buffer, filename);
-          bookRef.current = parsed;
-          setBook(parsed);
-          refreshBookSession();
-          extractCssFromBook(parsed);
           const targetChapterId = (restoreChapterId && parsed.chapters.some(c => c.id === restoreChapterId))
             ? restoreChapterId
             : (parsed.chapters[0]?.id || null);
+          const destCloudName = storedPath.replace(/\.epub$/i, '.chronicle');
+
+          const newSession = createSessionFromBook(
+            parsed,
+            'cloud',
+            null,
+            destCloudName,
+            false,
+            targetChapterId
+          );
+          const nextFiles = [...openFilesRef.current, newSession];
+          openFilesRef.current = nextFiles;
+          setOpenFiles(nextFiles);
+
+          setActiveFileId(newSession.id);
+          activeFileIdRef.current = newSession.id;
+
+          bookRef.current = parsed;
+          setBook(parsed);
+          setBookSessionId(newSession.bookSessionId);
+          extractCssFromBook(parsed);
           if (targetChapterId) {
             setActiveChapterId(targetChapterId);
+            activeChapterIdRef.current = targetChapterId;
           }
           setStorageTarget('cloud');
+          storageTargetRef.current = 'cloud';
           setLocalFilePath(null);
-          const destCloudName = storedPath.replace(/\.epub$/i, '.chronicle');
+          localFilePathRef.current = null;
           setCloudFileName(destCloudName);
+          cloudFileNameRef.current = destCloudName;
           if (isTauri()) {
             saveCloudDesktopSession(href, destCloudName, targetChapterId);
           }
           setCastPresenceData(null);
+          castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
+          isPresenceCacheValidRef.current = false;
           setIsDirtyState(false);
+          isDirtyRef.current = false;
           if (isRestore) {
             setViewModeState('editor');
             const ch = parsed.chapters.find(c => c.id === targetChapterId);
@@ -2349,7 +2949,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLoading(false);
       }
     },
-    [webdavConfig, showNotification, refreshBookSession, extractCssFromBook]
+    [createSessionFromBook, extractCssFromBook, showNotification, switchOpenFile]
   );
 
   const loadFromCloudRef = useRef(loadFromCloud);
@@ -2443,8 +3043,8 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return;
       }
 
-      // 1. Determine target: override, current state, or default to local in desktop environment
-      let target = overrideTarget || storageTarget;
+      const currentSessionId = activeFileIdRef.current;
+      let target = overrideTarget || storageTargetRef.current;
       if (!target && isTauri()) {
         target = 'local';
       }
@@ -2462,7 +3062,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const activeEl = document.activeElement;
         if (activeEl && activeEl.classList.contains('wysiwyg-content')) {
           const domContent = (activeEl as HTMLElement).innerHTML;
-          const currentActiveCh = currentBook.chapters.find(c => c.id === activeChapterId) || currentBook.chapters[0];
+          const currentActiveCh = currentBook.chapters.find(c => c.id === activeChapterIdRef.current) || currentBook.chapters[0];
           if (currentActiveCh && currentActiveCh.content !== domContent) {
             const updatedOriginalXhtml = wrapInXhtml(
               restoreAssetUrls(domContent, currentActiveCh.fullPath, currentBook.assets),
@@ -2498,7 +3098,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (target === 'local') {
           if (isTauri()) {
-            let destinationPath = localFilePath;
+            let destinationPath = localFilePathRef.current;
 
             // If forced Save As, or no path known yet, prompt user with native Save File Dialog
             if (forceSaveAs || !destinationPath) {
@@ -2524,14 +3124,36 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await writeLocalBinaryFile(destinationPath, blob);
 
             setStorageTarget('local');
+            storageTargetRef.current = 'local';
             setLocalFilePath(destinationPath);
+            localFilePathRef.current = destinationPath;
             setCloudFileName(null);
-            saveDesktopSession(destinationPath, activeChapterId);
+            cloudFileNameRef.current = null;
+            saveDesktopSession(destinationPath, activeChapterIdRef.current);
             const savedFileName = destinationPath.split(/[\\/]/).pop() || `${cleanTitle}.chronicle`;
 
             if (bookRef.current === saveSnapshot) {
               setIsDirtyState(false);
+              isDirtyRef.current = false;
             }
+
+            // Update active session in openFiles
+            setOpenFiles(prev =>
+              prev.map(s =>
+                s.id === currentSessionId
+                  ? {
+                    ...s,
+                    book: saveSnapshot,
+                    storageTarget: 'local',
+                    localFilePath: destinationPath,
+                    cloudFileName: null,
+                    isDirty: bookRef.current === saveSnapshot ? false : s.isDirty,
+                    lastAutoSavedAt: isAutoSave ? new Date() : s.lastAutoSavedAt,
+                  }
+                  : s
+              )
+            );
+
             if (isAutoSave) {
               setLastAutoSavedAt(new Date());
             } else {
@@ -2549,9 +3171,26 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             URL.revokeObjectURL(url);
 
             setStorageTarget('local');
+            storageTargetRef.current = 'local';
             if (bookRef.current === saveSnapshot) {
               setIsDirtyState(false);
+              isDirtyRef.current = false;
             }
+
+            setOpenFiles(prev =>
+              prev.map(s =>
+                s.id === currentSessionId
+                  ? {
+                    ...s,
+                    book: saveSnapshot,
+                    storageTarget: 'local',
+                    isDirty: bookRef.current === saveSnapshot ? false : s.isDirty,
+                    lastAutoSavedAt: isAutoSave ? new Date() : s.lastAutoSavedAt,
+                  }
+                  : s
+              )
+            );
+
             if (isAutoSave) {
               setLastAutoSavedAt(new Date());
             } else {
@@ -2559,9 +3198,10 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
           }
         } else if (target === 'cloud') {
-          if (!webdavConfig || (isAutoSave && !cloudFileName)) {
+          const activeCfg = webdavConfigRef.current || (await loadAllSettings()).webdavConfig;
+          if (!activeCfg || (isAutoSave && !cloudFileNameRef.current)) {
             if (!isAutoSave) {
-              if (!webdavConfig) {
+              if (!activeCfg) {
                 setIsWebDavConfigOpen(true);
                 showNotification('info', 'Please configure your WebDAV server to save to cloud storage.');
               }
@@ -2569,7 +3209,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return;
           }
 
-          let uploadName = customFilename || cloudFileName || `${cleanTitle}.chronicle`;
+          let uploadName = customFilename || cloudFileNameRef.current || `${cleanTitle}.chronicle`;
           if (!uploadName.endsWith('.chronicle')) {
             uploadName += '.chronicle';
           }
@@ -2579,17 +3219,38 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             uploadName = cleanSub ? `${cleanSub}/${nameOnly}` : nameOnly;
           }
 
-          await uploadFile(webdavConfig, uploadName, blob);
+          await uploadFile(activeCfg, uploadName, blob);
 
           setStorageTarget('cloud');
+          storageTargetRef.current = 'cloud';
           setCloudFileName(uploadName);
+          cloudFileNameRef.current = uploadName;
           setLocalFilePath(null);
+          localFilePathRef.current = null;
           if (isTauri()) {
-            saveCloudDesktopSession(uploadName, uploadName, activeChapterId);
+            saveCloudDesktopSession(uploadName, uploadName, activeChapterIdRef.current);
           }
           if (bookRef.current === saveSnapshot) {
             setIsDirtyState(false);
+            isDirtyRef.current = false;
           }
+
+          setOpenFiles(prev =>
+            prev.map(s =>
+              s.id === currentSessionId
+                ? {
+                  ...s,
+                  book: saveSnapshot,
+                  storageTarget: 'cloud',
+                  cloudFileName: uploadName,
+                  localFilePath: null,
+                  isDirty: bookRef.current === saveSnapshot ? false : s.isDirty,
+                  lastAutoSavedAt: isAutoSave ? new Date() : s.lastAutoSavedAt,
+                }
+                : s
+            )
+          );
+
           if (isAutoSave) {
             setLastAutoSavedAt(new Date());
           } else {
@@ -2621,7 +3282,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }, 500);
       }
     },
-    [book, activeChapterId, storageTarget, localFilePath, cloudFileName, webdavConfig, showNotification]
+    [book, showNotification]
   );
 
   const saveAs = useCallback(
@@ -3937,6 +4598,10 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   return (
     <EpubContext.Provider
       value={{
+        openFiles,
+        activeFileId,
+        switchOpenFile,
+        closeOpenFile,
         book,
         bookSessionId,
         refreshBookSession,

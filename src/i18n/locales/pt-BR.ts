@@ -49,6 +49,10 @@ export const ptBR: TranslationDictionary = {
     settingsTooltip: 'Configurações (Ctrl+,)',
     showSidebar: 'Mostrar Barra Lateral de Capítulos (Ctrl+\\)',
     hideSidebar: 'Ocultar Barra Lateral de Capítulos (Ctrl+\\)',
+    openManuscripts: 'Manuscritos Abertos',
+    switchManuscript: 'Alternar manuscrito',
+    closeManuscript: 'Fechar manuscrito',
+    saveCurrent: 'Salvar Manuscrito Atual',
   },
   statusBar: {
     processing: 'Processando...',

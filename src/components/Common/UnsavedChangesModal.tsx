@@ -74,6 +74,8 @@ export const UnsavedChangesModal: React.FC = () => {
         return t('headerActions.cloud');
       case 'sample':
         return t('welcomeModal.sampleTitle');
+      case 'close':
+        return t('common.close');
       default:
         return t('common.confirm');
     }
