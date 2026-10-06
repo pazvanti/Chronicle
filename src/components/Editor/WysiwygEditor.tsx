@@ -51,12 +51,232 @@ import { ImageControlsToolbar, ImageToolbarPosition } from './ImageControlsToolb
 function cleanTransientEditorMarkup(html: string): string {
   if (!html) return html;
   return html
+    .replace(/<span id="__merge_caret_marker__"[^>]*>.*?<\/span>/gi, '')
     .replace(/\s*\bzen-active-focus\b/g, '')
     .replace(/\s*\bselected-editor-image\b/g, '')
     .replace(/\s*data-selected="true"/g, '')
     .replace(/\s*data-selected='true'/g, '')
     .replace(/ class="(\s*)"/g, '')
     .replace(/ class=""/g, '');
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function cleanPastedHtml(html: string): string {
+  if (!html) return '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Remove dangerous and non-content elements
+  const badElements = doc.querySelectorAll(
+    'script, style, meta, link, noscript, iframe, frame, object, embed, applet, head, title'
+  );
+  badElements.forEach(el => el.remove());
+
+  // Clean elements and attributes
+  const allElements = doc.querySelectorAll('*');
+  allElements.forEach(el => {
+    const tag = el.tagName.toLowerCase();
+
+    // Replace div with p if it is a block container
+    if (tag === 'div') {
+      const p = doc.createElement('p');
+      while (el.firstChild) {
+        p.appendChild(el.firstChild);
+      }
+      el.parentNode?.replaceChild(p, el);
+      el = p;
+    }
+
+    // Keep allowed attributes only: src, alt, title, href, target, data-comment-id
+    const allowedAttrs = ['src', 'alt', 'title', 'href', 'target', 'data-comment-id'];
+    const attrsToRemove: string[] = [];
+    for (let i = 0; i < el.attributes.length; i++) {
+      const attr = el.attributes[i];
+      if (!allowedAttrs.includes(attr.name.toLowerCase())) {
+        attrsToRemove.push(attr.name);
+      }
+    }
+    attrsToRemove.forEach(a => el.removeAttribute(a));
+  });
+
+  // Ensure top-level text nodes or inline elements inside body are wrapped in <p>
+  const body = doc.body;
+  const childNodes = Array.from(body.childNodes);
+  let currentP: HTMLElement | null = null;
+
+  childNodes.forEach(child => {
+    if (child.nodeType === Node.TEXT_NODE) {
+      const text = child.textContent || '';
+      if (text.trim().length > 0) {
+        if (!currentP) {
+          currentP = doc.createElement('p');
+          body.insertBefore(currentP, child);
+        }
+        currentP.appendChild(child);
+      } else {
+        child.remove();
+      }
+    } else if (child.nodeType === Node.ELEMENT_NODE) {
+      const el = child as HTMLElement;
+      const tag = el.tagName.toLowerCase();
+      const isBlock = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'ul', 'ol', 'pre', 'hr', 'figure', 'table'].includes(tag);
+      if (!isBlock) {
+        if (!currentP) {
+          currentP = doc.createElement('p');
+          body.insertBefore(currentP, el);
+        }
+        currentP.appendChild(el);
+      } else {
+        currentP = null;
+      }
+    }
+  });
+
+  return body.innerHTML;
+}
+
+function isBlockEmpty(el: HTMLElement | null): boolean {
+  if (!el) return true;
+  const text = (el.textContent || '').replace(/[\u200B\u00A0\s]/g, '');
+  if (text.length > 0) return false;
+  const media = el.querySelectorAll('img, hr, table, iframe, svg, math, video, audio');
+  if (media.length > 0) return false;
+  return true;
+}
+
+function setCaretToEnd(el: HTMLElement | null) {
+  if (!el) return;
+  const sel = window.getSelection();
+  if (!sel) return;
+
+  let targetNode: Node = el;
+  let offset = 0;
+
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_ALL);
+  let lastNode: Node | null = null;
+  let currentNode = walker.nextNode();
+  while (currentNode) {
+    lastNode = currentNode;
+    currentNode = walker.nextNode();
+  }
+
+  if (lastNode) {
+    if (lastNode.nodeType === Node.TEXT_NODE) {
+      targetNode = lastNode;
+      offset = lastNode.textContent?.length || 0;
+    } else if (lastNode.nodeName === 'BR') {
+      const parent = lastNode.parentNode || el;
+      targetNode = parent;
+      const childIdx = Array.from(parent.childNodes).indexOf(lastNode as ChildNode);
+      offset = childIdx >= 0 ? childIdx : 0;
+    } else {
+      targetNode = lastNode;
+      offset = lastNode.childNodes.length;
+    }
+  } else {
+    targetNode = el;
+    offset = 0;
+  }
+
+  try {
+    const range = document.createRange();
+    range.setStart(targetNode, offset);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } catch {
+    try {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function setCaretToStart(el: HTMLElement | null) {
+  if (!el) return;
+  const sel = window.getSelection();
+  if (!sel) return;
+
+  let targetNode: Node = el;
+  let offset = 0;
+
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_ALL);
+  const firstNode = walker.nextNode();
+
+  if (firstNode) {
+    if (firstNode.nodeType === Node.TEXT_NODE) {
+      targetNode = firstNode;
+      offset = 0;
+    } else if (firstNode.nodeName === 'BR') {
+      targetNode = el;
+      offset = 0;
+    } else {
+      targetNode = firstNode;
+      offset = 0;
+    }
+  } else {
+    targetNode = el;
+    offset = 0;
+  }
+
+  try {
+    const range = document.createRange();
+    range.setStart(targetNode, offset);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } catch {
+    try {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function isCaretAtStartOfBlock(block: HTMLElement, sel: Selection): boolean {
+  if (!sel.anchorNode || !block.contains(sel.anchorNode)) return false;
+  try {
+    const range = document.createRange();
+    range.setStart(block, 0);
+    range.setEnd(sel.anchorNode, sel.anchorOffset);
+    const text = range.toString().replace(/[\u200B\u00A0\s]/g, '');
+    const media = range.cloneContents().querySelectorAll('img, hr, table, iframe');
+    return text.length === 0 && media.length === 0;
+  } catch {
+    return false;
+  }
+}
+
+function isCaretAtEndOfBlock(block: HTMLElement, sel: Selection): boolean {
+  if (!sel.anchorNode || !block.contains(sel.anchorNode)) return false;
+  try {
+    const range = document.createRange();
+    range.setStart(sel.anchorNode, sel.anchorOffset);
+    range.setEnd(block, block.childNodes.length);
+    const text = range.toString().replace(/[\u200B\u00A0\s]/g, '');
+    const media = range.cloneContents().querySelectorAll('img, hr, table, iframe');
+    return text.length === 0 && media.length === 0;
+  } catch {
+    return false;
+  }
 }
 
 function getMovableUnit(img: HTMLImageElement, editorContainer: HTMLElement | null): HTMLElement | null {
@@ -121,6 +341,14 @@ function restoreCaretPosition(el: HTMLElement | null, offset: number | null | un
       sel.addRange(range);
     } catch {
       // ignore
+    }
+  } else {
+    if (el.firstChild) {
+      if (offset === 0) {
+        setCaretToStart((el.firstElementChild as HTMLElement) || el);
+      } else {
+        setCaretToEnd((el.lastElementChild as HTMLElement) || el);
+      }
     }
   }
 }
@@ -293,6 +521,7 @@ export const WysiwygEditor: React.FC = () => {
       if (editorRef.current.innerHTML !== cleanContent) {
         editorRef.current.innerHTML = cleanContent;
       }
+      lastSelfUpdatedHtmlRef.current = cleanContent;
       if (historyRef.current.timer) {
         clearTimeout(historyRef.current.timer);
       }
@@ -316,16 +545,27 @@ export const WysiwygEditor: React.FC = () => {
     if (!editorRef.current || !activeChapter) return;
     const cleanContent = cleanTransientEditorMarkup(activeChapter.content);
 
-    // If this content update was triggered by the user's own typing in handleInput, skip re-injecting
+    // If this content update was triggered by the user's own typing in WysiwygEditor, skip re-injecting
     if (cleanContent === lastSelfUpdatedHtmlRef.current) {
       return;
     }
 
-    // External change detected! Update editor innerHTML to match activeChapter.content
-    if (editorRef.current.innerHTML !== cleanContent) {
-      deselectImage();
-      editorRef.current.innerHTML = cleanContent;
+    const currentCleanDom = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+    if (currentCleanDom === cleanContent) {
       lastSelfUpdatedHtmlRef.current = cleanContent;
+      return;
+    }
+
+    // External change detected! Update editor innerHTML while preserving caret if focused
+    const isFocused = document.activeElement === editorRef.current || editorRef.current.contains(document.activeElement);
+    const savedCaret = isFocused ? saveCaretPosition(editorRef.current) : null;
+
+    deselectImage();
+    editorRef.current.innerHTML = cleanContent;
+    lastSelfUpdatedHtmlRef.current = cleanContent;
+
+    if (isFocused && savedCaret !== null) {
+      restoreCaretPosition(editorRef.current, savedCaret);
     }
   }, [activeChapter?.content, deselectImage]);
 
@@ -668,6 +908,7 @@ export const WysiwygEditor: React.FC = () => {
     document.execCommand(command, false, value);
     if (editorRef.current && activeChapter) {
       const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+      lastSelfUpdatedHtmlRef.current = cleanedHtml;
       updateChapterContent(activeChapter.id, cleanedHtml);
     }
     recordImmediateSnapshot();
@@ -688,6 +929,7 @@ export const WysiwygEditor: React.FC = () => {
     h.index -= 1;
     const entry = h.entries[h.index];
     if (entry) {
+      lastSelfUpdatedHtmlRef.current = entry.html;
       editorRef.current.innerHTML = entry.html;
       updateChapterContent(activeChapter.id, entry.html);
       restoreCaretPosition(editorRef.current, entry.caret);
@@ -707,6 +949,7 @@ export const WysiwygEditor: React.FC = () => {
     h.index += 1;
     const entry = h.entries[h.index];
     if (entry) {
+      lastSelfUpdatedHtmlRef.current = entry.html;
       editorRef.current.innerHTML = entry.html;
       updateChapterContent(activeChapter.id, entry.html);
       restoreCaretPosition(editorRef.current, entry.caret);
@@ -735,6 +978,7 @@ export const WysiwygEditor: React.FC = () => {
     setActiveTextColor(colorHex);
     if (editorRef.current && activeChapter) {
       const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+      lastSelfUpdatedHtmlRef.current = cleanedHtml;
       updateChapterContent(activeChapter.id, cleanedHtml);
     }
     recordImmediateSnapshot();
@@ -803,6 +1047,7 @@ export const WysiwygEditor: React.FC = () => {
     setActiveTextColor('auto');
     if (editorRef.current && activeChapter) {
       const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+      lastSelfUpdatedHtmlRef.current = cleanedHtml;
       updateChapterContent(activeChapter.id, cleanedHtml);
     }
     recordImmediateSnapshot();
@@ -1125,7 +1370,8 @@ export const WysiwygEditor: React.FC = () => {
 
     if (selectedRangeRef.current && editorRef.current) {
       wrapSelectionWithComment(selectedRangeRef.current, commentId, color);
-      newHtml = editorRef.current.innerHTML;
+      newHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+      lastSelfUpdatedHtmlRef.current = newHtml;
       selectedRangeRef.current = null;
       window.getSelection()?.removeAllRanges();
     }
@@ -1143,7 +1389,9 @@ export const WysiwygEditor: React.FC = () => {
     updateComment(commentId, updates);
     if (updates.color && editorRef.current && activeChapter) {
       updateCommentHighlightColor(editorRef.current, commentId, updates.color);
-      updateChapterContent(activeChapter.id, cleanTransientEditorMarkup(editorRef.current.innerHTML));
+      const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+      lastSelfUpdatedHtmlRef.current = cleanedHtml;
+      updateChapterContent(activeChapter.id, cleanedHtml);
     }
   }, [updateComment, activeChapter, updateChapterContent]);
 
@@ -1151,7 +1399,9 @@ export const WysiwygEditor: React.FC = () => {
   const handleDeleteComment = useCallback((commentId: string) => {
     if (editorRef.current && activeChapter) {
       unwrapCommentHighlight(editorRef.current, commentId);
-      updateChapterContent(activeChapter.id, cleanTransientEditorMarkup(editorRef.current.innerHTML));
+      const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+      lastSelfUpdatedHtmlRef.current = cleanedHtml;
+      updateChapterContent(activeChapter.id, cleanedHtml);
     }
     deleteComment(commentId);
     if (activeModalComment?.id === commentId) {
@@ -1181,7 +1431,149 @@ export const WysiwygEditor: React.FC = () => {
     };
   }, [handleSelectionChange]);
 
-  // Keyboard shortcuts: Ctrl/Cmd + L (left), E (center), R (right), J (justify), and Image shortcuts
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!editorRef.current) return;
+
+    const clipboard = e.clipboardData;
+    if (!clipboard) return;
+
+    const rawHtml = clipboard.getData('text/html');
+    const plainText = clipboard.getData('text/plain');
+
+    let contentToInsert = '';
+    let isMultiBlock = false;
+
+    if (rawHtml && rawHtml.trim()) {
+      const cleaned = cleanPastedHtml(rawHtml);
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<body>${cleaned}</body>`, 'text/html');
+      const blocks = doc.body.querySelectorAll('p, h1, h2, h3, h4, h5, h6, blockquote, ul, ol, pre, hr, figure, table');
+      if (blocks.length > 1 || (blocks.length === 1 && doc.body.children.length === 1)) {
+        contentToInsert = cleaned;
+        isMultiBlock = blocks.length > 1;
+      }
+    }
+
+    if (!contentToInsert) {
+      if (!plainText) return;
+      if (plainText.includes('\n') || plainText.includes('\r')) {
+        const lines = plainText.split(/\r\n|\r|\n/);
+        contentToInsert = lines
+          .map(line => {
+            const trimmed = line.trim();
+            return trimmed.length === 0 ? '<p><br></p>' : `<p>${escapeHtml(line)}</p>`;
+          })
+          .join('');
+        isMultiBlock = true;
+      } else {
+        contentToInsert = plainText;
+        isMultiBlock = false;
+      }
+    }
+
+    editorRef.current.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || !editorRef.current.contains(sel.anchorNode)) {
+      setCaretToEnd(editorRef.current);
+    }
+
+    const activeSel = window.getSelection();
+    if (!activeSel || activeSel.rangeCount === 0) return;
+
+    const range = activeSel.getRangeAt(0);
+
+    if (!isMultiBlock) {
+      // Single line inline text insertion
+      const textToInsert = plainText || contentToInsert;
+      const inserted = document.execCommand('insertText', false, textToInsert);
+      if (!inserted) {
+        range.deleteContents();
+        const textNode = document.createTextNode(textToInsert);
+        range.insertNode(textNode);
+        range.setStartAfter(textNode);
+        range.setEndAfter(textNode);
+        activeSel.removeAllRanges();
+        activeSel.addRange(range);
+      }
+    } else {
+      // Multi-block insertion
+      range.deleteContents();
+
+      let currentBlock: HTMLElement | null = null;
+      let curr: Node | null = activeSel.anchorNode;
+      while (curr && curr !== editorRef.current) {
+        if (curr.parentElement === editorRef.current && curr.nodeType === Node.ELEMENT_NODE) {
+          currentBlock = curr as HTMLElement;
+          break;
+        }
+        curr = curr.parentElement;
+      }
+
+      const temp = document.createElement('div');
+      temp.innerHTML = contentToInsert;
+      const frag = document.createDocumentFragment();
+      const insertedElements: HTMLElement[] = [];
+      while (temp.firstChild) {
+        const child = temp.firstChild;
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          insertedElements.push(child as HTMLElement);
+        }
+        frag.appendChild(child);
+      }
+
+      const lastInserted = insertedElements[insertedElements.length - 1] || null;
+
+      if (!currentBlock || currentBlock === editorRef.current) {
+        editorRef.current.appendChild(frag);
+        if (lastInserted) {
+          setCaretToEnd(lastInserted);
+        }
+      } else if (isBlockEmpty(currentBlock)) {
+        editorRef.current.insertBefore(frag, currentBlock);
+        currentBlock.remove();
+        if (lastInserted) {
+          setCaretToEnd(lastInserted);
+        }
+      } else {
+        // Split currentBlock at range
+        const splitRange = document.createRange();
+        splitRange.setStart(range.startContainer, range.startOffset);
+        splitRange.setEnd(currentBlock, currentBlock.childNodes.length);
+        const extracted = splitRange.extractContents();
+
+        const afterBlock = currentBlock.cloneNode(false) as HTMLElement;
+        afterBlock.appendChild(extracted);
+
+        const parent = currentBlock.parentElement || editorRef.current;
+        const nextSibling = currentBlock.nextSibling;
+
+        parent.insertBefore(frag, nextSibling);
+        if (!isBlockEmpty(afterBlock)) {
+          const insertPos = lastInserted ? lastInserted.nextSibling : nextSibling;
+          parent.insertBefore(afterBlock, insertPos);
+        }
+
+        if (lastInserted) {
+          setCaretToEnd(lastInserted);
+        }
+      }
+    }
+
+    if (editorRef.current && activeChapter) {
+      const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+      lastSelfUpdatedHtmlRef.current = cleanedHtml;
+      updateChapterContent(activeChapter.id, cleanedHtml);
+      recordImmediateSnapshot();
+    }
+
+    requestAnimationFrame(() => {
+      updateParagraphFocusDimming();
+      performTypewriterScroll();
+    });
+  }, [activeChapter, updateChapterContent, recordImmediateSnapshot, updateParagraphFocusDimming, performTypewriterScroll]);
+
+  // Keyboard shortcuts and paragraph boundary controls
   const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (selectedImage) {
       if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -1203,6 +1595,194 @@ export const WysiwygEditor: React.FC = () => {
         e.preventDefault();
         handleMoveImageDown();
         return;
+      }
+    }
+
+    // Handle Backspace and Delete on empty paragraphs or paragraph boundaries
+    if (e.key === 'Backspace' || e.key === 'Delete') {
+      const sel = window.getSelection();
+      if (sel && sel.isCollapsed && editorRef.current && editorRef.current.contains(sel.anchorNode)) {
+        // Find current top-level block under editorRef
+        let currentBlock: HTMLElement | null = null;
+        let curr: Node | null = sel.anchorNode;
+        while (curr && curr !== editorRef.current) {
+          if (curr.parentElement === editorRef.current && curr.nodeType === Node.ELEMENT_NODE) {
+            currentBlock = curr as HTMLElement;
+            break;
+          }
+          curr = curr.parentElement;
+        }
+
+        if (currentBlock) {
+          const isCurrentEmpty = isBlockEmpty(currentBlock);
+
+          if (e.key === 'Backspace') {
+            if (isCurrentEmpty) {
+              e.preventDefault();
+              const prev = currentBlock.previousElementSibling as HTMLElement | null;
+              if (prev) {
+                currentBlock.remove();
+                setCaretToEnd(prev);
+                if (activeChapter && editorRef.current) {
+                  const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+                  lastSelfUpdatedHtmlRef.current = cleanedHtml;
+                  updateChapterContent(activeChapter.id, cleanedHtml);
+                  recordImmediateSnapshot();
+                }
+                requestAnimationFrame(() => {
+                  updateParagraphFocusDimming();
+                  performTypewriterScroll();
+                });
+                return;
+              } else {
+                // First block in editor
+                const next = currentBlock.nextElementSibling as HTMLElement | null;
+                if (next) {
+                  currentBlock.remove();
+                  setCaretToStart(next);
+                  if (activeChapter && editorRef.current) {
+                    const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+                    lastSelfUpdatedHtmlRef.current = cleanedHtml;
+                    updateChapterContent(activeChapter.id, cleanedHtml);
+                    recordImmediateSnapshot();
+                  }
+                  requestAnimationFrame(() => {
+                    updateParagraphFocusDimming();
+                    performTypewriterScroll();
+                  });
+                  return;
+                }
+              }
+            } else if (isCaretAtStartOfBlock(currentBlock, sel)) {
+              const prev = currentBlock.previousElementSibling as HTMLElement | null;
+              if (prev) {
+                e.preventDefault();
+                if (isBlockEmpty(prev)) {
+                  prev.remove();
+                  setCaretToStart(currentBlock);
+                } else {
+                  // Merge currentBlock into prev
+                  const lastChild = prev.lastChild;
+                  if (lastChild && lastChild.nodeName === 'BR' && prev.childNodes.length > 1) {
+                    lastChild.remove();
+                  }
+
+                  const marker = document.createElement('span');
+                  marker.id = '__merge_caret_marker__';
+                  marker.style.display = 'inline';
+                  marker.textContent = '\u200B';
+                  prev.appendChild(marker);
+
+                  while (currentBlock.firstChild) {
+                    const child = currentBlock.firstChild;
+                    if (child.nodeName === 'BR' && currentBlock.childNodes.length === 1 && prev.childNodes.length > 1) {
+                      child.remove();
+                    } else {
+                      prev.appendChild(child);
+                    }
+                  }
+
+                  currentBlock.remove();
+
+                  const markerSel = window.getSelection();
+                  if (markerSel) {
+                    const markerRange = document.createRange();
+                    markerRange.setStartBefore(marker);
+                    markerRange.collapse(true);
+                    markerSel.removeAllRanges();
+                    markerSel.addRange(markerRange);
+                  }
+                  marker.remove();
+                }
+
+                if (activeChapter && editorRef.current) {
+                  const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+                  lastSelfUpdatedHtmlRef.current = cleanedHtml;
+                  updateChapterContent(activeChapter.id, cleanedHtml);
+                  recordImmediateSnapshot();
+                }
+                requestAnimationFrame(() => {
+                  updateParagraphFocusDimming();
+                  performTypewriterScroll();
+                });
+                return;
+              }
+            }
+          } else if (e.key === 'Delete') {
+            if (isCurrentEmpty) {
+              const next = currentBlock.nextElementSibling as HTMLElement | null;
+              if (next) {
+                e.preventDefault();
+                currentBlock.remove();
+                setCaretToStart(next);
+                if (activeChapter && editorRef.current) {
+                  const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+                  lastSelfUpdatedHtmlRef.current = cleanedHtml;
+                  updateChapterContent(activeChapter.id, cleanedHtml);
+                  recordImmediateSnapshot();
+                }
+                requestAnimationFrame(() => {
+                  updateParagraphFocusDimming();
+                  performTypewriterScroll();
+                });
+                return;
+              }
+            } else if (isCaretAtEndOfBlock(currentBlock, sel)) {
+              const next = currentBlock.nextElementSibling as HTMLElement | null;
+              if (next) {
+                e.preventDefault();
+                if (isBlockEmpty(next)) {
+                  next.remove();
+                } else {
+                  // Merge next into currentBlock
+                  const lastChild = currentBlock.lastChild;
+                  if (lastChild && lastChild.nodeName === 'BR' && currentBlock.childNodes.length > 1) {
+                    lastChild.remove();
+                  }
+
+                  const marker = document.createElement('span');
+                  marker.id = '__merge_caret_marker__';
+                  marker.style.display = 'inline';
+                  marker.textContent = '\u200B';
+                  currentBlock.appendChild(marker);
+
+                  while (next.firstChild) {
+                    const child = next.firstChild;
+                    if (child.nodeName === 'BR' && next.childNodes.length === 1 && currentBlock.childNodes.length > 1) {
+                      child.remove();
+                    } else {
+                      currentBlock.appendChild(child);
+                    }
+                  }
+
+                  next.remove();
+
+                  const markerSel = window.getSelection();
+                  if (markerSel) {
+                    const markerRange = document.createRange();
+                    markerRange.setStartBefore(marker);
+                    markerRange.collapse(true);
+                    markerSel.removeAllRanges();
+                    markerSel.addRange(markerRange);
+                  }
+                  marker.remove();
+                }
+
+                if (activeChapter && editorRef.current) {
+                  const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+                  lastSelfUpdatedHtmlRef.current = cleanedHtml;
+                  updateChapterContent(activeChapter.id, cleanedHtml);
+                  recordImmediateSnapshot();
+                }
+                requestAnimationFrame(() => {
+                  updateParagraphFocusDimming();
+                  performTypewriterScroll();
+                });
+                return;
+              }
+            }
+          }
+        }
       }
     }
 
@@ -1896,6 +2476,14 @@ export const WysiwygEditor: React.FC = () => {
             suppressContentEditableWarning
             onInput={handleInput}
             onBlur={handleInput}
+            onPaste={handlePaste}
+            onFocus={() => {
+              try {
+                document.execCommand('defaultParagraphSeparator', false, 'p');
+              } catch {
+                // ignore
+              }
+            }}
             onMouseUp={handleSelectionChange}
             onKeyUp={handleSelectionChange}
             onKeyDown={handleEditorKeyDown}

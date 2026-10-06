@@ -899,9 +899,6 @@ export async function createNewBlankEpubBook(
   const finalAuthor = author || (isPt ? 'Nome do Autor' : 'Author Name');
   const chapter1Name = isPt ? 'Capítulo 1' : 'Chapter 1';
   const tocName = isPt ? 'Sumário' : 'Table of Contents';
-  const placeholderBody = isPt
-    ? 'Comece a escrever sua história aqui. Use a barra de ferramentas de formatação acima para adicionar títulos, citações, diálogos e cenas.'
-    : 'Begin writing your story here. Use the formatting toolbar above to add headings, quotes, dialogue, and scenes.';
 
   const zip = new JSZip();
 
@@ -952,12 +949,14 @@ h1, h2, h3 {
   margin-top: 2rem;
   margin-bottom: 1rem;
 }
-p {
-  margin-bottom: 1.25rem;
-  text-indent: 1.5rem;
+h1 {
+  font-size: 2.2rem;
+  border-bottom: 2px solid rgba(128, 128, 128, 0.2);
+  padding-bottom: 0.6rem;
 }
-p:first-of-type {
-  text-indent: 0;
+p {
+  margin: 1.1rem 0;
+  text-align: left;
 }
 `;
   zip.folder('OEBPS')?.folder('Styles')?.file('style.css', css);
@@ -971,10 +970,7 @@ p:first-of-type {
   <link rel="stylesheet" type="text/css" href="../Styles/style.css"/>
 </head>
 <body>
-  <section class="chapter">
-    <h1>${chapter1Name}</h1>
-    <p>${placeholderBody}</p>
-  </section>
+  <p></p>
 </body>
 </html>`;
   zip.folder('OEBPS')?.folder('Text')?.file('chapter1.xhtml', ch1);

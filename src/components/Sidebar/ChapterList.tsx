@@ -47,6 +47,7 @@ export const ChapterList: React.FC = () => {
     toggleFolderExpanded,
     reorderBinderItem,
     moveItemToRootEnd,
+    showNotification,
   } = useEpub();
 
   const { isAudioActive, isPlaying } = useTts();
@@ -55,6 +56,7 @@ export const ChapterList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [editingItem, setEditingItem] = useState<{ id: string; type: 'folder' | 'chapter' } | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; type: 'folder' | 'chapter'; title: string } | null>(null);
 
   // Context Menu state
   const [menuItem, setMenuItem] = useState<{ id: string; type: 'folder' | 'chapter'; name: string } | null>(null);
@@ -265,20 +267,15 @@ export const ChapterList: React.FC = () => {
   };
 
   const handleDeleteChapter = (chapterId: string, title: string) => {
-    if (window.confirm(t('sidebar.confirmDelete').replace('{title}', title))) {
-      deleteChapter(chapterId);
+    if (book.chapters.length <= 1) {
+      showNotification('error', 'Cannot delete the only chapter in the book.');
+      return;
     }
+    setPendingDelete({ id: chapterId, type: 'chapter', title });
   };
 
   const handleDeleteFolder = (folderId: string, folderName: string) => {
-    const stats = getFolderStats(folderId, book.folders || [], book.chapters);
-    let msg = t('sidebar.confirmDeleteFolder').replace('{title}', folderName);
-    if (stats.chapterCount === 0) {
-      msg = `Are you sure you want to delete folder "${folderName}"?`;
-    }
-    if (window.confirm(msg)) {
-      deleteFolder(folderId, false);
-    }
+    setPendingDelete({ id: folderId, type: 'folder', title: folderName });
   };
 
   const handleAddFolder = (parentId?: string | null) => {
@@ -912,12 +909,110 @@ export const ChapterList: React.FC = () => {
                   closeMenu();
                   handleDeleteChapter(menuItem.id, menuItem.name);
                 }}
+                disabled={book.chapters.length <= 1}
+                title={book.chapters.length <= 1 ? 'Cannot delete the only chapter in the book' : undefined}
               >
                 <Trash2 size={13} />
                 <span>{t('sidebar.deleteChapter')}</span>
               </button>
             </>
           )}
+        </div>,
+        document.body
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {pendingDelete && createPortal(
+        <div
+          className="modal-overlay"
+          onClick={() => setPendingDelete(null)}
+          style={{ zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="modal-card"
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth: '440px', width: '92%' }}
+          >
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Trash2 size={18} style={{ color: 'var(--accent-danger, #ef4444)' }} />
+                <h3 className="modal-title">
+                  {pendingDelete.type === 'chapter' ? t('sidebar.deleteChapter') : t('sidebar.deleteFolder')}
+                </h3>
+              </div>
+              <button
+                className="btn-icon btn-sm"
+                onClick={() => setPendingDelete(null)}
+                title={t('common.cancel')}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                {pendingDelete.type === 'chapter'
+                  ? t('sidebar.confirmDelete').replace('{title}', pendingDelete.title)
+                  : t('sidebar.confirmDeleteFolder').replace('{title}', pendingDelete.title)}
+              </p>
+              <div
+                style={{
+                  padding: '0.6rem 0.8rem',
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  color: 'var(--accent-danger, #f87171)',
+                }}
+              >
+                This action cannot be undone.
+              </div>
+            </div>
+
+            <div
+              className="modal-footer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: '0.6rem',
+                padding: '0.85rem 1.25rem',
+                borderTop: '1px solid var(--border-subtle)',
+              }}
+            >
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setPendingDelete(null)}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={() => {
+                  if (pendingDelete.type === 'chapter') {
+                    deleteChapter(pendingDelete.id);
+                  } else {
+                    deleteFolder(pendingDelete.id, false);
+                  }
+                  setPendingDelete(null);
+                }}
+                style={{
+                  background: 'var(--accent-danger, #ef4444)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                <Trash2 size={13} />
+                <span>{t('common.delete')}</span>
+              </button>
+            </div>
+          </div>
         </div>,
         document.body
       )}

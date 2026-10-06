@@ -56,6 +56,63 @@ export function scopeCssForContainer(css: string, containerSelector: string): st
 
 export const CSS_PRESETS: StylePreset[] = [
   {
+    id: 'modern-fiction',
+    name: 'Modern Fiction',
+    description: 'Clean modern layout with bold headers, subtle paragraph spacing, and modern sans typography.',
+    fontFamily: "'Inter', -apple-system, sans-serif",
+    category: 'Modern',
+    css: `/* Modern Fiction Style */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.8;
+  color: #1e293b;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  max-width: 42rem;
+}
+
+h1, h2, h3 {
+  font-family: 'Outfit', sans-serif;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+p {
+  margin: 1.1rem 0;
+  text-align: left;
+}
+
+blockquote {
+  background: #f1f5f9;
+  border-left: 4px solid #0ea5e9;
+  padding: 1rem 1.4rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1.8rem 0;
+  color: #334155;
+}
+
+img {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin: 2rem 0;
+}
+`,
+  },
+  {
     id: 'classic-literature',
     name: 'Classic Literature',
     description: 'Traditional book typography with indented paragraphs, serif fonts, and elegant headers.',
@@ -141,63 +198,6 @@ img {
   display: block;
   margin: 2rem auto;
   border-radius: 4px;
-}
-`,
-  },
-  {
-    id: 'modern-fiction',
-    name: 'Modern Fiction',
-    description: 'Clean modern layout with bold headers, subtle paragraph spacing, and modern sans typography.',
-    fontFamily: "'Inter', -apple-system, sans-serif",
-    category: 'Modern',
-    css: `/* Modern Fiction Style */
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  line-height: 1.8;
-  color: #1e293b;
-  margin: 0 auto;
-  padding: 2.5rem 2rem;
-  max-width: 42rem;
-}
-
-h1, h2, h3 {
-  font-family: 'Outfit', sans-serif;
-  color: #0f172a;
-  letter-spacing: -0.02em;
-}
-
-h1 {
-  font-size: 2.4rem;
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-}
-
-h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
-}
-
-p {
-  margin: 1.2rem 0;
-  text-align: left;
-}
-
-blockquote {
-  background: #f1f5f9;
-  border-left: 4px solid #0ea5e9;
-  padding: 1rem 1.4rem;
-  border-radius: 0 8px 8px 0;
-  margin: 1.8rem 0;
-  color: #334155;
-}
-
-img {
-  max-width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  margin: 2rem 0;
 }
 `,
   },

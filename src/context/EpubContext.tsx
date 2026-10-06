@@ -2442,20 +2442,20 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const deleteChapter = useCallback(
     (chapterId: string) => {
-      if (!book) return;
-      if (book.chapters.length <= 1) {
+      const currentBook = bookRef.current || book;
+      if (!currentBook) return;
+      if (currentBook.chapters.length <= 1) {
         showNotification('error', 'Cannot delete the only chapter in the book.');
         return;
       }
 
-      const deletedChapter = book.chapters.find(c => c.id === chapterId);
-      const newChapters = book.chapters.filter(c => c.id !== chapterId);
-      newChapters.forEach((ch, idx) => {
-        ch.order = idx;
-      });
+      const deletedChapter = currentBook.chapters.find(c => c.id === chapterId);
+      const newChapters = currentBook.chapters
+        .filter(c => c.id !== chapterId)
+        .map((ch, idx) => ({ ...ch, order: idx }));
 
-      const newSpine = book.spine.filter(s => s.idref !== chapterId);
-      const newManifest = { ...book.manifest };
+      const newSpine = currentBook.spine.filter(s => s.idref !== chapterId);
+      const newManifest = { ...currentBook.manifest };
       delete newManifest[chapterId];
 
       function removeTocItem(items: EpubTocItem[]): EpubTocItem[] {
@@ -2466,32 +2466,51 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             children: i.children ? removeTocItem(i.children) : undefined,
           }));
       }
-      const newToc = removeTocItem(book.toc);
+      const newToc = removeTocItem(currentBook.toc);
 
-      const currentComments = book.writerData?.comments || [];
+      const currentComments = currentBook.writerData?.comments || [];
       const filteredComments = currentComments.filter(c => c.chapterId !== chapterId);
 
-      setBook(prev =>
-        prev
-          ? {
-            ...prev,
-            chapters: newChapters,
-            spine: newSpine,
-            manifest: newManifest,
-            toc: newToc,
-            writerData: {
-              ...prev.writerData,
-              comments: filteredComments,
-            },
-          }
-          : null
-      );
+      const updatedBook: EpubBook = {
+        ...currentBook,
+        chapters: newChapters,
+        spine: newSpine,
+        manifest: newManifest,
+        toc: newToc,
+        writerData: {
+          ...currentBook.writerData,
+          comments: filteredComments,
+        },
+      };
 
-      if (activeChapterId === chapterId) {
-        setActiveChapterId(newChapters[0]?.id || null);
+      bookRef.current = updatedBook;
+      setBook(updatedBook);
+
+      let nextActiveId = activeChapterIdRef.current;
+      if (activeChapterIdRef.current === chapterId || activeChapterId === chapterId) {
+        nextActiveId = newChapters[0]?.id || null;
+        setActiveChapterId(nextActiveId);
+        activeChapterIdRef.current = nextActiveId;
+      }
+
+      const currentFileId = activeFileIdRef.current;
+      if (currentFileId) {
+        const updatedSessions = openFilesRef.current.map(s =>
+          s.id === currentFileId
+            ? {
+              ...s,
+              book: updatedBook,
+              activeChapterId: nextActiveId,
+              isDirty: true,
+            }
+            : s
+        );
+        openFilesRef.current = updatedSessions;
+        setOpenFiles(updatedSessions);
       }
 
       setIsDirty(true);
+      isDirtyRef.current = true;
       showNotification('info', `Deleted chapter "${deletedChapter?.title || 'Chapter'}"`);
     },
     [book, activeChapterId, setIsDirty, showNotification]
@@ -2510,7 +2529,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         ? `${getDirectory(currentBook.chapters[0].fullPath)}chapter_${timestamp}${ext}`
         : `OEBPS/${newHref}`;
 
-      const initialContent = `<h1>${title}</h1>\n<p>Write or paste your chapter text here...</p>`;
+      const initialContent = '<p></p>';
       const fullXhtml = wrapInXhtml(initialContent, title);
 
       let targetFolderId: string | null = null;
