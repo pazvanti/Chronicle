@@ -82,7 +82,7 @@ p {
   ${paragraphStyle === 'indent' ? 'text-indent: 1.5em;' : ''}
 }
 
-${paragraphStyle === 'indent' ? 'h1 + p, h2 + p, h3 + p, hr + p { text-indent: 0; }' : ''}
+${paragraphStyle === 'indent' ? 'body > p:first-of-type, body > p:first-child, p:first-of-type, h1 + p, h2 + p, h3 + p, h4 + p, hr + p, blockquote + p, .no-indent { text-indent: 0; }' : ''}
 
 ${
   enableDropCaps

@@ -32,6 +32,9 @@ export function scopeCssForContainer(css: string, containerSelector: string): st
         if (trimmed === 'body' || trimmed === 'html') {
           return containerSelector;
         }
+        if (trimmed.startsWith('body >') || trimmed.startsWith('html >')) {
+          return `${containerSelector} > ${trimmed.substring(6).trim()}`;
+        }
         if (trimmed.startsWith('body ') || trimmed.startsWith('html ')) {
           return `${containerSelector} ${trimmed.substring(5)}`;
         }
@@ -158,8 +161,12 @@ p {
   text-indent: 1.5em;
 }
 
-/* First paragraph after heading has no indent */
-h1 + p, h2 + p, h3 + p, hr + p, .no-indent {
+/* First paragraph of chapter or after headings/dividers/quotes has no indent */
+body > p:first-of-type,
+body > p:first-child,
+p:first-of-type,
+h1 + p, h2 + p, h3 + p, h4 + p, hr + p, blockquote + p,
+.no-indent {
   text-indent: 0;
 }
 
@@ -306,7 +313,11 @@ p {
   text-indent: 1.75em;
 }
 
-h1 + p, h2 + p, hr + p {
+body > p:first-of-type,
+body > p:first-child,
+p:first-of-type,
+h1 + p, h2 + p, h3 + p, hr + p, blockquote + p,
+.no-indent {
   text-indent: 0;
 }
 

@@ -1932,6 +1932,140 @@ export const WysiwygEditor: React.FC = () => {
       }
     }
 
+    // Enter key handling: convert headings to paragraphs on Enter, exit empty blockquotes
+    if (e.key === 'Enter' && !e.shiftKey) {
+      const sel = window.getSelection();
+      if (sel && sel.isCollapsed && editorRef.current && editorRef.current.contains(sel.anchorNode)) {
+        let currentBlock: HTMLElement | null = null;
+        let curr: Node | null = sel.anchorNode;
+        while (curr && curr !== editorRef.current) {
+          if (curr.parentElement === editorRef.current && curr.nodeType === Node.ELEMENT_NODE) {
+            currentBlock = curr as HTMLElement;
+            break;
+          }
+          curr = curr.parentElement;
+        }
+
+        if (currentBlock) {
+          const tag = currentBlock.tagName.toUpperCase();
+
+          // Pressing Enter in a Heading (H1-H6)
+          if (/^H[1-6]$/.test(tag)) {
+            const isAtEnd = isCaretAtEndOfBlock(currentBlock, sel);
+            const isAtStart = isCaretAtStartOfBlock(currentBlock, sel);
+            const isEmpty = isBlockEmpty(currentBlock);
+
+            if (isEmpty) {
+              e.preventDefault();
+              const p = document.createElement('p');
+              p.innerHTML = '<br>';
+              editorRef.current.insertBefore(p, currentBlock);
+              currentBlock.remove();
+              setCaretToStart(p);
+              if (activeChapter && editorRef.current) {
+                const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+                lastSelfUpdatedHtmlRef.current = cleanedHtml;
+                updateChapterContent(activeChapter.id, cleanedHtml);
+                recordImmediateSnapshot();
+              }
+              requestAnimationFrame(() => {
+                updateParagraphFocusDimming();
+                performTypewriterScroll();
+              });
+              return;
+            }
+
+            if (isAtEnd) {
+              e.preventDefault();
+              const p = document.createElement('p');
+              p.innerHTML = '<br>';
+              editorRef.current.insertBefore(p, currentBlock.nextSibling);
+              setCaretToStart(p);
+              if (activeChapter && editorRef.current) {
+                const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+                lastSelfUpdatedHtmlRef.current = cleanedHtml;
+                updateChapterContent(activeChapter.id, cleanedHtml);
+                recordImmediateSnapshot();
+              }
+              requestAnimationFrame(() => {
+                updateParagraphFocusDimming();
+                performTypewriterScroll();
+              });
+              return;
+            }
+
+            if (isAtStart) {
+              e.preventDefault();
+              const p = document.createElement('p');
+              p.innerHTML = '<br>';
+              editorRef.current.insertBefore(p, currentBlock);
+              if (activeChapter && editorRef.current) {
+                const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+                lastSelfUpdatedHtmlRef.current = cleanedHtml;
+                updateChapterContent(activeChapter.id, cleanedHtml);
+                recordImmediateSnapshot();
+              }
+              requestAnimationFrame(() => {
+                updateParagraphFocusDimming();
+                performTypewriterScroll();
+              });
+              return;
+            }
+
+            // Splitting heading in middle: first part stays heading, second part becomes <p>
+            e.preventDefault();
+            const splitRange = document.createRange();
+            splitRange.setStart(sel.anchorNode!, sel.anchorOffset);
+            splitRange.setEnd(currentBlock, currentBlock.childNodes.length);
+            const extracted = splitRange.extractContents();
+
+            const p = document.createElement('p');
+            if (extracted.childNodes.length === 0 || !extracted.textContent?.trim()) {
+              p.innerHTML = '<br>';
+            } else {
+              p.appendChild(extracted);
+            }
+
+            editorRef.current.insertBefore(p, currentBlock.nextSibling);
+            setCaretToStart(p);
+
+            if (activeChapter && editorRef.current) {
+              const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+              lastSelfUpdatedHtmlRef.current = cleanedHtml;
+              updateChapterContent(activeChapter.id, cleanedHtml);
+              recordImmediateSnapshot();
+            }
+            requestAnimationFrame(() => {
+              updateParagraphFocusDimming();
+              performTypewriterScroll();
+            });
+            return;
+          }
+
+          // Pressing Enter in empty blockquote
+          if (tag === 'BLOCKQUOTE' && isBlockEmpty(currentBlock)) {
+            e.preventDefault();
+            const p = document.createElement('p');
+            p.innerHTML = '<br>';
+            editorRef.current.insertBefore(p, currentBlock.nextSibling);
+            currentBlock.remove();
+            setCaretToStart(p);
+            if (activeChapter && editorRef.current) {
+              const cleanedHtml = cleanTransientEditorMarkup(editorRef.current.innerHTML);
+              lastSelfUpdatedHtmlRef.current = cleanedHtml;
+              updateChapterContent(activeChapter.id, cleanedHtml);
+              recordImmediateSnapshot();
+            }
+            requestAnimationFrame(() => {
+              updateParagraphFocusDimming();
+              performTypewriterScroll();
+            });
+            return;
+          }
+        }
+      }
+    }
+
     // When Enter is pressed in Zen mode, immediately trigger focus dimming update and typewriter scroll
     if (e.key === 'Enter') {
       requestAnimationFrame(() => {
