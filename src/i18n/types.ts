@@ -962,5 +962,6 @@ export interface TranslationDictionary {
     reloadCloudVersion: string;
     cloudUpdatedTitle: string;
     cloudConflictTitle: string;
+    cloudLocalIsNewer: string;
   };
 }

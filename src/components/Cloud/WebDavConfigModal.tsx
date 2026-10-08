@@ -120,17 +120,18 @@ export const WebDavConfigModal: React.FC<WebDavConfigModalProps> = ({ onClose, o
     }
   };
 
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState<boolean>(false);
+
   const handleDisconnect = async () => {
-    if (window.confirm('Are you sure you want to disconnect and remove your WebDAV cloud configuration?')) {
-      await updateWebDavConfig(null);
-      setServerUrl('');
-      setUsername('');
-      setPassword('');
-      setRemotePath('/Chronicle/');
-      setTestResult(null);
-      showNotification('info', 'WebDAV configuration removed.');
-      onClose();
-    }
+    setShowDisconnectConfirm(false);
+    await updateWebDavConfig(null);
+    setServerUrl('');
+    setUsername('');
+    setPassword('');
+    setRemotePath('/Chronicle/');
+    setTestResult(null);
+    showNotification('info', 'WebDAV configuration removed.');
+    onClose();
   };
 
   if (!isTauri()) {
@@ -381,7 +382,7 @@ export const WebDavConfigModal: React.FC<WebDavConfigModalProps> = ({ onClose, o
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"
-                  onClick={handleDisconnect}
+                  onClick={() => setShowDisconnectConfirm(true)}
                   style={{ color: '#ef4444' }}
                   title="Remove saved credentials from IndexedDB"
                 >
@@ -414,6 +415,92 @@ export const WebDavConfigModal: React.FC<WebDavConfigModalProps> = ({ onClose, o
           </div>
         </form>
       </div>
+
+      {/* Disconnect Confirmation Modal */}
+      {showDisconnectConfirm && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDisconnectConfirm(false)}
+          style={{ zIndex: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="modal-card"
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth: '440px', width: '92%' }}
+          >
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Trash2 size={18} style={{ color: 'var(--accent-danger, #ef4444)' }} />
+                <h3 className="modal-title" style={{ fontSize: '1.05rem', fontWeight: 600 }}>
+                  Disconnect Cloud Storage
+                </h3>
+              </div>
+              <button
+                className="btn-icon btn-sm"
+                onClick={() => setShowDisconnectConfirm(false)}
+                title="Cancel"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                Are you sure you want to disconnect and remove your WebDAV cloud configuration?
+              </p>
+              <div
+                style={{
+                  padding: '0.6rem 0.8rem',
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  color: 'var(--accent-danger, #f87171)',
+                }}
+              >
+                Your cloud manuscripts will remain safely on your WebDAV server, but credentials will be cleared from this app.
+              </div>
+            </div>
+
+            <div
+              className="modal-footer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: '0.6rem',
+                padding: '0.85rem 1.25rem',
+                borderTop: '1px solid var(--border-subtle)',
+              }}
+            >
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setShowDisconnectConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={handleDisconnect}
+                style={{
+                  background: 'var(--accent-danger, #ef4444)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                <Trash2 size={14} />
+                <span>Disconnect</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

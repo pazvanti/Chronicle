@@ -962,5 +962,6 @@ export const ro: TranslationDictionary = {
     reloadCloudVersion: 'Reîncarcă versiunea din cloud',
     cloudUpdatedTitle: 'Manuscris actualizat în cloud',
     cloudConflictTitle: 'Conflict cloud detectat',
+    cloudLocalIsNewer: 'Manuscrisul deschis curent are modificări locale mai noi sau nesalvate.',
   },
 };

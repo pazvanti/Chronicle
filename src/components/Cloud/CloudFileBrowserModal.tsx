@@ -118,6 +118,9 @@ export const CloudFileBrowserModal: React.FC<CloudFileBrowserModalProps> = ({ on
     }
   };
 
+  const [pendingDeleteFile, setPendingDeleteFile] = useState<WebDavFileItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
   const handleOpenFile = async (file: WebDavFileItem) => {
     try {
       onClose();
@@ -127,22 +130,25 @@ export const CloudFileBrowserModal: React.FC<CloudFileBrowserModalProps> = ({ on
     }
   };
 
-  const handleDeleteFile = async (file: WebDavFileItem, e: React.MouseEvent) => {
+  const handleRequestDelete = (file: WebDavFileItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!webdavConfig) return;
-    const isDir = file.isDirectory;
-    const confirmMessage = isDir
-      ? `Are you sure you want to delete the folder "${file.name}"? Note: WebDAV servers usually require folders to be empty before deleting.`
-      : `Are you sure you want to delete "${file.name}" from your cloud storage?`;
+    setPendingDeleteFile(file);
+  };
 
-    if (window.confirm(confirmMessage)) {
-      try {
-        await deleteFile(webdavConfig, file.href);
-        setFiles(prev => prev.filter(f => f.href !== file.href));
-        showNotification('success', `Deleted "${file.name}" from cloud.`);
-      } catch (err: any) {
-        showNotification('error', `Failed to delete ${isDir ? 'folder' : 'file'}: ${err.message || 'Error'}`);
-      }
+  const handleConfirmDelete = async () => {
+    if (!pendingDeleteFile || !webdavConfig) return;
+    const file = pendingDeleteFile;
+    const isDir = file.isDirectory;
+    setIsDeleting(true);
+    try {
+      await deleteFile(webdavConfig, file.href);
+      setFiles(prev => prev.filter(f => f.href !== file.href && f.name !== file.name));
+      showNotification('success', `Deleted "${file.name}" from cloud.`);
+      setPendingDeleteFile(null);
+    } catch (err: any) {
+      showNotification('error', `Failed to delete ${isDir ? 'folder' : 'file'}: ${err.message || 'Error'}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -713,7 +719,7 @@ export const CloudFileBrowserModal: React.FC<CloudFileBrowserModalProps> = ({ on
                               <button
                                 type="button"
                                 className="btn-icon btn-sm"
-                                onClick={e => handleDeleteFile(file, e)}
+                                onClick={e => handleRequestDelete(file, e)}
                                 title={isDir ? `Delete folder "${file.name}"` : `Delete "${file.name}"`}
                                 style={{ color: 'var(--text-muted)' }}
                               >
@@ -741,6 +747,97 @@ export const CloudFileBrowserModal: React.FC<CloudFileBrowserModalProps> = ({ on
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {pendingDeleteFile && (
+        <div
+          className="modal-overlay"
+          onClick={() => !isDeleting && setPendingDeleteFile(null)}
+          style={{ zIndex: 310, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="modal-card"
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth: '440px', width: '92%' }}
+          >
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Trash2 size={18} style={{ color: 'var(--accent-danger, #ef4444)' }} />
+                <h3 className="modal-title" style={{ fontSize: '1.05rem', fontWeight: 600 }}>
+                  {pendingDeleteFile.isDirectory ? 'Delete Cloud Folder' : 'Delete Cloud Manuscript'}
+                </h3>
+              </div>
+              <button
+                className="btn-icon btn-sm"
+                onClick={() => setPendingDeleteFile(null)}
+                disabled={isDeleting}
+                title="Cancel"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                {pendingDeleteFile.isDirectory
+                  ? `Are you sure you want to delete the folder "${pendingDeleteFile.name}" from your cloud storage? Note: WebDAV servers require folders to be empty before deleting.`
+                  : `Are you sure you want to delete "${pendingDeleteFile.name}" from your cloud storage?`}
+              </p>
+              <div
+                style={{
+                  padding: '0.6rem 0.8rem',
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  color: 'var(--accent-danger, #f87171)',
+                }}
+              >
+                This action cannot be undone.
+              </div>
+            </div>
+
+            <div
+              className="modal-footer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: '0.6rem',
+                padding: '0.85rem 1.25rem',
+                borderTop: '1px solid var(--border-subtle)',
+              }}
+            >
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setPendingDeleteFile(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                style={{
+                  background: 'var(--accent-danger, #ef4444)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

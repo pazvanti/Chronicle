@@ -962,5 +962,6 @@ export const ptBR: TranslationDictionary = {
     reloadCloudVersion: 'Recarregar Versão da Nuvem',
     cloudUpdatedTitle: 'Manuscrito na Nuvem Atualizado',
     cloudConflictTitle: 'Conflito na Nuvem Detectado',
+    cloudLocalIsNewer: 'O manuscrito aberto atualmente possui alterações locais mais recentes ou não salvas.',
   },
 };

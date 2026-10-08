@@ -2844,6 +2844,23 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           console.warn('[WebDAV] Could not retrieve file metadata:', err);
         }
 
+        // When force reloading an already-open manuscript, make sure the cloud version is actually newer before replacing
+        if (!isRestore && existing) {
+          const isSessionDirty = existing.isDirty || (activeFileIdRef.current === existing.id && isDirtyRef.current);
+          const hasLocalTimestamp = existing.cloudLastModifiedTimestamp;
+          const hasRemoteTimestamp = remoteMeta?.lastModifiedTimestamp;
+
+          if (hasRemoteTimestamp && hasLocalTimestamp && hasRemoteTimestamp <= hasLocalTimestamp + 1000) {
+            // The cloud file is not newer than our local open manuscript
+            if (isSessionDirty) {
+              switchOpenFile(existing.id);
+              showNotification('info', t('notifications.cloudLocalIsNewer') || 'Current opened manuscript has newer or unsaved local changes.');
+              setIsLoading(false);
+              return;
+            }
+          }
+        }
+
         const cloudMeta = {
           href,
           lastModified: remoteMeta?.lastModified || null,
@@ -3192,6 +3209,9 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     isCheckingCloudUpdateRef.current = true;
     try {
+      // Flush active editor DOM into memory before inspecting dirty/timestamp state
+      flushCurrentEditorContent();
+
       const activeCfg = webdavConfigRef.current || (await loadAllSettings()).webdavConfig;
       if (!activeCfg) return;
 
@@ -3202,35 +3222,34 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const localEtag = cloudEtagRef.current;
       const localSize = cloudSizeRef.current;
 
-      let hasRemoteUpdated = false;
+      let isRemoteStrictlyNewer = false;
 
-      // 1. Compare lastModified timestamp (allow 1000ms threshold for clock differences)
+      // 1. Compare lastModified timestamp: remote must be strictly newer than local session timestamp
       if (remoteMeta.lastModifiedTimestamp && localTimestamp) {
         if (remoteMeta.lastModifiedTimestamp > localTimestamp + 1000) {
-          hasRemoteUpdated = true;
+          isRemoteStrictlyNewer = true;
+        } else {
+          // Cloud version is older or identical to the currently open manuscript
+          isRemoteStrictlyNewer = false;
         }
-      }
-
-      // 2. Compare ETag if both exist and timestamp didn't already trigger
-      if (!hasRemoteUpdated && remoteMeta.etag && localEtag) {
-        if (remoteMeta.etag !== localEtag) {
-          hasRemoteUpdated = true;
+      } else if (remoteMeta.lastModifiedTimestamp && !localTimestamp) {
+        // Local timestamp wasn't recorded initially: check if ETag or size indicates an update
+        if (remoteMeta.etag && localEtag && remoteMeta.etag !== localEtag) {
+          isRemoteStrictlyNewer = true;
+        } else if (
+          remoteMeta.size !== null &&
+          localSize !== null &&
+          localSize > 0 &&
+          remoteMeta.size !== localSize
+        ) {
+          isRemoteStrictlyNewer = true;
         }
+      } else if (remoteMeta.etag && localEtag && remoteMeta.etag !== localEtag) {
+        // Fallback: ETag difference if timestamps were not provided by server
+        isRemoteStrictlyNewer = true;
       }
 
-      // 3. Fallback: Compare file size if neither timestamp nor etag differed but size changed
-      if (
-        !hasRemoteUpdated &&
-        remoteMeta.size !== null &&
-        localSize !== null &&
-        localSize > 0 &&
-        remoteMeta.size !== localSize &&
-        (!localTimestamp || (remoteMeta.lastModifiedTimestamp && remoteMeta.lastModifiedTimestamp >= localTimestamp))
-      ) {
-        hasRemoteUpdated = true;
-      }
-
-      if (hasRemoteUpdated) {
+      if (isRemoteStrictlyNewer) {
         if (!isDirtyRef.current) {
           // No unsaved local changes: reload updated manuscript in-place
           await loadFromCloudRef.current(
@@ -3276,7 +3295,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } finally {
       isCheckingCloudUpdateRef.current = false;
     }
-  }, [showNotification, t]);
+  }, [flushCurrentEditorContent, showNotification, t]);
 
   const checkAndReloadCloudFileIfUpdatedRef = useRef(checkAndReloadCloudFileIfUpdated);
   useEffect(() => {

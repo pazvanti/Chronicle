@@ -962,5 +962,6 @@ export const en: TranslationDictionary = {
     reloadCloudVersion: 'Reload Cloud Version',
     cloudUpdatedTitle: 'Cloud Manuscript Updated',
     cloudConflictTitle: 'Cloud Conflict Detected',
+    cloudLocalIsNewer: 'Current opened manuscript has newer or unsaved local changes.',
   },
 };
