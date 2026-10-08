@@ -1,4 +1,4 @@
-import { WebDavConfig, WebDavFileItem } from '../../types/cloud';
+import { WebDavConfig, WebDavFileItem, WebDavFileMetadata } from '../../types/cloud';
 
 interface TauriWindow {
   __TAURI_INTERNALS__?: unknown;
@@ -474,4 +474,133 @@ export async function deleteFile(config: WebDavConfig, hrefOrFilename: string): 
   if (!res.ok && res.status !== 204 && res.status !== 200 && res.status !== 404) {
     throw new Error(`Failed to delete file from WebDAV (HTTP ${res.status}: ${res.statusText})`);
   }
+}
+
+/**
+ * Queries metadata (lastModified, etag, size) of a remote WebDAV file without downloading its full body.
+ * First attempts a PROPFIND Depth: 0 request, then falls back to HTTP HEAD.
+ */
+export async function getFileMetadata(
+  config: WebDavConfig,
+  hrefOrFilename: string
+): Promise<WebDavFileMetadata | null> {
+  let targetUrl: string;
+  if (hrefOrFilename.startsWith('http://') || hrefOrFilename.startsWith('https://')) {
+    targetUrl = hrefOrFilename;
+  } else if (hrefOrFilename.startsWith('/')) {
+    targetUrl = new URL(hrefOrFilename, config.serverUrl).href;
+  } else {
+    targetUrl = getFileUrl(config, hrefOrFilename);
+  }
+
+  const propfindXml = `<?xml version="1.0" encoding="utf-8" ?>
+<d:propfind xmlns:d="DAV:">
+  <d:prop>
+    <d:getlastmodified/>
+    <d:getcontentlength/>
+    <d:getetag/>
+  </d:prop>
+</d:propfind>`;
+
+  try {
+    const res = await nativeFetch(targetUrl, {
+      method: 'PROPFIND',
+      headers: {
+        ...getAuthHeaders(config),
+        'Depth': '0',
+        'Content-Type': 'application/xml; charset=utf-8',
+      },
+      body: propfindXml,
+    });
+
+    if (res.status === 404) {
+      return {
+        exists: false,
+        lastModified: null,
+        lastModifiedTimestamp: null,
+        etag: null,
+        size: null,
+      };
+    }
+
+    if (res.ok || res.status === 207) {
+      const xmlText = await res.text();
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+
+      const lastModifiedStr = findXmlText(xmlDoc.documentElement, 'getlastmodified');
+      const lengthStr = findXmlText(xmlDoc.documentElement, 'getcontentlength');
+      const etagStr = findXmlText(xmlDoc.documentElement, 'getetag');
+
+      let lastModifiedTimestamp: number | null = null;
+      if (lastModifiedStr) {
+        const parsed = Date.parse(lastModifiedStr);
+        if (!isNaN(parsed)) {
+          lastModifiedTimestamp = parsed;
+        }
+      }
+
+      const size = lengthStr ? parseInt(lengthStr, 10) || null : null;
+      const cleanEtag = etagStr ? etagStr.replace(/^["']|["']$/g, '').trim() : null;
+
+      if (lastModifiedTimestamp !== null || cleanEtag !== null || size !== null) {
+        return {
+          exists: true,
+          lastModified: lastModifiedStr,
+          lastModifiedTimestamp,
+          etag: cleanEtag,
+          size,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[WebDAV] PROPFIND Depth:0 failed for metadata, trying HEAD fallback:', err);
+  }
+
+  // Fallback to HTTP HEAD
+  try {
+    const headRes = await nativeFetch(targetUrl, {
+      method: 'HEAD',
+      headers: getAuthHeaders(config),
+    });
+
+    if (headRes.status === 404) {
+      return {
+        exists: false,
+        lastModified: null,
+        lastModifiedTimestamp: null,
+        etag: null,
+        size: null,
+      };
+    }
+
+    if (headRes.ok) {
+      const lm = headRes.headers.get('last-modified') || headRes.headers.get('Last-Modified');
+      const et = headRes.headers.get('etag') || headRes.headers.get('ETag');
+      const cl = headRes.headers.get('content-length') || headRes.headers.get('Content-Length');
+
+      let lastModifiedTimestamp: number | null = null;
+      if (lm) {
+        const parsed = Date.parse(lm);
+        if (!isNaN(parsed)) {
+          lastModifiedTimestamp = parsed;
+        }
+      }
+
+      const size = cl ? parseInt(cl, 10) || null : null;
+      const cleanEtag = et ? et.replace(/^["']|["']$/g, '').trim() : null;
+
+      return {
+        exists: true,
+        lastModified: lm || null,
+        lastModifiedTimestamp,
+        etag: cleanEtag,
+        size,
+      };
+    }
+  } catch (err) {
+    console.warn('[WebDAV] HEAD request failed for metadata:', err);
+  }
+
+  return null;
 }

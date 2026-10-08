@@ -20,4 +20,12 @@ export interface WebDavFileItem {
   relativePath?: string; // Full relative path from config.remotePath
 }
 
+export interface WebDavFileMetadata {
+  lastModified: string | null;
+  lastModifiedTimestamp: number | null; // Milliseconds timestamp (Date.parse)
+  etag: string | null;
+  size: number | null;
+  exists: boolean;
+}
+
 export type StorageTarget = 'local' | 'cloud';

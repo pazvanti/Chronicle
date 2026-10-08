@@ -957,5 +957,10 @@ export const en: TranslationDictionary = {
     checkUpdatesDisabled: 'Automatic update checks disabled.',
     chronicleUpToDate: 'Chronicle is up to date ({version}).',
     newVersionAvailable: 'New version {version} available!',
+    cloudFileReloaded: 'Manuscript reloaded with latest changes from cloud (updated from another source).',
+    cloudConflictDetected: 'The cloud manuscript has been modified from another source while you were away. You have unsaved local edits.',
+    reloadCloudVersion: 'Reload Cloud Version',
+    cloudUpdatedTitle: 'Cloud Manuscript Updated',
+    cloudConflictTitle: 'Cloud Conflict Detected',
   },
 };

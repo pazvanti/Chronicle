@@ -957,5 +957,10 @@ export const ro: TranslationDictionary = {
     checkUpdatesDisabled: 'Verificarea automată a actualizărilor a fost dezactivată.',
     chronicleUpToDate: 'Chronicle este la zi ({version}).',
     newVersionAvailable: 'O nouă versiune {version} este disponibilă!',
+    cloudFileReloaded: 'Manuscrisul a fost reîncărcat cu cele mai recente modificări din cloud (actualizat dintr-o altă sursă).',
+    cloudConflictDetected: 'Manuscrisul din cloud a fost modificat dintr-o altă sursă în timp ce erați inactiv. Aveți modificări locale nesalvate.',
+    reloadCloudVersion: 'Reîncarcă versiunea din cloud',
+    cloudUpdatedTitle: 'Manuscris actualizat în cloud',
+    cloudConflictTitle: 'Conflict cloud detectat',
   },
 };

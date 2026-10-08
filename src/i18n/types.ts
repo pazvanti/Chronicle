@@ -957,5 +957,10 @@ export interface TranslationDictionary {
     checkUpdatesDisabled: string;
     chronicleUpToDate: string;
     newVersionAvailable: string;
+    cloudFileReloaded: string;
+    cloudConflictDetected: string;
+    reloadCloudVersion: string;
+    cloudUpdatedTitle: string;
+    cloudConflictTitle: string;
   };
 }

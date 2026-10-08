@@ -57,7 +57,7 @@ import {
   isChronicleProjectFile,
 } from '../services/epub/projectFormat';
 import { isMarkdownFile, parseMarkdownToBook } from '../services/epub/markdownImporter';
-import { WebDavConfig, StorageTarget } from '../types/cloud';
+import { WebDavConfig, StorageTarget, WebDavFileMetadata } from '../types/cloud';
 import { UiTheme, CustomTheme } from '../types/theme';
 import { applyActiveTheme, resolvePaletteSecondary } from '../services/theme/customThemeService';
 import { saveWebDavConfig, deleteWebDavConfig } from '../services/cloud/webdavStorage';
@@ -69,7 +69,7 @@ import {
   DEFAULT_ZEN_SETTINGS,
   DEFAULT_CHRONICLE_SETTINGS,
 } from '../services/storage/indexedDbSettings';
-import { uploadFile, downloadFile } from '../services/cloud/webdavClient';
+import { uploadFile, downloadFile, getFileMetadata } from '../services/cloud/webdavClient';
 import {
   isTauri,
   pickFileToOpen,
@@ -119,6 +119,11 @@ export interface OpenFileSession {
   storageTarget: StorageTarget | null;
   localFilePath: string | null;
   cloudFileName: string | null;
+  cloudHref?: string | null;
+  cloudLastModified?: string | null;
+  cloudLastModifiedTimestamp?: number | null;
+  cloudEtag?: string | null;
+  cloudSize?: number | null;
   isDirty: boolean;
   activeChapterId: string | null;
   activeTimelineId: string | null;
@@ -134,6 +139,7 @@ interface EpubContextType {
   activeFileId: string | null;
   switchOpenFile: (fileId: string) => void;
   closeOpenFile: (fileId: string, force?: boolean) => Promise<void>;
+  checkAndReloadCloudFileIfUpdated?: () => Promise<void>;
 
   book: EpubBook | null;
   bookSessionId: string;
@@ -668,6 +674,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     cloudFileNameRef.current = cloudFileName;
   }, [cloudFileName]);
 
+  const cloudHrefRef = useRef<string | null>(null);
+  const cloudLastModifiedRef = useRef<string | null>(null);
+  const cloudLastModifiedTimestampRef = useRef<number | null>(null);
+  const cloudEtagRef = useRef<string | null>(null);
+  const cloudSizeRef = useRef<number | null>(null);
+
   const webdavConfigRef = useRef<WebDavConfig | null>(webdavConfig);
   useEffect(() => {
     webdavConfigRef.current = webdavConfig;
@@ -701,6 +713,11 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             storageTarget,
             localFilePath,
             cloudFileName,
+            cloudHref: cloudHrefRef.current,
+            cloudLastModified: cloudLastModifiedRef.current,
+            cloudLastModifiedTimestamp: cloudLastModifiedTimestampRef.current,
+            cloudEtag: cloudEtagRef.current,
+            cloudSize: cloudSizeRef.current,
             isDirty,
             activeChapterId,
             activeTimelineId: activeTimelineIdRef.current,
@@ -1239,7 +1256,14 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       cloudName: string | null = null,
       dirty: boolean = false,
       chapterId?: string | null,
-      cssText?: string
+      cssText?: string,
+      cloudMeta?: {
+        href?: string | null;
+        lastModified?: string | null;
+        lastModifiedTimestamp?: number | null;
+        etag?: string | null;
+        size?: number | null;
+      }
     ): OpenFileSession => {
       const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       const bookSessId = `book_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -1272,6 +1296,11 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         storageTarget: target,
         localFilePath: localPath,
         cloudFileName: cloudName,
+        cloudHref: cloudMeta?.href || (target === 'cloud' ? cloudName : null),
+        cloudLastModified: cloudMeta?.lastModified || null,
+        cloudLastModifiedTimestamp: cloudMeta?.lastModifiedTimestamp || null,
+        cloudEtag: cloudMeta?.etag || null,
+        cloudSize: cloudMeta?.size || null,
         isDirty: dirty,
         activeChapterId: targetChapterId,
         activeTimelineId: newBook.writerData?.timelines?.[0]?.id || null,
@@ -1336,6 +1365,11 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               storageTarget: storageTargetRef.current,
               localFilePath: localFilePathRef.current,
               cloudFileName: cloudFileNameRef.current,
+              cloudHref: cloudHrefRef.current,
+              cloudLastModified: cloudLastModifiedRef.current,
+              cloudLastModifiedTimestamp: cloudLastModifiedTimestampRef.current,
+              cloudEtag: cloudEtagRef.current,
+              cloudSize: cloudSizeRef.current,
               isDirty: isDirtyRef.current,
               activeChapterId: activeChapterIdRef.current,
               activeTimelineId: activeTimelineIdRef.current,
@@ -1369,6 +1403,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       cloudFileNameRef.current = target.cloudFileName;
       setCloudFileName(target.cloudFileName);
 
+      cloudHrefRef.current = target.cloudHref || target.cloudFileName;
+      cloudLastModifiedRef.current = target.cloudLastModified || null;
+      cloudLastModifiedTimestampRef.current = target.cloudLastModifiedTimestamp || null;
+      cloudEtagRef.current = target.cloudEtag || null;
+      cloudSizeRef.current = target.cloudSize || null;
+
       isDirtyRef.current = target.isDirty;
       setIsDirtyState(target.isDirty);
 
@@ -1399,7 +1439,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (target.storageTarget === 'local' && target.localFilePath) {
           saveDesktopSession(target.localFilePath, targetChapter);
         } else if (target.storageTarget === 'cloud' && target.cloudFileName) {
-          saveCloudDesktopSession(target.cloudFileName, target.cloudFileName, targetChapter);
+          saveCloudDesktopSession(target.cloudHref || target.cloudFileName, target.cloudFileName, targetChapter);
         }
       }
 
@@ -1605,6 +1645,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           cloudFileNameRef.current = nextSession.cloudFileName;
           setCloudFileName(nextSession.cloudFileName);
 
+          cloudHrefRef.current = nextSession.cloudHref || nextSession.cloudFileName;
+          cloudLastModifiedRef.current = nextSession.cloudLastModified || null;
+          cloudLastModifiedTimestampRef.current = nextSession.cloudLastModifiedTimestamp || null;
+          cloudEtagRef.current = nextSession.cloudEtag || null;
+          cloudSizeRef.current = nextSession.cloudSize || null;
+
           isDirtyRef.current = nextSession.isDirty;
           setIsDirtyState(nextSession.isDirty);
 
@@ -1635,7 +1681,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (nextSession.storageTarget === 'local' && nextSession.localFilePath) {
               saveDesktopSession(nextSession.localFilePath, targetChapter);
             } else if (nextSession.storageTarget === 'cloud' && nextSession.cloudFileName) {
-              saveCloudDesktopSession(nextSession.cloudFileName, nextSession.cloudFileName, targetChapter);
+              saveCloudDesktopSession(nextSession.cloudHref || nextSession.cloudFileName, nextSession.cloudFileName, targetChapter);
             }
           }
         }
@@ -2768,7 +2814,9 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const storedPath = relativePath || filename;
 
       // Check if already open (unless force reload is requested)
-      const existing = openFilesRef.current.find(s => s.storageTarget === 'cloud' && s.cloudFileName === storedPath);
+      const existing = openFilesRef.current.find(
+        s => s.storageTarget === 'cloud' && (s.cloudFileName === storedPath || (s.cloudHref && s.cloudHref === href))
+      );
       if (!force && existing) {
         switchOpenFile(existing.id);
         showNotification('info', `Switched to open cloud manuscript "${existing.book.metadata.title}"`);
@@ -2787,6 +2835,23 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       try {
         setIsLoading(true);
+
+        // Fetch remote file metadata for change tracking and caching
+        let remoteMeta: WebDavFileMetadata | null = null;
+        try {
+          remoteMeta = await getFileMetadata(activeConfig, href);
+        } catch (err) {
+          console.warn('[WebDAV] Could not retrieve file metadata:', err);
+        }
+
+        const cloudMeta = {
+          href,
+          lastModified: remoteMeta?.lastModified || null,
+          lastModifiedTimestamp: remoteMeta?.lastModifiedTimestamp || Date.now(),
+          etag: remoteMeta?.etag || null,
+          size: remoteMeta?.size || null,
+        };
+
         const blob = await downloadFile(activeConfig, href);
         const buffer = await blob.arrayBuffer();
         const lower = filename.toLowerCase();
@@ -2803,18 +2868,34 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             null,
             storedPath,
             false,
-            targetChapterId
+            targetChapterId,
+            undefined,
+            cloudMeta
           );
-          const nextFiles = [...openFilesRef.current, newSession];
+
+          const existingIndex = openFilesRef.current.findIndex(
+            s => s.storageTarget === 'cloud' && (s.cloudFileName === storedPath || (s.cloudHref && s.cloudHref === href))
+          );
+          let sessionToUse = newSession;
+          let nextFiles: OpenFileSession[];
+          if (existingIndex >= 0) {
+            sessionToUse = {
+              ...newSession,
+              id: openFilesRef.current[existingIndex].id,
+            };
+            nextFiles = openFilesRef.current.map((s, idx) => (idx === existingIndex ? sessionToUse : s));
+          } else {
+            nextFiles = [...openFilesRef.current, newSession];
+          }
           openFilesRef.current = nextFiles;
           setOpenFiles(nextFiles);
 
-          setActiveFileId(newSession.id);
-          activeFileIdRef.current = newSession.id;
+          setActiveFileId(sessionToUse.id);
+          activeFileIdRef.current = sessionToUse.id;
 
           bookRef.current = projectBook;
           setBook(projectBook);
-          setBookSessionId(newSession.bookSessionId);
+          setBookSessionId(sessionToUse.bookSessionId);
           extractCssFromBook(projectBook);
           if (targetChapterId) {
             setActiveChapterId(targetChapterId);
@@ -2826,6 +2907,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           localFilePathRef.current = null;
           setCloudFileName(storedPath);
           cloudFileNameRef.current = storedPath;
+          cloudHrefRef.current = href;
+          cloudLastModifiedRef.current = cloudMeta.lastModified;
+          cloudLastModifiedTimestampRef.current = cloudMeta.lastModifiedTimestamp;
+          cloudEtagRef.current = cloudMeta.etag;
+          cloudSizeRef.current = cloudMeta.size;
+
           if (isTauri()) {
             saveCloudDesktopSession(href, storedPath, targetChapterId);
           }
@@ -2857,18 +2944,34 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             null,
             destCloudName,
             true,
-            targetChapterId
+            targetChapterId,
+            undefined,
+            cloudMeta
           );
-          const nextFiles = [...openFilesRef.current, newSession];
+
+          const existingIndex = openFilesRef.current.findIndex(
+            s => s.storageTarget === 'cloud' && (s.cloudFileName === destCloudName || (s.cloudHref && s.cloudHref === href))
+          );
+          let sessionToUse = newSession;
+          let nextFiles: OpenFileSession[];
+          if (existingIndex >= 0) {
+            sessionToUse = {
+              ...newSession,
+              id: openFilesRef.current[existingIndex].id,
+            };
+            nextFiles = openFilesRef.current.map((s, idx) => (idx === existingIndex ? sessionToUse : s));
+          } else {
+            nextFiles = [...openFilesRef.current, newSession];
+          }
           openFilesRef.current = nextFiles;
           setOpenFiles(nextFiles);
 
-          setActiveFileId(newSession.id);
-          activeFileIdRef.current = newSession.id;
+          setActiveFileId(sessionToUse.id);
+          activeFileIdRef.current = sessionToUse.id;
 
           bookRef.current = mdBook;
           setBook(mdBook);
-          setBookSessionId(newSession.bookSessionId);
+          setBookSessionId(sessionToUse.bookSessionId);
           extractCssFromBook(mdBook);
           if (targetChapterId) {
             setActiveChapterId(targetChapterId);
@@ -2880,6 +2983,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           localFilePathRef.current = null;
           setCloudFileName(destCloudName);
           cloudFileNameRef.current = destCloudName;
+          cloudHrefRef.current = href;
+          cloudLastModifiedRef.current = cloudMeta.lastModified;
+          cloudLastModifiedTimestampRef.current = cloudMeta.lastModifiedTimestamp;
+          cloudEtagRef.current = cloudMeta.etag;
+          cloudSizeRef.current = cloudMeta.size;
+
           if (isTauri()) {
             saveCloudDesktopSession(href, destCloudName, targetChapterId);
           }
@@ -2914,18 +3023,34 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             null,
             destCloudName,
             false,
-            targetChapterId
+            targetChapterId,
+            undefined,
+            cloudMeta
           );
-          const nextFiles = [...openFilesRef.current, newSession];
+
+          const existingIndex = openFilesRef.current.findIndex(
+            s => s.storageTarget === 'cloud' && (s.cloudFileName === destCloudName || (s.cloudHref && s.cloudHref === href))
+          );
+          let sessionToUse = newSession;
+          let nextFiles: OpenFileSession[];
+          if (existingIndex >= 0) {
+            sessionToUse = {
+              ...newSession,
+              id: openFilesRef.current[existingIndex].id,
+            };
+            nextFiles = openFilesRef.current.map((s, idx) => (idx === existingIndex ? sessionToUse : s));
+          } else {
+            nextFiles = [...openFilesRef.current, newSession];
+          }
           openFilesRef.current = nextFiles;
           setOpenFiles(nextFiles);
 
-          setActiveFileId(newSession.id);
-          activeFileIdRef.current = newSession.id;
+          setActiveFileId(sessionToUse.id);
+          activeFileIdRef.current = sessionToUse.id;
 
           bookRef.current = parsed;
           setBook(parsed);
-          setBookSessionId(newSession.bookSessionId);
+          setBookSessionId(sessionToUse.bookSessionId);
           extractCssFromBook(parsed);
           if (targetChapterId) {
             setActiveChapterId(targetChapterId);
@@ -2937,6 +3062,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           localFilePathRef.current = null;
           setCloudFileName(destCloudName);
           cloudFileNameRef.current = destCloudName;
+          cloudHrefRef.current = href;
+          cloudLastModifiedRef.current = cloudMeta.lastModified;
+          cloudLastModifiedTimestampRef.current = cloudMeta.lastModifiedTimestamp;
+          cloudEtagRef.current = cloudMeta.etag;
+          cloudSizeRef.current = cloudMeta.size;
+
           if (isTauri()) {
             saveCloudDesktopSession(href, destCloudName, targetChapterId);
           }
@@ -3045,6 +3176,169 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     restorePreviousSession();
+  }, []);
+
+  // Inactivity tracking & automatic remote cloud update check on re-activation (30-minute threshold)
+  const lastActiveTimestampRef = useRef<number>(Date.now());
+  const isCheckingCloudUpdateRef = useRef<boolean>(false);
+  const INACTIVITY_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
+
+  const checkAndReloadCloudFileIfUpdated = useCallback(async () => {
+    if (isCheckingCloudUpdateRef.current) return;
+    if (storageTargetRef.current !== 'cloud') return;
+    const targetHref = cloudHrefRef.current || cloudFileNameRef.current;
+    const filename = cloudFileNameRef.current || targetHref?.split('/').pop() || 'manuscript.chronicle';
+    if (!targetHref) return;
+
+    isCheckingCloudUpdateRef.current = true;
+    try {
+      const activeCfg = webdavConfigRef.current || (await loadAllSettings()).webdavConfig;
+      if (!activeCfg) return;
+
+      const remoteMeta = await getFileMetadata(activeCfg, targetHref);
+      if (!remoteMeta || !remoteMeta.exists) return;
+
+      const localTimestamp = cloudLastModifiedTimestampRef.current;
+      const localEtag = cloudEtagRef.current;
+      const localSize = cloudSizeRef.current;
+
+      let hasRemoteUpdated = false;
+
+      // 1. Compare lastModified timestamp (allow 1000ms threshold for clock differences)
+      if (remoteMeta.lastModifiedTimestamp && localTimestamp) {
+        if (remoteMeta.lastModifiedTimestamp > localTimestamp + 1000) {
+          hasRemoteUpdated = true;
+        }
+      }
+
+      // 2. Compare ETag if both exist and timestamp didn't already trigger
+      if (!hasRemoteUpdated && remoteMeta.etag && localEtag) {
+        if (remoteMeta.etag !== localEtag) {
+          hasRemoteUpdated = true;
+        }
+      }
+
+      // 3. Fallback: Compare file size if neither timestamp nor etag differed but size changed
+      if (
+        !hasRemoteUpdated &&
+        remoteMeta.size !== null &&
+        localSize !== null &&
+        localSize > 0 &&
+        remoteMeta.size !== localSize &&
+        (!localTimestamp || (remoteMeta.lastModifiedTimestamp && remoteMeta.lastModifiedTimestamp >= localTimestamp))
+      ) {
+        hasRemoteUpdated = true;
+      }
+
+      if (hasRemoteUpdated) {
+        if (!isDirtyRef.current) {
+          // No unsaved local changes: reload updated manuscript in-place
+          await loadFromCloudRef.current(
+            targetHref,
+            filename,
+            true,
+            cloudFileNameRef.current || filename,
+            activeChapterIdRef.current,
+            false
+          );
+          showNotification(
+            'info',
+            t('notifications.cloudFileReloaded') || 'Manuscript reloaded with latest changes from cloud (updated from another source).',
+            undefined,
+            6000,
+            t('notifications.cloudUpdatedTitle') || 'Cloud Manuscript Updated'
+          );
+        } else {
+          // Unsaved local edits exist: notify user with action to reload or keep local changes
+          showNotification(
+            'update',
+            t('notifications.cloudConflictDetected') || 'The cloud manuscript has been modified from another source while you were away. You have unsaved local edits.',
+            {
+              label: t('notifications.reloadCloudVersion') || 'Reload Cloud Version',
+              onClick: async () => {
+                await loadFromCloudRef.current(
+                  targetHref,
+                  filename,
+                  true,
+                  cloudFileNameRef.current || filename,
+                  activeChapterIdRef.current,
+                  false
+                );
+              },
+            },
+            12000,
+            t('notifications.cloudConflictTitle') || 'Cloud Conflict Detected'
+          );
+        }
+      }
+    } catch (err) {
+      console.warn('[Cloud Auto-Check] Failed to check for remote cloud updates:', err);
+    } finally {
+      isCheckingCloudUpdateRef.current = false;
+    }
+  }, [showNotification, t]);
+
+  const checkAndReloadCloudFileIfUpdatedRef = useRef(checkAndReloadCloudFileIfUpdated);
+  useEffect(() => {
+    checkAndReloadCloudFileIfUpdatedRef.current = checkAndReloadCloudFileIfUpdated;
+  }, [checkAndReloadCloudFileIfUpdated]);
+
+  // Setup activity and focus/visibility listeners for 30-minute inactivity check
+  useEffect(() => {
+    let lastThrottledRecord = Date.now();
+
+    const handleUserActivity = () => {
+      const now = Date.now();
+      if (now - lastThrottledRecord > 5000) {
+        lastThrottledRecord = now;
+        lastActiveTimestampRef.current = now;
+      }
+    };
+
+    const handleBlur = () => {
+      lastActiveTimestampRef.current = Date.now();
+    };
+
+    const handleReactivation = () => {
+      const now = Date.now();
+      const inactiveDuration = now - lastActiveTimestampRef.current;
+      lastActiveTimestampRef.current = now;
+      lastThrottledRecord = now;
+
+      if (inactiveDuration >= INACTIVITY_THRESHOLD_MS) {
+        if (storageTargetRef.current === 'cloud' && (cloudFileNameRef.current || cloudHrefRef.current)) {
+          checkAndReloadCloudFileIfUpdatedRef.current();
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleReactivation();
+      } else {
+        handleBlur();
+      }
+    };
+
+    window.addEventListener('focus', handleReactivation);
+    window.addEventListener('blur', handleBlur);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('mousemove', handleUserActivity, { passive: true });
+    window.addEventListener('pointerdown', handleUserActivity, { passive: true });
+    window.addEventListener('keydown', handleUserActivity, { passive: true });
+    window.addEventListener('scroll', handleUserActivity, { passive: true });
+    window.addEventListener('touchstart', handleUserActivity, { passive: true });
+
+    return () => {
+      window.removeEventListener('focus', handleReactivation);
+      window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('pointerdown', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      window.removeEventListener('scroll', handleUserActivity);
+      window.removeEventListener('touchstart', handleUserActivity);
+    };
   }, []);
 
   const saveProject = useCallback(
@@ -3240,10 +3534,27 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
           await uploadFile(activeCfg, uploadName, blob);
 
+          let remoteMeta: WebDavFileMetadata | null = null;
+          try {
+            remoteMeta = await getFileMetadata(activeCfg, uploadName);
+          } catch (err) {
+            console.warn('[WebDAV] Could not fetch updated metadata after upload:', err);
+          }
+
+          const savedTimestamp = remoteMeta?.lastModifiedTimestamp || Date.now();
+          const savedEtag = remoteMeta?.etag || null;
+          const savedSize = remoteMeta?.size || blob.size;
+          const savedLastModified = remoteMeta?.lastModified || null;
+
           setStorageTarget('cloud');
           storageTargetRef.current = 'cloud';
           setCloudFileName(uploadName);
           cloudFileNameRef.current = uploadName;
+          cloudHrefRef.current = uploadName;
+          cloudLastModifiedRef.current = savedLastModified;
+          cloudLastModifiedTimestampRef.current = savedTimestamp;
+          cloudEtagRef.current = savedEtag;
+          cloudSizeRef.current = savedSize;
           setLocalFilePath(null);
           localFilePathRef.current = null;
           if (isTauri()) {
@@ -3262,6 +3573,11 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                   book: saveSnapshot,
                   storageTarget: 'cloud',
                   cloudFileName: uploadName,
+                  cloudHref: uploadName,
+                  cloudLastModified: savedLastModified,
+                  cloudLastModifiedTimestamp: savedTimestamp,
+                  cloudEtag: savedEtag,
+                  cloudSize: savedSize,
                   localFilePath: null,
                   isDirty: bookRef.current === saveSnapshot ? false : s.isDirty,
                   lastAutoSavedAt: isAutoSave ? new Date() : s.lastAutoSavedAt,
@@ -4637,6 +4953,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         saveProject,
         saveAs,
         loadFromCloud,
+        checkAndReloadCloudFileIfUpdated,
         autoSaveEnabled,
         setAutoSaveEnabled,
         autoSaveInterval,

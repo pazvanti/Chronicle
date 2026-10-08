@@ -957,5 +957,10 @@ export const ptBR: TranslationDictionary = {
     checkUpdatesDisabled: 'Verificação automática de atualizações desativada.',
     chronicleUpToDate: 'O Chronicle está atualizado ({version}).',
     newVersionAvailable: 'Nova versão {version} disponível!',
+    cloudFileReloaded: 'Manuscrito recarregado com as alterações mais recentes da nuvem (atualizado de outra fonte).',
+    cloudConflictDetected: 'O manuscrito na nuvem foi modificado a partir de outra fonte enquanto você esteve inativo. Você tem alterações locais não salvas.',
+    reloadCloudVersion: 'Recarregar Versão da Nuvem',
+    cloudUpdatedTitle: 'Manuscrito na Nuvem Atualizado',
+    cloudConflictTitle: 'Conflito na Nuvem Detectado',
   },
 };
