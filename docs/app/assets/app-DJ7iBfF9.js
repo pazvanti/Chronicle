@@ -1,0 +1,1 @@
+import{t as e}from"./index-DvQEIz3B.js";async function t(){return e(`plugin:app|version`)}export{t as getVersion};
