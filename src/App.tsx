@@ -32,6 +32,7 @@ import { UnsavedChangesModal } from './components/Common/UnsavedChangesModal';
 import { SettingsModal } from './components/Settings/SettingsModal';
 import { SnapshotsModal } from './components/Snapshots/SnapshotsModal';
 import { MobileNoticeModal } from './components/Mobile/MobileNoticeModal';
+import { LibraryView } from './components/Library/LibraryView';
 import { useSmallScreenDetector } from './hooks/useSmallScreenDetector';
 import { isTauri } from './services/cloud/webdavClient';
 import { Upload, Loader2 } from 'lucide-react';
@@ -48,6 +49,7 @@ const AppContent: React.FC = () => {
     toggleSidebar,
     sidebarCollapsed,
     showNotification,
+    isLibraryOpen,
     isWebDavConfigOpen,
     setIsWebDavConfigOpen,
     isSaveDestinationOpen,
@@ -203,8 +205,8 @@ const AppContent: React.FC = () => {
       <Header />
 
       <main className="app-main">
-        {/* Sidebar Chapter List shown in Reader and Editor modes when book is loaded */}
-        {book && !sidebarCollapsed && (viewMode === 'editor' || viewMode === 'reader') && (
+        {/* Sidebar Chapter List shown in Reader and Editor modes when book is loaded and library is closed */}
+        {!isLibraryOpen && book && !sidebarCollapsed && (viewMode === 'editor' || viewMode === 'reader') && (
           <ChapterList />
         )}
 
@@ -216,7 +218,9 @@ const AppContent: React.FC = () => {
             </div>
           )}
 
-          {!book ? (
+          {isLibraryOpen ? (
+            <LibraryView />
+          ) : !book ? (
             <WelcomeScreen />
           ) : (
             <>

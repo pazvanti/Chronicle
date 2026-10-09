@@ -68,7 +68,16 @@ import {
   ZenModeSettings,
   DEFAULT_ZEN_SETTINGS,
   DEFAULT_CHRONICLE_SETTINGS,
+  StartupBehavior,
 } from '../services/storage/indexedDbSettings';
+import {
+  LibraryBookItem,
+  getLibraryItems,
+  saveLibraryItem,
+  removeLibraryItem,
+  createCoverThumbnail,
+  getOrGenerateSpineColor,
+} from '../services/library/libraryStorage';
 import { uploadFile, downloadFile, getFileMetadata } from '../services/cloud/webdavClient';
 import {
   isTauri,
@@ -368,6 +377,21 @@ interface EpubContextType {
   presenceProgress: AnalysisProgress | null;
   runCastPresenceAnalysis: (force?: boolean) => Promise<CastPresenceMatrix | null>;
   invalidatePresenceCache: () => void;
+
+  libraryItems: LibraryBookItem[];
+  isLibraryOpen: boolean;
+  setIsLibraryOpen: (open: boolean) => void;
+  removeLibraryBook: (id: string) => Promise<void>;
+  startupBehavior: StartupBehavior;
+  setStartupBehavior: (behavior: StartupBehavior) => Promise<void>;
+  recordToLibrary: (
+    bookToRecord: EpubBook,
+    source: 'local' | 'cloud',
+    filePath?: string | null,
+    cloudHref?: string | null,
+    cloudFileName?: string | null,
+    fileType?: 'chronicle' | 'epub' | 'markdown'
+  ) => Promise<void>;
 }
 
 const EpubContext = createContext<EpubContextType | undefined>(undefined);
@@ -634,6 +658,102 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     await saveSetting('showWelcomeOnStartup', enabled);
   }, []);
+
+  const [libraryItems, setLibraryItems] = useState<LibraryBookItem[]>([]);
+  const [isLibraryOpen, setIsLibraryOpen] = useState<boolean>(false);
+  const [startupBehavior, setStartupBehaviorState] = useState<StartupBehavior>('previous');
+  const startupBehaviorRef = useRef<StartupBehavior>('previous');
+
+  useEffect(() => {
+    getLibraryItems()
+      .then(items => {
+        if (isMountedRef.current) {
+          setLibraryItems(items);
+        }
+      })
+      .catch(err => {
+        console.warn('[Library] Failed to load library items on mount:', err);
+      });
+  }, []);
+
+  const setStartupBehavior = useCallback(async (behavior: StartupBehavior) => {
+    setStartupBehaviorState(behavior);
+    startupBehaviorRef.current = behavior;
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('chronicle_startup_behavior', behavior);
+      }
+    } catch {
+      /* ignore */
+    }
+    await saveSetting('startupBehavior', behavior);
+  }, []);
+
+  const removeLibraryBook = useCallback(async (id: string) => {
+    try {
+      await removeLibraryItem(id);
+      const updated = await getLibraryItems();
+      setLibraryItems(updated);
+    } catch (err) {
+      console.warn('[Library] Failed to remove book from library:', err);
+    }
+  }, []);
+
+  const recordToLibrary = useCallback(
+    async (
+      bookToRecord: EpubBook,
+      source: 'local' | 'cloud',
+      filePath?: string | null,
+      cloudHref?: string | null,
+      cloudFileName?: string | null,
+      fileType: 'chronicle' | 'epub' | 'markdown' = 'chronicle'
+    ) => {
+      try {
+        const id =
+          source === 'cloud'
+            ? `cloud:${cloudHref || cloudFileName || bookToRecord.metadata.title}`
+            : `local:${filePath || bookToRecord.metadata.identifier || bookToRecord.metadata.title}`;
+
+        let coverThumb: string | undefined;
+        if (bookToRecord.coverImageUrl) {
+          try {
+            coverThumb = await createCoverThumbnail(bookToRecord.coverImageUrl);
+          } catch (e) {
+            console.warn('[Library] Could not generate cover thumbnail:', e);
+          }
+        }
+
+        const totalWords = bookToRecord.chapters.reduce(
+          (acc, ch) => acc + (ch.wordCount || calculateWordCount(ch.content || '')),
+          0
+        );
+
+        const item: LibraryBookItem = {
+          id,
+          title: bookToRecord.metadata.title || 'Untitled Manuscript',
+          author: bookToRecord.metadata.creator || undefined,
+          source,
+          filePath: filePath || undefined,
+          cloudHref: cloudHref || undefined,
+          cloudFileName: cloudFileName || undefined,
+          fileType,
+          coverDataUrl: coverThumb,
+          lastOpened: Date.now(),
+          chapterCount: bookToRecord.chapters.length,
+          wordCount: totalWords,
+          spineColor: getOrGenerateSpineColor(bookToRecord.metadata.title || 'Untitled'),
+        };
+
+        await saveLibraryItem(item);
+        const updated = await getLibraryItems();
+        setLibraryItems(updated);
+      } catch (err) {
+        console.warn('[Library] Failed to record book to library:', err);
+      }
+    },
+    []
+  );
+
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isCharacterSidebarOpen, setIsCharacterSidebarOpen] = useState<boolean>(false);
   const [isLocationSidebarOpen, setIsLocationSidebarOpen] = useState<boolean>(false);
@@ -823,6 +943,15 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setShowWelcomeOnStartupState(settings.showWelcomeOnStartup);
         showWelcomeOnStartupRef.current = settings.showWelcomeOnStartup;
         setIsWelcomeModalOpen(settings.showWelcomeOnStartup);
+
+        if (settings.startupBehavior) {
+          setStartupBehaviorState(settings.startupBehavior);
+          startupBehaviorRef.current = settings.startupBehavior;
+          if (settings.startupBehavior === 'library') {
+            setIsLibraryOpen(true);
+            setIsWelcomeModalOpen(false);
+          }
+        }
 
         if (typeof settings.autoSaveEnabled === 'boolean') {
           setAutoSaveEnabledState(settings.autoSaveEnabled);
@@ -1459,6 +1588,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       try {
         setIsLoading(true);
         const settings = await loadAllSettings();
+        if (settings.startupBehavior === 'library') {
+          setIsLibraryOpen(true);
+          setIsWelcomeModalOpen(false);
+          setIsLoading(false);
+          return;
+        }
         const activeLang = settings.language || (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en');
         const sample = await createSampleEpubBook(activeLang);
         const sampleSession = createSessionFromBook(sample, null, null, null, false);
@@ -1752,6 +1887,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri() && nativePath) {
             saveDesktopSession(nativePath, projectBook.chapters[0]?.id || null);
           }
+          recordToLibrary(projectBook, 'local', nativePath || null, null, null, 'chronicle');
           showNotification('success', `Opened Chronicle "${projectBook.metadata.title}" successfully!`);
         } else if (isMarkdownFile(file)) {
           const text = await file.text();
@@ -1796,6 +1932,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri() && chroniclePath) {
             saveDesktopSession(chroniclePath, mdBook.chapters[0]?.id || null);
           }
+          recordToLibrary(mdBook, 'local', chroniclePath, null, null, 'markdown');
           showNotification(
             'success',
             `Imported Markdown "${mdBook.metadata.title}" (${mdBook.chapters.length} chapter${mdBook.chapters.length === 1 ? '' : 's'
@@ -1842,6 +1979,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri() && chroniclePath) {
             saveDesktopSession(chroniclePath, parsed.chapters[0]?.id || null);
           }
+          recordToLibrary(parsed, 'local', chroniclePath, null, null, 'epub');
           showNotification('success', `Imported EPUB "${parsed.metadata.title}" successfully!`);
         }
       } catch (err: any) {
@@ -1939,6 +2077,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri()) {
             saveDesktopSession(filePath, targetChapterId);
           }
+          recordToLibrary(projectBook, 'local', filePath, null, null, 'chronicle');
           if (isRestore) {
             setViewModeState('editor');
             const ch = projectBook.chapters.find(c => c.id === targetChapterId);
@@ -1999,6 +2138,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri()) {
             saveDesktopSession(filePath, targetChapterId);
           }
+          recordToLibrary(mdBook, 'local', chroniclePath, null, null, 'markdown');
           if (isRestore) {
             const ch = mdBook.chapters.find(c => c.id === targetChapterId);
             const chTitle = ch?.title ? ` at "${ch.title}"` : '';
@@ -2056,6 +2196,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri()) {
             saveDesktopSession(filePath, targetChapterId);
           }
+          recordToLibrary(parsed, 'local', chroniclePath, null, null, 'epub');
           if (isRestore) {
             setViewModeState('editor');
             const ch = parsed.chapters.find(c => c.id === targetChapterId);
@@ -2933,6 +3074,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri()) {
             saveCloudDesktopSession(href, storedPath, targetChapterId);
           }
+          recordToLibrary(projectBook, 'cloud', null, href, storedPath, 'chronicle');
           setCastPresenceData(null);
           castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
@@ -3009,6 +3151,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri()) {
             saveCloudDesktopSession(href, destCloudName, targetChapterId);
           }
+          recordToLibrary(mdBook, 'cloud', null, href, destCloudName, 'markdown');
           setCastPresenceData(null);
           castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
@@ -3088,6 +3231,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri()) {
             saveCloudDesktopSession(href, destCloudName, targetChapterId);
           }
+          recordToLibrary(parsed, 'cloud', null, href, destCloudName, 'epub');
           setCastPresenceData(null);
           castPresenceDataRef.current = null;
           setIsPresenceCacheValid(false);
@@ -3133,6 +3277,15 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     async function restorePreviousSession() {
       try {
+        const settings = await loadAllSettings();
+        const behavior = settings.startupBehavior || startupBehaviorRef.current || 'previous';
+        if (behavior === 'library') {
+          setIsLibraryOpen(true);
+          setIsWelcomeModalOpen(false);
+          setIsLoading(false);
+          return;
+        }
+
         const session = getDesktopSession();
         if (!session) {
           setIsLoading(false);
@@ -3462,6 +3615,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setCloudFileName(null);
             cloudFileNameRef.current = null;
             saveDesktopSession(destinationPath, activeChapterIdRef.current);
+            recordToLibrary(saveSnapshot, 'local', destinationPath, null, null, 'chronicle');
             const savedFileName = destinationPath.split(/[\\/]/).pop() || `${cleanTitle}.chronicle`;
 
             if (bookRef.current === saveSnapshot) {
@@ -3501,6 +3655,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            recordToLibrary(saveSnapshot, 'local', downloadName, null, null, 'chronicle');
 
             setStorageTarget('local');
             storageTargetRef.current = 'local';
@@ -3579,6 +3734,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (isTauri()) {
             saveCloudDesktopSession(uploadName, uploadName, activeChapterIdRef.current);
           }
+          recordToLibrary(saveSnapshot, 'cloud', null, uploadName, uploadName, 'chronicle');
           if (bookRef.current === saveSnapshot) {
             setIsDirtyState(false);
             isDirtyRef.current = false;
@@ -5143,6 +5299,13 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         presenceProgress,
         runCastPresenceAnalysis,
         invalidatePresenceCache,
+        libraryItems,
+        isLibraryOpen,
+        setIsLibraryOpen,
+        removeLibraryBook,
+        startupBehavior,
+        setStartupBehavior,
+        recordToLibrary,
       }}
     >
       {children}

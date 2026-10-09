@@ -11,10 +11,18 @@ import {
   FileText,
   Palette,
   ArrowRight,
+  Library,
 } from 'lucide-react';
 
 export const WelcomeScreen: React.FC = () => {
-  const { loadAnyFile, openLocalDocument, loadSampleBook, createNewBook } = useEpub();
+  const {
+    loadAnyFile,
+    openLocalDocument,
+    loadSampleBook,
+    createNewBook,
+    libraryItems,
+    setIsLibraryOpen,
+  } = useEpub();
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,6 +96,29 @@ export const WelcomeScreen: React.FC = () => {
 
       {/* Primary Action Cards */}
       <div className="welcome-actions-grid">
+        {/* Action: Library Bookshelf (if previous manuscripts exist) */}
+        {libraryItems.length > 0 && (
+          <div
+            className="welcome-card welcome-card-library"
+            onClick={() => setIsLibraryOpen(true)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => e.key === 'Enter' && setIsLibraryOpen(true)}
+          >
+            <div className="card-icon-bubble library" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+              <Library size={24} />
+            </div>
+            <div className="card-body">
+              <h3>{t('library.title')} ({libraryItems.length})</h3>
+              <p>{t('library.subtitle')}</p>
+            </div>
+            <div className="card-action-hint">
+              <span>View Bookshelf</span>
+              <ArrowRight size={14} />
+            </div>
+          </div>
+        )}
+
         {/* Action 1: Create Blank Book */}
         <div
           className="welcome-card welcome-card-primary"

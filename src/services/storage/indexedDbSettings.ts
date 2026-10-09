@@ -3,12 +3,15 @@ import { WebDavConfig } from '../../types/cloud';
 import { AppViewMode, EditorSubMode, ReaderTheme, ReaderFont, CustomPaperTone, DEFAULT_CUSTOM_PAPER_TONE } from '../../types/project';
 import { loadWebDavConfig as loadLegacyWebDavConfig } from '../cloud/webdavStorage';
 
+export type StartupBehavior = 'previous' | 'library';
+
 export interface ChronicleSettings {
   uiTheme: UiTheme;
   customThemes?: CustomTheme[];
   activeCustomThemeId?: string | null;
   webdavConfig: WebDavConfig | null;
   showWelcomeOnStartup: boolean;
+  startupBehavior?: StartupBehavior;
   readerTheme: ReaderTheme;
   customPaperTone?: CustomPaperTone;
   readerFont: ReaderFont;
@@ -68,6 +71,7 @@ export const DEFAULT_CHRONICLE_SETTINGS: ChronicleSettings = {
   activeCustomThemeId: null,
   webdavConfig: null,
   showWelcomeOnStartup: true,
+  startupBehavior: 'previous',
   checkUpdatesOnStartup: true,
   readerTheme: 'light',
   customPaperTone: DEFAULT_CUSTOM_PAPER_TONE,
@@ -220,11 +224,24 @@ export async function loadAllSettings(): Promise<ChronicleSettings> {
         /* ignore */
       }
 
+      let startupBehaviorPref: StartupBehavior = stored.startupBehavior || 'previous';
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const savedBehavior = localStorage.getItem('chronicle_startup_behavior');
+          if (savedBehavior === 'previous' || savedBehavior === 'library') {
+            startupBehaviorPref = savedBehavior;
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+
       const merged: ChronicleSettings = {
         ...DEFAULT_CHRONICLE_SETTINGS,
         ...localFallback,
         ...stored,
         showWelcomeOnStartup: welcomePref,
+        startupBehavior: startupBehaviorPref,
         zenSettings: {
           ...DEFAULT_ZEN_SETTINGS,
           ...(stored.zenSettings || {}),
@@ -329,6 +346,9 @@ export async function saveSettings(updates: Partial<ChronicleSettings>): Promise
     if (typeof window !== 'undefined' && window.localStorage) {
       if (updates.showWelcomeOnStartup !== undefined) {
         localStorage.setItem('chronicle_show_welcome_on_startup', String(updates.showWelcomeOnStartup));
+      }
+      if (updates.startupBehavior !== undefined) {
+        localStorage.setItem('chronicle_startup_behavior', String(updates.startupBehavior));
       }
       localStorage.setItem('epub_editor_app_settings_v1', JSON.stringify(snapshotToSave));
     }

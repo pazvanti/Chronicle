@@ -9,6 +9,7 @@ import {
   HardDrive,
   FileText,
   Edit2,
+  Library,
 } from 'lucide-react';
 
 interface DocumentSwitcherDropdownProps {
@@ -27,6 +28,7 @@ export const DocumentSwitcherDropdown: React.FC<DocumentSwitcherDropdownProps> =
     activeFileId,
     switchOpenFile,
     closeOpenFile,
+    setIsLibraryOpen,
   } = useEpub();
   const { t } = useTranslation();
 
@@ -234,6 +236,35 @@ export const DocumentSwitcherDropdown: React.FC<DocumentSwitcherDropdownProps> =
                 </div>
               );
             })}
+          </div>
+
+          {/* Footer: Open Library Bookshelf */}
+          <div
+            style={{
+              borderTop: '1px solid var(--border-subtle)',
+              padding: '0.4rem 0.5rem',
+              backgroundColor: 'var(--bg-surface)',
+            }}
+          >
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              style={{
+                width: '100%',
+                justifyContent: 'flex-start',
+                gap: '0.55rem',
+                fontSize: '0.78rem',
+                padding: '0.35rem 0.5rem',
+                borderRadius: '6px',
+              }}
+              onClick={() => {
+                setIsOpen(false);
+                setIsLibraryOpen(true);
+              }}
+            >
+              <Library size={13} style={{ color: 'var(--accent-primary)' }} />
+              <span>{t('header.libraryTooltip')}</span>
+            </button>
           </div>
         </div>
       )}

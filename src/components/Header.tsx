@@ -25,6 +25,7 @@ import {
   Moon,
   ArrowUpCircle,
   Camera,
+  Library,
 } from 'lucide-react';
 import { PrimaryAppMode } from '../types/project';
 import { TypographyModal } from './Typography/TypographyModal';
@@ -48,6 +49,8 @@ export const Header: React.FC = () => {
     saveProject,
     sidebarCollapsed,
     toggleSidebar,
+    isLibraryOpen,
+    setIsLibraryOpen,
     storageTarget,
     localFilePath,
     isWebDavConnected,
@@ -238,6 +241,15 @@ export const Header: React.FC = () => {
               )}
             </button>
 
+            {/* Library button */}
+            <button
+              className={`btn-icon btn-sm ${isLibraryOpen ? 'btn-active' : ''}`}
+              onClick={() => setIsLibraryOpen(!isLibraryOpen)}
+              title={t('header.libraryTooltip')}
+            >
+              <Library size={15} style={{ color: isLibraryOpen ? 'var(--accent-primary)' : 'inherit' }} />
+            </button>
+
             {/* Settings button */}
             <button
               className="btn-icon btn-sm"
@@ -350,6 +362,17 @@ export const Header: React.FC = () => {
             >
               <Upload size={14} />
               <span>{t('headerActions.openBook')}</span>
+            </button>
+
+            {/* Library / Bookshelf Button */}
+            <button
+              className={`btn btn-ghost btn-sm header-btn-collapsible ${isLibraryOpen ? 'btn-active' : ''}`}
+              onClick={() => setIsLibraryOpen(!isLibraryOpen)}
+              title={t('header.libraryTooltip')}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+            >
+              <Library size={14} style={{ color: isLibraryOpen ? 'var(--accent-primary)' : 'inherit' }} />
+              <span>{t('header.library')}</span>
             </button>
 
             {/* WebDAV Cloud Storage Hub */}

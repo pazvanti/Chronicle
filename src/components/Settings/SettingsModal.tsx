@@ -50,6 +50,8 @@ import {
   Star,
   ThumbsUp,
   Rocket,
+  Library,
+  BookOpen,
 } from 'lucide-react';
 import { ChronicleLogo } from '../Common/ChronicleLogo';
 import { markdownToHtml } from '../../services/epub/markdownImporter';
@@ -163,6 +165,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setAutoSaveEnabled,
     autoSaveInterval,
     setAutoSaveInterval,
+    startupBehavior,
+    setStartupBehavior,
   } = useEpub();
 
   // Theme Studio Customizer state
@@ -2448,6 +2452,85 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     onChange={e => handleToggleWelcome(e.target.checked)}
                     style={{ width: '18px', height: '18px', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
                   />
+                </div>
+
+                {/* Application Startup Behavior Setting */}
+                <div
+                  style={{
+                    padding: '0.85rem 1rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Library size={15} style={{ color: 'var(--accent-primary)' }} />
+                      <span>{t('settings.startupBehavior')}</span>
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      {t('settings.startupBehaviorDesc')}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setStartupBehavior('previous')}
+                      className="btn"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.55rem 0.75rem',
+                        borderRadius: '8px',
+                        fontSize: '0.78rem',
+                        fontWeight: startupBehavior === 'previous' ? 600 : 400,
+                        backgroundColor: startupBehavior === 'previous' ? 'var(--accent-primary)' : 'var(--bg-input)',
+                        color: startupBehavior === 'previous' ? '#ffffff' : 'var(--text-primary)',
+                        border: startupBehavior === 'previous' ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <BookOpen size={14} />
+                      <span>{t('settings.startupOpenPrevious')}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setStartupBehavior('library')}
+                      className="btn"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.55rem 0.75rem',
+                        borderRadius: '8px',
+                        fontSize: '0.78rem',
+                        fontWeight: startupBehavior === 'library' ? 600 : 400,
+                        backgroundColor: startupBehavior === 'library' ? 'var(--accent-primary)' : 'var(--bg-input)',
+                        color: startupBehavior === 'library' ? '#ffffff' : 'var(--text-primary)',
+                        border: startupBehavior === 'library' ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <Library size={14} />
+                      <span>{t('settings.startupOpenLibrary')}</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* IndexedDB Status Card */}

@@ -53,6 +53,8 @@ export interface TranslationDictionary {
     switchManuscript: string;
     closeManuscript: string;
     saveCurrent: string;
+    library: string;
+    libraryTooltip: string;
   };
   statusBar: {
     processing: string;
@@ -253,6 +255,10 @@ export interface TranslationDictionary {
     openGuide: string;
     showWelcomeStartup: string;
     showWelcomeStartupDesc: string;
+    startupBehavior: string;
+    startupBehaviorDesc: string;
+    startupOpenPrevious: string;
+    startupOpenLibrary: string;
     dbPersistence: string;
     dbPersistenceDesc: string;
     shortcutsTitle: string;
@@ -963,5 +969,25 @@ export interface TranslationDictionary {
     cloudUpdatedTitle: string;
     cloudConflictTitle: string;
     cloudLocalIsNewer: string;
+  };
+  library: {
+    title: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    all: string;
+    local: string;
+    cloud: string;
+    backToEditor: string;
+    newManuscript: string;
+    openFile: string;
+    emptyTitle: string;
+    emptyDesc: string;
+    removeFromLibrary: string;
+    removedNotification: string;
+    cloudStorage: string;
+    localStorage: string;
+    chapters: string;
+    words: string;
+    openedJustNow: string;
   };
 }
