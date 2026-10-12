@@ -720,6 +720,8 @@ export const ptBR: TranslationDictionary = {
     currentArtworkActions: 'Ações da Arte Atual',
     downloadCoverImage: 'Baixar Imagem de Capa',
     openInCoverDesigner: 'Abrir no Designer de Capa',
+    resetToDefaultCover: 'Restaurar Capa Padrão',
+    resetToDefaultDesc: 'Restaura a capa padrão limpa que sincroniza automaticamente com o título e o autor.',
     coverMetadata: 'Metadados da Capa',
     manifestId: 'ID no Manifesto:',
     mediaType: 'Tipo de Mídia:',

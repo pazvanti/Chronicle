@@ -45,6 +45,7 @@ export interface ChronicleProjectManifest {
   opfDir: string;
   coverManifestId?: string;
   coverMediaType?: string;
+  coverCustomized?: boolean;
   navPath?: string;
   tocPath?: string;
   foldersCount?: number;
@@ -88,6 +89,7 @@ export async function saveChronicleProject(book: EpubBook): Promise<Blob> {
     opfDir: book.opfDir || 'OEBPS/',
     coverManifestId: book.coverManifestId,
     coverMediaType: book.coverMediaType,
+    coverCustomized: book.coverCustomized,
     navPath: book.navPath || undefined,
     tocPath: book.tocPath || undefined,
     foldersCount: folders.length,
@@ -160,6 +162,7 @@ export async function saveChronicleProject(book: EpubBook): Promise<Blob> {
         synopsis: writerData.synopsis || '',
         dailyWordGoal: writerData.dailyWordGoal || 0,
         customNotes: writerData.customNotes || '',
+        coverCustomized: writerData.coverCustomized ?? book.coverCustomized,
       },
       null,
       2
@@ -630,6 +633,7 @@ export async function parseChronicleProject(
     coverManifestId: project.coverManifestId,
     coverImageUrl: coverImageUrl || undefined,
     coverMediaType: project.coverMediaType,
+    coverCustomized: project.coverCustomized ?? writerData?.coverCustomized,
     assets,
     rawFiles,
     originalFileName: fileName.replace(/\.(chronicle)$/i, '.epub'),

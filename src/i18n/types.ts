@@ -720,6 +720,8 @@ export interface TranslationDictionary {
     currentArtworkActions: string;
     downloadCoverImage: string;
     openInCoverDesigner: string;
+    resetToDefaultCover: string;
+    resetToDefaultDesc: string;
     coverMetadata: string;
     manifestId: string;
     mediaType: string;

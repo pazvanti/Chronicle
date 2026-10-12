@@ -720,6 +720,8 @@ export const ro: TranslationDictionary = {
     currentArtworkActions: 'Acțiuni Grafică Curentă',
     downloadCoverImage: 'Descarcă Imaginea Copertei',
     openInCoverDesigner: 'Deschide în Designerul de Coperte',
+    resetToDefaultCover: 'Resetează la Coperta Implicită',
+    resetToDefaultDesc: 'Restaurează coperta implicită curată care se sincronizează automat cu titlul și autorul.',
     coverMetadata: 'Metadate Copertă',
     manifestId: 'ID Manifest:',
     mediaType: 'Tip Media:',

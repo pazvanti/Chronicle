@@ -720,6 +720,8 @@ export const en: TranslationDictionary = {
     currentArtworkActions: 'Current Artwork Actions',
     downloadCoverImage: 'Download Cover Image',
     openInCoverDesigner: 'Open in Cover Designer',
+    resetToDefaultCover: 'Reset to Default Cover',
+    resetToDefaultDesc: 'Restore the clean default cover template that auto-syncs with manuscript title and author.',
     coverMetadata: 'Cover Metadata',
     manifestId: 'Manifest ID:',
     mediaType: 'Media Type:',

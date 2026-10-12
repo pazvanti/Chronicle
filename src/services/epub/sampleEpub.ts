@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import { parseEpub } from './epubParser';
 import { EpubBook } from '../../types/project';
+import { escapeXml } from './htmlUtils';
 
 /**
  * Creates a sample EPUB binary ("Alice's Adventures in Wonderland") and parses it into an EpubBook.
@@ -887,6 +888,124 @@ blockquote {
 }
 
 /**
+ * Wraps text into lines suitable for SVG typography.
+ */
+export function wrapSvgText(text: string, maxCharsPerLine = 16): string[] {
+  const clean = text?.trim() || '';
+  if (!clean) return ['Untitled Manuscript'];
+  const words = clean.split(/\s+/);
+  const lines: string[] = [];
+  let current = '';
+
+  for (const word of words) {
+    if ((current + ' ' + word).trim().length <= maxCharsPerLine) {
+      current = (current + ' ' + word).trim();
+    } else {
+      if (current) lines.push(current);
+      current = word;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+/**
+ * Generates the clean default cover SVG with centered, wrapped title and author.
+ */
+export function createDefaultCoverSvg(
+  title: string,
+  author: string,
+  lang: string = 'en'
+): string {
+  const isPt = lang === 'pt-BR' || lang.startsWith('pt');
+  const finalTitle = title?.trim() || (isPt ? 'Manuscrito Sem Título' : 'Untitled Manuscript');
+  const finalAuthor = author?.trim() || (isPt ? 'Nome do Autor' : 'Author Name');
+  const editionText = isPt ? 'PRIMEIRA EDIÇÃO' : 'FIRST EDITION';
+
+  const titleLines = wrapSvgText(finalTitle, 16);
+  const lineSpacing = 48;
+  const startY = Math.round(420 - ((titleLines.length - 1) * lineSpacing) / 2);
+
+  const titleTspans = titleLines
+    .map((line, idx) => `<tspan x="300" y="${startY + idx * lineSpacing}">${escapeXml(line)}</tspan>`)
+    .join('');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" width="600" height="900">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="900" fill="url(#bg)"/>
+  <rect x="40" y="40" width="520" height="820" rx="8" fill="none" stroke="#6366f1" stroke-width="2" stroke-opacity="0.6"/>
+  <text x="300" y="220" font-family="sans-serif" font-size="18" fill="#c7d2fe" font-weight="600" letter-spacing="4" text-anchor="middle">${escapeXml(finalAuthor.toUpperCase())}</text>
+  <line x1="220" y1="245" x2="380" y2="245" stroke="#818cf8" stroke-width="1.5"/>
+  <text font-family="serif" font-size="40" fill="#ffffff" font-weight="bold" text-anchor="middle">${titleTspans}</text>
+  <text x="300" y="750" font-family="sans-serif" font-size="13" fill="#818cf8" letter-spacing="3" text-anchor="middle">${escapeXml(editionText)}</text>
+</svg>`;
+}
+
+/**
+ * Detects whether the book's cover is still the uncustomized default template.
+ */
+export function isDefaultCover(book: EpubBook | null | undefined): boolean {
+  if (!book) return false;
+  if (book.coverCustomized === true || book.writerData?.coverCustomized === true) {
+    return false;
+  }
+  if (book.coverCustomized === false || book.writerData?.coverCustomized === false) {
+    return true;
+  }
+
+  // Fallback heuristic: check if cover is SVG matching default template signature
+  const coverAsset = book.assets?.find(
+    a => (book.coverManifestId && a.id === book.coverManifestId) || a.href.toLowerCase().includes('cover')
+  );
+
+  let svgContent: string | null = null;
+  if (coverAsset?.data) {
+    try {
+      svgContent = new TextDecoder().decode(coverAsset.data);
+    } catch {
+      svgContent = null;
+    }
+  } else if (coverAsset && book.rawFiles?.has(coverAsset.fullPath)) {
+    const raw = book.rawFiles.get(coverAsset.fullPath);
+    if (raw) {
+      try {
+        svgContent = new TextDecoder().decode(raw);
+      } catch {
+        svgContent = null;
+      }
+    }
+  } else if (book.rawFiles?.has('OEBPS/Images/cover.svg')) {
+    const raw = book.rawFiles.get('OEBPS/Images/cover.svg');
+    if (raw) {
+      try {
+        svgContent = new TextDecoder().decode(raw);
+      } catch {
+        svgContent = null;
+      }
+    }
+  }
+
+  if (svgContent) {
+    const hasBgGrad = svgContent.includes('id="bg"') || svgContent.includes("id='bg'");
+    const hasFrame = svgContent.includes('stroke="#6366f1"') || svgContent.includes("stroke='#6366f1'");
+    const hasEdition =
+      svgContent.includes('FIRST EDITION') ||
+      svgContent.includes('PRIMEIRA EDIÇÃO') ||
+      svgContent.includes('#818cf8');
+    if (hasBgGrad && hasFrame && hasEdition) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Creates a pristine blank EPUB project ready for writing.
  */
 export async function createNewBlankEpubBook(
@@ -917,20 +1036,7 @@ export async function createNewBlankEpubBook(
   );
 
   // 3. Simple Cover SVG
-  const coverSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" width="600" height="900">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0b0f19" />
-      <stop offset="100%" stop-color="#1e1b4b" />
-    </linearGradient>
-  </defs>
-  <rect width="600" height="900" fill="url(#bg)"/>
-  <rect x="40" y="40" width="520" height="820" rx="8" fill="none" stroke="#6366f1" stroke-width="2" stroke-opacity="0.6"/>
-  <text x="300" y="220" font-family="sans-serif" font-size="18" fill="#c7d2fe" font-weight="600" letter-spacing="4" text-anchor="middle">${finalAuthor.toUpperCase()}</text>
-  <line x1="220" y1="245" x2="380" y2="245" stroke="#818cf8" stroke-width="1.5"/>
-  <text x="300" y="400" font-family="serif" font-size="40" fill="#ffffff" font-weight="bold" text-anchor="middle">${finalTitle}</text>
-  <text x="300" y="750" font-family="sans-serif" font-size="13" fill="#818cf8" letter-spacing="3" text-anchor="middle">${isPt ? 'PRIMEIRA EDIÇÃO' : 'FIRST EDITION'}</text>
-</svg>`;
+  const coverSvg = createDefaultCoverSvg(finalTitle, finalAuthor, lang);
   zip.folder('OEBPS')?.folder('Images')?.file('cover.svg', coverSvg);
 
   // 4. Stylesheet
@@ -1044,5 +1150,11 @@ p {
     compression: 'DEFLATE',
   });
 
-  return await parseEpub(epubBlob, `${finalTitle}.epub`);
+  const book = await parseEpub(epubBlob, `${finalTitle}.epub`);
+  book.coverCustomized = false;
+  if (!book.writerData) {
+    book.writerData = {};
+  }
+  book.writerData.coverCustomized = false;
+  return book;
 }

@@ -15,6 +15,7 @@ import {
   DEFAULT_CUSTOM_PAPER_TONE,
   EpubTocItem,
   EpubManifestItem,
+  EpubAsset,
   CharacterProfile,
   CharacterTraitItem,
   StoryTimeline,
@@ -38,7 +39,7 @@ import {
 } from '../services/epub/commentHighlightService';
 import { parseEpub } from '../services/epub/epubParser';
 import { exportEpub } from '../services/epub/epubExporter';
-import { createSampleEpubBook, createNewBlankEpubBook } from '../services/epub/sampleEpub';
+import { createSampleEpubBook, createNewBlankEpubBook, createDefaultCoverSvg, isDefaultCover } from '../services/epub/sampleEpub';
 import { splitChapter, splitChapterAtHeadingIndex, splitChapterAtText } from '../services/epub/chapterSplitter';
 import { calculateWordCount, wrapInXhtml, restoreAssetUrls } from '../services/epub/htmlUtils';
 import { getDirectory } from '../services/epub/pathUtils';
@@ -236,6 +237,7 @@ interface EpubContextType {
   updateToc: (newToc: EpubTocItem[]) => void;
   updateCoverImage: (file: File | Blob, mediaType?: string) => Promise<void>;
   generateCustomCover: (svgString: string) => Promise<void>;
+  resetToDefaultCover: () => Promise<void>;
   exportAndDownload: () => Promise<void>;
   showNotification: (
     type: 'success' | 'error' | 'info' | 'update',
@@ -2843,19 +2845,114 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const currentBook = bookRef.current;
       if (!currentBook) return;
 
-      const updatedBook = {
+      const newTitle = updates.title !== undefined ? updates.title : currentBook.metadata.title;
+      const newAuthor = updates.creator !== undefined ? updates.creator : currentBook.metadata.creator;
+      const titleChanged = updates.title !== undefined && updates.title !== currentBook.metadata.title;
+      const authorChanged = updates.creator !== undefined && updates.creator !== currentBook.metadata.creator;
+
+      let updatedBook: EpubBook = {
         ...currentBook,
         metadata: { ...currentBook.metadata, ...updates },
       };
 
+      // If the cover was not previously customized by the user and title/author changed,
+      // automatically update the cover SVG to match the new title and author.
+      if ((titleChanged || authorChanged) && isDefaultCover(currentBook)) {
+        try {
+          const newSvg = createDefaultCoverSvg(newTitle, newAuthor, updatedBook.metadata.language);
+          const svgBytes = new TextEncoder().encode(newSvg);
+          const blobUrl = URL.createObjectURL(new Blob([svgBytes], { type: 'image/svg+xml' }));
+
+          const coverId = currentBook.coverManifestId || 'cover-image';
+          const existingCoverAsset = currentBook.assets.find(
+            a => a.id === coverId || a.href.toLowerCase().includes('cover')
+          );
+          const coverHref = existingCoverAsset ? existingCoverAsset.href : 'Images/cover.svg';
+          const coverFullPath = existingCoverAsset
+            ? existingCoverAsset.fullPath
+            : currentBook.opfDir
+              ? `${currentBook.opfDir}${coverHref}`
+              : `OEBPS/${coverHref}`;
+
+          const updatedCoverAsset: EpubAsset = {
+            id: coverId,
+            href: coverHref,
+            fullPath: coverFullPath,
+            mediaType: 'image/svg+xml',
+            size: svgBytes.length,
+            blobUrl,
+            data: svgBytes,
+          };
+
+          const updatedAssets = currentBook.assets.filter(a => a.id !== coverId && a.fullPath !== coverFullPath);
+          updatedAssets.push(updatedCoverAsset);
+
+          const updatedRawFiles = new Map(currentBook.rawFiles);
+          updatedRawFiles.set(coverFullPath, svgBytes);
+
+          const existingManifestItem = currentBook.manifest[coverId];
+          const updatedManifestItem: EpubManifestItem = {
+            ...(existingManifestItem || {}),
+            id: coverId,
+            href: coverHref,
+            fullPath: coverFullPath,
+            mediaType: 'image/svg+xml',
+            properties: 'cover-image',
+          };
+
+          updatedBook = {
+            ...updatedBook,
+            coverManifestId: coverId,
+            coverImageUrl: blobUrl,
+            coverMediaType: 'image/svg+xml',
+            coverCustomized: false,
+            manifest: {
+              ...updatedBook.manifest,
+              [coverId]: updatedManifestItem,
+            },
+            assets: updatedAssets,
+            rawFiles: updatedRawFiles,
+            writerData: {
+              ...updatedBook.writerData,
+              coverCustomized: false,
+            },
+          };
+
+          // Update library thumbnail if tracked
+          if (storageTargetRef.current === 'cloud') {
+            recordToLibrary(updatedBook, 'cloud', null, cloudHrefRef.current, cloudFileNameRef.current);
+          } else if (storageTargetRef.current === 'local' && localFilePathRef.current) {
+            recordToLibrary(updatedBook, 'local', localFilePathRef.current);
+          }
+        } catch (coverErr) {
+          console.warn('[EpubContext] Failed to auto-update default cover SVG:', coverErr);
+        }
+      }
+
       bookRef.current = updatedBook;
       setBook(updatedBook);
+
+      const currentFileId = activeFileIdRef.current;
+      if (currentFileId) {
+        const updatedSessions = openFilesRef.current.map(s =>
+          s.id === currentFileId
+            ? {
+                ...s,
+                book: updatedBook,
+                isDirty: true,
+              }
+            : s
+        );
+        openFilesRef.current = updatedSessions;
+        setOpenFiles(updatedSessions);
+      }
+
       setIsDirty(true);
       if (!suppressNotification) {
         showNotification('success', 'Updated book metadata');
       }
     },
-    [setIsDirty, showNotification]
+    [setIsDirty, showNotification, recordToLibrary]
   );
 
   const updateToc = useCallback(
@@ -2877,16 +2974,17 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateCoverImage = useCallback(
     async (fileOrBlob: File | Blob, mediaType?: string) => {
-      if (!book) return;
+      const currentBook = bookRef.current;
+      if (!currentBook) return;
       try {
         const buffer = await fileOrBlob.arrayBuffer();
         const bytes = new Uint8Array(buffer);
         const resolvedMediaType = mediaType || (fileOrBlob instanceof File ? fileOrBlob.type : 'image/jpeg') || 'image/jpeg';
         const ext = resolvedMediaType.includes('png') ? 'png' : resolvedMediaType.includes('svg') ? 'svg' : 'jpg';
 
-        const coverId = book.coverManifestId || 'cover-image';
+        const coverId = currentBook.coverManifestId || 'cover-image';
         const coverHref = `Images/cover.${ext}`;
-        const coverFullPath = book.opfDir ? `${book.opfDir}${coverHref}` : `OEBPS/${coverHref}`;
+        const coverFullPath = currentBook.opfDir ? `${currentBook.opfDir}${coverHref}` : `OEBPS/${coverHref}`;
         const blobUrl = URL.createObjectURL(new Blob([bytes], { type: resolvedMediaType }));
 
         const newManifestItem: EpubManifestItem = {
@@ -2897,7 +2995,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           properties: 'cover-image',
         };
 
-        const updatedAssets = book.assets.filter(a => a.id !== coverId);
+        const updatedAssets = currentBook.assets.filter(a => a.id !== coverId && a.fullPath !== coverFullPath);
         updatedAssets.push({
           id: coverId,
           href: coverHref,
@@ -2908,31 +3006,56 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           data: bytes,
         });
 
-        const updatedRawFiles = new Map(book.rawFiles);
+        const updatedRawFiles = new Map(currentBook.rawFiles);
         updatedRawFiles.set(coverFullPath, bytes);
 
-        setBook(prev =>
-          prev
-            ? {
-              ...prev,
-              coverManifestId: coverId,
-              coverImageUrl: blobUrl,
-              coverMediaType: resolvedMediaType,
-              manifest: { ...prev.manifest, [coverId]: newManifestItem },
-              assets: updatedAssets,
-              rawFiles: updatedRawFiles,
-            }
-            : null
-        );
+        const updatedBook: EpubBook = {
+          ...currentBook,
+          coverManifestId: coverId,
+          coverImageUrl: blobUrl,
+          coverMediaType: resolvedMediaType,
+          coverCustomized: true,
+          manifest: { ...currentBook.manifest, [coverId]: newManifestItem },
+          assets: updatedAssets,
+          rawFiles: updatedRawFiles,
+          writerData: {
+            ...currentBook.writerData,
+            coverCustomized: true,
+          },
+        };
+
+        bookRef.current = updatedBook;
+        setBook(updatedBook);
+
+        const currentFileId = activeFileIdRef.current;
+        if (currentFileId) {
+          const updatedSessions = openFilesRef.current.map(s =>
+            s.id === currentFileId
+              ? {
+                  ...s,
+                  book: updatedBook,
+                  isDirty: true,
+                }
+              : s
+          );
+          openFilesRef.current = updatedSessions;
+          setOpenFiles(updatedSessions);
+        }
 
         setIsDirty(true);
         showNotification('success', 'Cover image updated successfully!');
+
+        if (storageTargetRef.current === 'cloud') {
+          recordToLibrary(updatedBook, 'cloud', null, cloudHrefRef.current, cloudFileNameRef.current);
+        } else if (storageTargetRef.current === 'local' && localFilePathRef.current) {
+          recordToLibrary(updatedBook, 'local', localFilePathRef.current);
+        }
       } catch (err: any) {
         console.error(err);
         showNotification('error', `Failed to update cover image: ${err?.message || 'Error'}`);
       }
     },
-    [book, setIsDirty, showNotification]
+    [setIsDirty, showNotification, recordToLibrary]
   );
 
   const generateCustomCover = useCallback(
@@ -2942,6 +3065,86 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     },
     [updateCoverImage]
   );
+
+  const resetToDefaultCover = useCallback(async () => {
+    const currentBook = bookRef.current;
+    if (!currentBook) return;
+
+    try {
+      const newSvg = createDefaultCoverSvg(
+        currentBook.metadata.title,
+        currentBook.metadata.creator,
+        currentBook.metadata.language
+      );
+      const svgBytes = new TextEncoder().encode(newSvg);
+      const blobUrl = URL.createObjectURL(new Blob([svgBytes], { type: 'image/svg+xml' }));
+
+      const coverId = currentBook.coverManifestId || 'cover-image';
+      const coverHref = 'Images/cover.svg';
+      const coverFullPath = currentBook.opfDir ? `${currentBook.opfDir}${coverHref}` : `OEBPS/${coverHref}`;
+
+      const newManifestItem: EpubManifestItem = {
+        id: coverId,
+        href: coverHref,
+        fullPath: coverFullPath,
+        mediaType: 'image/svg+xml',
+        properties: 'cover-image',
+      };
+
+      const updatedAssets = currentBook.assets.filter(a => a.id !== coverId && a.fullPath !== coverFullPath);
+      updatedAssets.push({
+        id: coverId,
+        href: coverHref,
+        fullPath: coverFullPath,
+        mediaType: 'image/svg+xml',
+        size: svgBytes.length,
+        blobUrl,
+        data: svgBytes,
+      });
+
+      const updatedRawFiles = new Map(currentBook.rawFiles);
+      updatedRawFiles.set(coverFullPath, svgBytes);
+
+      const updatedBook: EpubBook = {
+        ...currentBook,
+        coverManifestId: coverId,
+        coverImageUrl: blobUrl,
+        coverMediaType: 'image/svg+xml',
+        coverCustomized: false,
+        manifest: { ...currentBook.manifest, [coverId]: newManifestItem },
+        assets: updatedAssets,
+        rawFiles: updatedRawFiles,
+        writerData: {
+          ...currentBook.writerData,
+          coverCustomized: false,
+        },
+      };
+
+      bookRef.current = updatedBook;
+      setBook(updatedBook);
+
+      const currentFileId = activeFileIdRef.current;
+      if (currentFileId) {
+        const updatedSessions = openFilesRef.current.map(s =>
+          s.id === currentFileId ? { ...s, book: updatedBook, isDirty: true } : s
+        );
+        openFilesRef.current = updatedSessions;
+        setOpenFiles(updatedSessions);
+      }
+
+      setIsDirty(true);
+      showNotification('success', 'Reset cover to default template');
+
+      if (storageTargetRef.current === 'cloud') {
+        recordToLibrary(updatedBook, 'cloud', null, cloudHrefRef.current, cloudFileNameRef.current);
+      } else if (storageTargetRef.current === 'local' && localFilePathRef.current) {
+        recordToLibrary(updatedBook, 'local', localFilePathRef.current);
+      }
+    } catch (err: any) {
+      console.error(err);
+      showNotification('error', `Failed to reset cover: ${err?.message || 'Error'}`);
+    }
+  }, [setIsDirty, showNotification, recordToLibrary]);
 
   const loadFromCloud = useCallback(
     async (
@@ -5245,6 +5448,7 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         totalReadingTimeMinutes,
         updateCoverImage,
         generateCustomCover,
+        resetToDefaultCover,
         exportAndDownload,
         showNotification,
         dismissNotification,

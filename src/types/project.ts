@@ -270,6 +270,7 @@ export interface WriterProjectData {
   synopsis?: string;
   dailyWordGoal?: number;
   customNotes?: string;
+  coverCustomized?: boolean;
 }
 
 export interface EpubBook {
@@ -287,6 +288,7 @@ export interface EpubBook {
   coverManifestId?: string;
   coverImageUrl?: string;
   coverMediaType?: string;
+  coverCustomized?: boolean;
   assets: EpubAsset[];
   rawFiles: Map<string, Uint8Array>;
   originalFileName: string;

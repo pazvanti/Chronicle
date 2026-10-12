@@ -1,6 +1,7 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { escapeXml } from '../../services/epub/htmlUtils';
+import { isDefaultCover } from '../../services/epub/sampleEpub';
 import { useTranslation } from '../../i18n/I18nContext';
 import {
   Upload,
@@ -27,6 +28,7 @@ import {
   Eye,
   Trash2,
   Info,
+  RotateCcw,
 } from 'lucide-react';
 
 interface GradientPreset {
@@ -50,7 +52,7 @@ const GRADIENT_PRESETS: GradientPreset[] = [
 ];
 
 export const CoverStudio: React.FC = () => {
-  const { book, updateCoverImage, generateCustomCover, showNotification } = useEpub();
+  const { book, bookSessionId, updateCoverImage, generateCustomCover, resetToDefaultCover, showNotification } = useEpub();
   const { t } = useTranslation();
   const directFileInputRef = useRef<HTMLInputElement>(null);
   const bgImageInputRef = useRef<HTMLInputElement>(null);
@@ -114,6 +116,28 @@ export const CoverStudio: React.FC = () => {
   const [emblemScale, setEmblemScale] = useState<number>(3.2);
   const [emblemColor, setEmblemColor] = useState<string>('#818cf8');
   const [emblemGlow, setEmblemGlow] = useState<boolean>(true);
+
+  // Sync title and author from manuscript metadata whenever the cover was not previously customized
+  const lastSessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!book) return;
+    const isNewSession = lastSessionIdRef.current !== bookSessionId;
+    lastSessionIdRef.current = bookSessionId;
+
+    if (isNewSession || !book.coverCustomized || isDefaultCover(book)) {
+      setTitleText(book.metadata?.title || 'Untitled Manuscript');
+      setAuthorText(book.metadata?.creator || 'Author Name');
+    }
+  }, [bookSessionId, book?.metadata?.title, book?.metadata?.creator, book?.coverCustomized]);
+
+  const handleResetToDefault = async () => {
+    await resetToDefaultCover();
+    if (book) {
+      setTitleText(book.metadata?.title || 'Untitled Manuscript');
+      setAuthorText(book.metadata?.creator || 'Author Name');
+    }
+  };
 
   // Handle Direct Cover File Upload (Raw untouched image)
   const handleDirectFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -639,6 +663,15 @@ export const CoverStudio: React.FC = () => {
                     <Sparkles size={14} />
                     <span>{t('coverStudio.openInCoverDesigner')}</span>
                   </button>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={handleResetToDefault}
+                    style={{ justifyContent: 'flex-start' }}
+                    title={t('coverStudio.resetToDefaultDesc')}
+                  >
+                    <RotateCcw size={14} />
+                    <span>{t('coverStudio.resetToDefaultCover')}</span>
+                  </button>
                 </div>
               </div>
 
@@ -726,6 +759,16 @@ export const CoverStudio: React.FC = () => {
                     <span>{t('coverStudio.saveSvg')}</span>
                   </button>
                 </div>
+
+                <button
+                  className="btn btn-outline btn-sm"
+                  style={{ width: '100%', fontSize: '0.78rem' }}
+                  onClick={handleResetToDefault}
+                  title={t('coverStudio.resetToDefaultDesc')}
+                >
+                  <RotateCcw size={13} />
+                  <span>{t('coverStudio.resetToDefaultCover')}</span>
+                </button>
               </div>
             </div>
 
