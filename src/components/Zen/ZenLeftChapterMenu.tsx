@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { BookOpen, Check, Search, X, Layers } from 'lucide-react';
 import { useTranslation } from '../../i18n/I18nContext';
+import { useZenMouseActivity } from '../../hooks/useZenMouseActivity';
 
 export const ZenLeftChapterMenu: React.FC = () => {
   const {
@@ -45,36 +46,45 @@ export const ZenLeftChapterMenu: React.FC = () => {
       }
     }, 3500);
 
-    const handleMouseMove = () => {
-      setIsVisible(true);
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = setTimeout(() => {
-        if (!isHoveredRef.current) {
-          setIsVisible(false);
-        }
-      }, 3000);
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't hide if pressing Escape or modifier keys alone
-      if (e.key === 'Escape' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Shift') {
-        return;
-      }
-
-      // Instantly fade out as soon as typing begins
-      setIsVisible(false);
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('keydown', handleKeyDown, { passive: true });
-
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('keydown', handleKeyDown);
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, [isZenMode, zenSettings.ghostHud]);
+
+  const handleRealMouseMove = useCallback(() => {
+    setIsVisible(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => {
+      if (!isHoveredRef.current) {
+        setIsVisible(false);
+      }
+    }, 3000);
+  }, []);
+
+  const handleZenKeyDown = useCallback((e: KeyboardEvent) => {
+    // Don't hide if pressing Escape or modifier keys alone
+    if (
+      e.key === 'Escape' ||
+      e.key === 'Control' ||
+      e.key === 'Alt' ||
+      e.key === 'Shift' ||
+      e.key === 'Meta' ||
+      e.ctrlKey ||
+      e.metaKey
+    ) {
+      return;
+    }
+
+    // Instantly fade out as soon as typing begins
+    setIsVisible(false);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+  }, []);
+
+  useZenMouseActivity(
+    Boolean(isZenMode && zenSettings.ghostHud),
+    handleRealMouseMove,
+    handleZenKeyDown
+  );
 
   if (!isZenMode || !zenSettings.ghostHud || !book || book.chapters.length === 0) {
     return null;

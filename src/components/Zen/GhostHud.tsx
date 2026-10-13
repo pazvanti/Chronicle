@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { BookOpen, Sparkles, ChevronUp, Check, Search, X } from 'lucide-react';
 import { useTranslation } from '../../i18n/I18nContext';
+import { useZenMouseActivity } from '../../hooks/useZenMouseActivity';
 
 export const GhostHud: React.FC = () => {
   const {
@@ -62,47 +63,56 @@ export const GhostHud: React.FC = () => {
       }
     }, 3500);
 
-    const handleMouseMove = () => {
-      setIsVisible(true);
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = setTimeout(() => {
-        if (!isHoveringRef.current && !isMenuOpenRef.current) {
-          setIsVisible(false);
-        }
-      }, 3000);
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // If chapter menu is open and Escape is pressed, close chapter menu first
-      if (e.key === 'Escape' && isMenuOpenRef.current) {
-        e.stopPropagation();
-        setIsChapterMenuOpen(false);
-        clearMenuCloseTimer();
-        return;
-      }
-
-      // Don't hide if pressing Escape or modifier keys alone
-      if (e.key === 'Escape' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Shift') {
-        return;
-      }
-
-      // Instantly fade out HUD and close menu as soon as typing begins
-      setIsChapterMenuOpen(false);
-      setIsVisible(false);
-      clearMenuCloseTimer();
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('keydown', handleKeyDown, { passive: true });
-
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('keydown', handleKeyDown);
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
       clearMenuCloseTimer();
     };
   }, [isZenMode, zenSettings.ghostHud]);
+
+  const handleRealMouseMove = useCallback(() => {
+    setIsVisible(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => {
+      if (!isHoveringRef.current && !isMenuOpenRef.current) {
+        setIsVisible(false);
+      }
+    }, 3000);
+  }, []);
+
+  const handleZenKeyDown = useCallback((e: KeyboardEvent) => {
+    // If chapter menu is open and Escape is pressed, close chapter menu first
+    if (e.key === 'Escape' && isMenuOpenRef.current) {
+      e.stopPropagation();
+      setIsChapterMenuOpen(false);
+      clearMenuCloseTimer();
+      return;
+    }
+
+    // Don't hide if pressing Escape or modifier keys alone
+    if (
+      e.key === 'Escape' ||
+      e.key === 'Control' ||
+      e.key === 'Alt' ||
+      e.key === 'Shift' ||
+      e.key === 'Meta' ||
+      e.ctrlKey ||
+      e.metaKey
+    ) {
+      return;
+    }
+
+    // Instantly fade out HUD and close menu as soon as typing begins
+    setIsChapterMenuOpen(false);
+    setIsVisible(false);
+    clearMenuCloseTimer();
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+  }, []);
+
+  useZenMouseActivity(
+    Boolean(isZenMode && zenSettings.ghostHud),
+    handleRealMouseMove,
+    handleZenKeyDown
+  );
 
   if (!isZenMode || !zenSettings.ghostHud || !book) {
     return null;

@@ -24,6 +24,7 @@ import {
 import { ReaderTheme, ReaderFont } from '../../types/project';
 import { TextColorPicker } from '../Editor/TextColorPicker';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useZenMouseActivity } from '../../hooks/useZenMouseActivity';
 
 export interface ActiveFormats {
   bold: boolean;
@@ -104,40 +105,41 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
     setIsVisible(true);
     resetHideTimer(3500);
 
-    const handleMouseMove = () => {
-      setIsVisible(true);
-      resetHideTimer(3000);
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't hide if pressing Escape or modifier keys alone
-      if (
-        e.key === 'Escape' ||
-        e.key === 'Control' ||
-        e.key === 'Alt' ||
-        e.key === 'Shift' ||
-        e.key === 'Meta' ||
-        e.ctrlKey ||
-        e.metaKey
-      ) {
-        return;
-      }
-
-      // If user starts typing, close menus and fade out
-      setIsColorPickerOpen(false);
-      setIsVisible(false);
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('keydown', handleKeyDown, { passive: true });
-
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('keydown', handleKeyDown);
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, [resetHideTimer]);
+
+  const handleRealMouseMove = useCallback(() => {
+    setIsVisible(true);
+    resetHideTimer(3000);
+  }, [resetHideTimer]);
+
+  const handleZenKeyDown = useCallback((e: KeyboardEvent) => {
+    // Don't hide if pressing Escape or modifier keys alone
+    if (
+      e.key === 'Escape' ||
+      e.key === 'Control' ||
+      e.key === 'Alt' ||
+      e.key === 'Shift' ||
+      e.key === 'Meta' ||
+      e.ctrlKey ||
+      e.metaKey
+    ) {
+      return;
+    }
+
+    // If user starts typing, close menus and fade out
+    setIsColorPickerOpen(false);
+    setIsVisible(false);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+  }, []);
+
+  useZenMouseActivity(
+    true,
+    handleRealMouseMove,
+    handleZenKeyDown
+  );
 
   useEscapeKey(() => {
     if (isColorPickerOpen) {
