@@ -5,6 +5,7 @@ import { HardDrive, Cloud, X, ArrowRight, Settings, Check } from 'lucide-react';
 import { WebDavConfigModal } from './WebDavConfigModal';
 import { isTauri } from '../../services/cloud/webdavClient';
 import { useTranslation } from '../../i18n/I18nContext';
+import { formatShortcut } from '../../utils/platform';
 
 interface SaveDestinationModalProps {
   onClose: () => void;
@@ -83,7 +84,7 @@ export const SaveDestinationModal: React.FC<SaveDestinationModalProps> = ({ onCl
 
         <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-            Subsequent saves (via <kbd className="kbd-shortcut">Ctrl+S</kbd>) will automatically update this location without asking again. You can switch destinations anytime.
+            Subsequent saves (via <kbd className="kbd-shortcut">{formatShortcut('Ctrl+S')}</kbd>) will automatically update this location without asking again. You can switch destinations anytime.
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.9rem' }}>

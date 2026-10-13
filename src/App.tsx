@@ -28,6 +28,7 @@ import { SaveAsModal } from './components/Cloud/SaveAsModal';
 import { CloudFileBrowserModal } from './components/Cloud/CloudFileBrowserModal';
 import { CloudDesktopNoticeModal } from './components/Cloud/CloudDesktopNoticeModal';
 import { WelcomeModal } from './components/Welcome/WelcomeModal';
+import { isKeyMatch } from './utils/platform';
 import { UnsavedChangesModal } from './components/Common/UnsavedChangesModal';
 import { SettingsModal } from './components/Settings/SettingsModal';
 import { SnapshotsModal } from './components/Snapshots/SnapshotsModal';
@@ -80,7 +81,7 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // 1. Ctrl+S / Cmd+S: Quick Save Studio Project
-      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+      if ((e.ctrlKey || e.metaKey) && isKeyMatch(e, 's', 'KeyS')) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -94,7 +95,7 @@ const AppContent: React.FC = () => {
       }
 
       // 2. Ctrl+\ or Cmd+\: Toggle Sidebar
-      if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
+      if ((e.ctrlKey || e.metaKey) && (e.key === '\\' || e.code === 'Backslash')) {
         e.preventDefault();
         e.stopPropagation();
         toggleSidebar();
@@ -102,7 +103,7 @@ const AppContent: React.FC = () => {
       }
 
       // 3. Ctrl+O or Cmd+O: Open EPUB or Project File
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'o' || e.key === 'O')) {
+      if ((e.ctrlKey || e.metaKey) && isKeyMatch(e, 'o', 'KeyO')) {
         e.preventDefault();
         e.stopPropagation();
         if (isTauri()) {
@@ -114,17 +115,17 @@ const AppContent: React.FC = () => {
       }
 
       // 4. Ctrl+, or Cmd+,: Open Settings & Preferences
-      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+      if ((e.ctrlKey || e.metaKey) && (e.key === ',' || e.code === 'Comma')) {
         e.preventDefault();
         e.stopPropagation();
         openSettings();
         return;
       }
 
-      // 5. Alt+S or Ctrl+Shift+S: Open Story Snapshots (Time Machine)
+      // 5. Alt+S or Ctrl+Shift+S / Cmd+Shift+S: Open Story Snapshots (Time Machine)
       if (
-        (e.altKey && (e.key === 's' || e.key === 'S')) ||
-        ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 's' || e.key === 'S'))
+        (e.altKey && isKeyMatch(e, 's', 'KeyS')) ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && isKeyMatch(e, 's', 'KeyS'))
       ) {
         e.preventDefault();
         e.stopPropagation();
@@ -135,7 +136,7 @@ const AppContent: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [book, saveProject, isSaving, showNotification, toggleSidebar, openSettings, setIsSnapshotsModalOpen]);
+  }, [book, saveProject, isSaving, showNotification, toggleSidebar, openSettings, setIsSnapshotsModalOpen, openLocalDocument]);
 
   const isExternalFileDrag = (e: React.DragEvent) => {
     const types = e.dataTransfer?.types;

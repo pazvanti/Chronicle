@@ -36,6 +36,7 @@ import { ChronicleLogo } from './Common/ChronicleLogo';
 import { isTauri } from '../services/cloud/webdavClient';
 import { CURRENT_VERSION } from '../services/update/updateChecker';
 import { useTranslation } from '../i18n/I18nContext';
+import { formatShortcut } from '../utils/platform';
 
 export const Header: React.FC = () => {
   const {
@@ -156,7 +157,7 @@ export const Header: React.FC = () => {
             <button
               className={`btn-icon btn-sm sidebar-toggle-btn ${sidebarCollapsed ? 'sidebar-hidden' : ''}`}
               onClick={toggleSidebar}
-              title={sidebarCollapsed ? 'Show Chapters Sidebar (Ctrl+\\)' : 'Hide Chapters Sidebar (Ctrl+\\)'}
+              title={sidebarCollapsed ? formatShortcut('Show Chapters Sidebar (Ctrl+\\)') : formatShortcut('Hide Chapters Sidebar (Ctrl+\\)')}
             >
               <Sidebar size={15} />
             </button>
@@ -669,7 +670,7 @@ export const Header: React.FC = () => {
                           {storageTarget === 'cloud' ? t('header.saveCloudTooltip') : t('header.saveTooltip')}
                         </div>
                       </div>
-                      <kbd className="kbd-shortcut" style={{ fontSize: '9px', padding: '1px 4px' }}>Ctrl+S</kbd>
+                      <kbd className="kbd-shortcut" style={{ fontSize: '9px', padding: '1px 4px' }}>{formatShortcut('Ctrl+S')}</kbd>
                     </button>
 
                     <button
@@ -889,7 +890,7 @@ export const Header: React.FC = () => {
                         <div style={{ fontWeight: 600 }}>{t('header.openManuscript')}</div>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('welcome.openDesc')}</div>
                       </div>
-                      <kbd className="kbd-shortcut">Ctrl+O</kbd>
+                      <kbd className="kbd-shortcut">{formatShortcut('Ctrl+O')}</kbd>
                     </button>
 
                     {!isTauri() ? (
@@ -1075,7 +1076,7 @@ export const Header: React.FC = () => {
                         <div style={{ fontWeight: 600 }}>{t('headerActions.settingsPreferences')}</div>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('headerActions.settingsPreferencesDesc')}</div>
                       </div>
-                      <kbd className="kbd-shortcut">Ctrl+,</kbd>
+                      <kbd className="kbd-shortcut">{formatShortcut('Ctrl+,')}</kbd>
                     </button>
 
                     <button

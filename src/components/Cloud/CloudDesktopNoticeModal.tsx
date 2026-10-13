@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { Cloud, Monitor, X, ShieldCheck, RefreshCw, ArrowRight } from 'lucide-react';
+import { formatShortcut } from '../../utils/platform';
 
 interface CloudDesktopNoticeModalProps {
   onClose: () => void;
@@ -178,7 +179,7 @@ export const CloudDesktopNoticeModal: React.FC<CloudDesktopNoticeModalProps> = (
                     Automatic Cloud Overwrite & Bidirectional Save As
                   </div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.4, marginTop: '2px' }}>
-                    Pressing <kbd>Ctrl+S</kbd> uploads and replaces the file directly on your cloud, keeping manuscripts synchronized.
+                    Pressing <kbd>{formatShortcut('Ctrl+S')}</kbd> uploads and replaces the file directly on your cloud, keeping manuscripts synchronized.
                   </div>
                 </div>
               </div>

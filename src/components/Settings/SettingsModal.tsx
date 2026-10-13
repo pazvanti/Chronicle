@@ -69,6 +69,7 @@ import {
 import { useTranslation } from '../../i18n/I18nContext';
 import { SupportedLanguage } from '../../i18n/types';
 import { DEFAULT_CUSTOM_PAPER_TONE } from '../../types/project';
+import { formatShortcut } from '../../utils/platform';
 
 interface PaperPreset {
   id: string;
@@ -2582,27 +2583,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem', fontSize: '0.75rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
                       <span>{t('settings.keySettings')}</span>
-                      <kbd className="kbd-shortcut">Ctrl+,</kbd>
+                      <kbd className="kbd-shortcut">{formatShortcut('Ctrl+,')}</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
                       <span>{isDesktop ? t('settings.keyQuickSave') : 'Quick Save (Project File)'}</span>
-                      <kbd className="kbd-shortcut">Ctrl+S</kbd>
+                      <kbd className="kbd-shortcut">{formatShortcut('Ctrl+S')}</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
                       <span>{t('settings.keyOpen')}</span>
-                      <kbd className="kbd-shortcut">Ctrl+O</kbd>
+                      <kbd className="kbd-shortcut">{formatShortcut('Ctrl+O')}</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
                       <span>{t('settings.keySidebar')}</span>
-                      <kbd className="kbd-shortcut">Ctrl+\</kbd>
+                      <kbd className="kbd-shortcut">{formatShortcut('Ctrl+\\')}</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
                       <span>{t('settings.keyMinimalist')}</span>
-                      <kbd className="kbd-shortcut">Alt+M</kbd>
+                      <kbd className="kbd-shortcut">{formatShortcut('Alt+M')}</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
                       <span>{t('settings.keyZen')}</span>
-                      <kbd className="kbd-shortcut">Alt+Z</kbd>
+                      <kbd className="kbd-shortcut">{formatShortcut('Alt+Z')}</kbd>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px', borderRadius: 4, backgroundColor: 'var(--bg-input)' }}>
                       <span>{t('settings.keyExitZen')}</span>

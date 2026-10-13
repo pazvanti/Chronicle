@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEpub } from '../../context/EpubContext';
 import { useTranslation } from '../../i18n/I18nContext';
+import { formatShortcut } from '../../utils/platform';
 import {
   Loader2,
   Clock,
@@ -95,7 +96,7 @@ export const StatusBar: React.FC = () => {
               <span>{storageTarget === 'cloud' ? t('statusBar.uploadingCloud') : t('statusBar.saving')}</span>
             </span>
           ) : isDirty ? (
-            <span className="status-badge status-dirty" title="You have unsaved changes. Press Ctrl+S to save project.">
+            <span className="status-badge status-dirty" title={formatShortcut("You have unsaved changes. Press Ctrl+S to save project.")}>
               <span className="status-dot dot-dirty" />
               <span>{t('statusBar.unsavedChanges')}</span>
             </span>
@@ -170,11 +171,11 @@ export const StatusBar: React.FC = () => {
 
         <div className="status-item shortcut-hints" title="Global keyboard shortcuts">
           <Keyboard size={12} style={{ opacity: 0.6 }} />
-          <span>Ctrl+S Save</span>
+          <span>{formatShortcut('Ctrl+S')} Save</span>
           <span style={{ opacity: 0.4 }}>•</span>
-          <span>Ctrl+\ Sidebar</span>
+          <span>{formatShortcut('Ctrl+\\')} Sidebar</span>
           <span style={{ opacity: 0.4 }}>•</span>
-          <span>Ctrl+O Open</span>
+          <span>{formatShortcut('Ctrl+O')} Open</span>
         </div>
       </div>
 
@@ -250,7 +251,7 @@ export const StatusBar: React.FC = () => {
         <button
           className={`status-btn ${sidebarCollapsed ? 'active' : ''}`}
           onClick={toggleSidebar}
-          title={sidebarCollapsed ? 'Show Sidebar (Ctrl+\\)' : 'Hide Sidebar (Ctrl+\\)'}
+          title={sidebarCollapsed ? formatShortcut('Show Sidebar (Ctrl+\\)') : formatShortcut('Hide Sidebar (Ctrl+\\)')}
         >
           <Sidebar size={12} />
           <span>{sidebarCollapsed ? 'Show Sidebar' : 'Hide Sidebar'}</span>

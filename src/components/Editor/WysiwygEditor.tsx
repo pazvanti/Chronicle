@@ -47,6 +47,7 @@ import { CommentFloatingPill } from '../Comments/CommentFloatingPill';
 import { CommentModal } from '../Comments/CommentModal';
 import { CommentsSidebar } from '../Comments/CommentsSidebar';
 import { ImageControlsToolbar, ImageToolbarPosition } from './ImageControlsToolbar';
+import { formatShortcut, isKeyMatch } from '../../utils/platform';
 
 function cleanTransientEditorMarkup(html: string): string {
   if (!html) return html;
@@ -1276,14 +1277,13 @@ export const WysiwygEditor: React.FC = () => {
   useEffect(() => {
     const handleGlobalUndoRedo = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
-        const key = e.key.toLowerCase();
-        if (key === 'z' || key === 'y') {
+        if (isKeyMatch(e, 'z', 'KeyZ') || isKeyMatch(e, 'y', 'KeyY')) {
           const activeTag = document.activeElement?.tagName;
           if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') {
             return;
           }
           e.preventDefault();
-          if (key === 'y' || e.shiftKey) {
+          if (isKeyMatch(e, 'y', 'KeyY') || e.shiftKey) {
             handleRedo();
           } else {
             handleUndo();
@@ -1291,8 +1291,8 @@ export const WysiwygEditor: React.FC = () => {
         }
       }
     };
-    window.addEventListener('keydown', handleGlobalUndoRedo);
-    return () => window.removeEventListener('keydown', handleGlobalUndoRedo);
+    window.addEventListener('keydown', handleGlobalUndoRedo, true);
+    return () => window.removeEventListener('keydown', handleGlobalUndoRedo, true);
   }, [handleUndo, handleRedo]);
 
   const handleSelectionChange = useCallback(() => {
@@ -2075,22 +2075,46 @@ export const WysiwygEditor: React.FC = () => {
     }
 
     if (e.ctrlKey || e.metaKey) {
-      const key = e.key.toLowerCase();
-      if (key === 'y') {
+      if (isKeyMatch(e, 'z', 'KeyZ')) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+        return;
+      } else if (isKeyMatch(e, 'y', 'KeyY')) {
         e.preventDefault();
         handleRedo();
-      } else if (key === 'l') {
+        return;
+      } else if (isKeyMatch(e, 'b', 'KeyB')) {
+        e.preventDefault();
+        execCommand('bold');
+        return;
+      } else if (isKeyMatch(e, 'i', 'KeyI')) {
+        e.preventDefault();
+        execCommand('italic');
+        return;
+      } else if (isKeyMatch(e, 'u', 'KeyU')) {
+        e.preventDefault();
+        execCommand('underline');
+        return;
+      } else if (isKeyMatch(e, 'l', 'KeyL')) {
         e.preventDefault();
         handleAlign('left');
-      } else if (key === 'e') {
+        return;
+      } else if (isKeyMatch(e, 'e', 'KeyE')) {
         e.preventDefault();
         handleAlign('center');
-      } else if (key === 'r') {
+        return;
+      } else if (isKeyMatch(e, 'r', 'KeyR')) {
         e.preventDefault();
         handleAlign('right');
-      } else if (key === 'j') {
+        return;
+      } else if (isKeyMatch(e, 'j', 'KeyJ')) {
         e.preventDefault();
         handleAlign('justify');
+        return;
       }
     }
   };
@@ -2193,7 +2217,7 @@ export const WysiwygEditor: React.FC = () => {
             disabled={!canUndo}
             onMouseDown={e => e.preventDefault()}
             onClick={handleUndo}
-            title={canUndo ? "Undo (Ctrl+Z)" : "Undo"}
+            title={canUndo ? formatShortcut("Undo (Ctrl+Z)") : "Undo"}
           >
             <Undo size={16} />
           </button>
@@ -2203,7 +2227,7 @@ export const WysiwygEditor: React.FC = () => {
             disabled={!canRedo}
             onMouseDown={e => e.preventDefault()}
             onClick={handleRedo}
-            title={canRedo ? "Redo (Ctrl+Y / Ctrl+Shift+Z)" : "Redo"}
+            title={canRedo ? formatShortcut("Redo (Ctrl+Y / Ctrl+Shift+Z)") : "Redo"}
           >
             <Redo size={16} />
           </button>

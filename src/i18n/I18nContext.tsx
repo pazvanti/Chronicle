@@ -4,6 +4,7 @@ import { en } from './locales/en';
 import { ptBR } from './locales/pt-BR';
 import { ro } from './locales/ro';
 import { saveSetting, loadAllSettings } from '../services/storage/indexedDbSettings';
+import { localizeShortcuts } from '../utils/platform';
 
 const DICTIONARIES: Record<SupportedLanguage, TranslationDictionary> = {
   en,
@@ -98,7 +99,7 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
         });
       }
 
-      return result;
+      return localizeShortcuts(result);
     },
     [dictionary]
   );

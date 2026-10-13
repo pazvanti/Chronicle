@@ -80,6 +80,7 @@ import {
   getOrGenerateSpineColor,
 } from '../services/library/libraryStorage';
 import { uploadFile, downloadFile, getFileMetadata } from '../services/cloud/webdavClient';
+import { isKeyMatch } from '../utils/platform';
 import {
   isTauri,
   pickFileToOpen,
@@ -1300,13 +1301,13 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Alt+M toggles Minimalist Mode
-      if (e.altKey && (e.key === 'm' || e.key === 'M')) {
+      // Alt+M / Option+M toggles Minimalist Mode
+      if (e.altKey && isKeyMatch(e, 'm', 'KeyM')) {
         e.preventDefault();
         toggleMinimalistMode();
       }
-      // Alt+Z toggles Zen Mode
-      if (e.altKey && (e.key === 'z' || e.key === 'Z')) {
+      // Alt+Z / Option+Z toggles Zen Mode
+      if (e.altKey && isKeyMatch(e, 'z', 'KeyZ')) {
         e.preventDefault();
         toggleZenMode();
       }

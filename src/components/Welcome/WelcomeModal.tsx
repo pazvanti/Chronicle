@@ -4,6 +4,7 @@ import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { ChronicleLogo } from '../Common/ChronicleLogo';
 import { isTauri } from '../../services/cloud/webdavClient';
 import { useTranslation } from '../../i18n/I18nContext';
+import { formatShortcut } from '../../utils/platform';
 import {
   Sparkles,
   ArrowRight,
@@ -326,18 +327,18 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                 <div className="intro-shortcut-row">
                   <span>{t('welcomeModal.shortAlign')}</span>
                   <div className="intro-kbd-group">
-                    <kbd>Ctrl+L</kbd>
-                    <kbd>Ctrl+E</kbd>
-                    <kbd>Ctrl+R</kbd>
-                    <kbd>Ctrl+J</kbd>
+                    <kbd>{formatShortcut('Ctrl+L')}</kbd>
+                    <kbd>{formatShortcut('Ctrl+E')}</kbd>
+                    <kbd>{formatShortcut('Ctrl+R')}</kbd>
+                    <kbd>{formatShortcut('Ctrl+J')}</kbd>
                   </div>
                 </div>
                 <div className="intro-shortcut-row">
                   <span>{t('welcomeModal.shortStyle')}</span>
                   <div className="intro-kbd-group">
-                    <kbd>Ctrl+B</kbd>
-                    <kbd>Ctrl+I</kbd>
-                    <kbd>Ctrl+U</kbd>
+                    <kbd>{formatShortcut('Ctrl+B')}</kbd>
+                    <kbd>{formatShortcut('Ctrl+I')}</kbd>
+                    <kbd>{formatShortcut('Ctrl+U')}</kbd>
                   </div>
                 </div>
               </div>
@@ -346,15 +347,15 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                 <h4>{t('welcomeModal.shortNavSection')}</h4>
                 <div className="intro-shortcut-row">
                   <span>{t('welcomeModal.shortSave')}</span>
-                  <kbd>Ctrl+S</kbd>
+                  <kbd>{formatShortcut('Ctrl+S')}</kbd>
                 </div>
                 <div className="intro-shortcut-row">
                   <span>{t('welcomeModal.shortOpen')}</span>
-                  <kbd>Ctrl+O</kbd>
+                  <kbd>{formatShortcut('Ctrl+O')}</kbd>
                 </div>
                 <div className="intro-shortcut-row">
                   <span>{t('welcomeModal.shortSidebar')}</span>
-                  <kbd>Ctrl+\</kbd>
+                  <kbd>{formatShortcut('Ctrl+\\')}</kbd>
                 </div>
                 <div className="intro-shortcut-row">
                   <span>{t('welcomeModal.shortDismiss')}</span>

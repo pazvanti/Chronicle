@@ -25,6 +25,7 @@ import { ReaderTheme, ReaderFont } from '../../types/project';
 import { TextColorPicker } from '../Editor/TextColorPicker';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { useZenMouseActivity } from '../../hooks/useZenMouseActivity';
+import { formatShortcut } from '../../utils/platform';
 
 export interface ActiveFormats {
   bold: boolean;
@@ -177,7 +178,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
             onPreserveSelection?.();
           }}
           onClick={onUndo}
-          title={canUndo ? 'Undo (Ctrl+Z)' : 'Undo'}
+          title={canUndo ? formatShortcut('Undo (Ctrl+Z)') : 'Undo'}
           aria-label="Undo"
         >
           <Undo size={17} />
@@ -191,7 +192,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
             onPreserveSelection?.();
           }}
           onClick={onRedo}
-          title={canRedo ? 'Redo (Ctrl+Y)' : 'Redo'}
+          title={canRedo ? formatShortcut('Redo (Ctrl+Y)') : 'Redo'}
           aria-label="Redo"
         >
           <Redo size={17} />
@@ -264,7 +265,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
             onPreserveSelection?.();
           }}
           onClick={() => onExecCommand('bold')}
-          title="Bold (Ctrl+B)"
+          title={formatShortcut('Bold (Ctrl+B)')}
           aria-label="Bold"
         >
           <Bold size={17} />
@@ -277,7 +278,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
             onPreserveSelection?.();
           }}
           onClick={() => onExecCommand('italic')}
-          title="Italic (Ctrl+I)"
+          title={formatShortcut('Italic (Ctrl+I)')}
           aria-label="Italic"
         >
           <Italic size={17} />
@@ -290,7 +291,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
             onPreserveSelection?.();
           }}
           onClick={() => onExecCommand('underline')}
-          title="Underline (Ctrl+U)"
+          title={formatShortcut('Underline (Ctrl+U)')}
           aria-label="Underline"
         >
           <Underline size={17} />
@@ -351,7 +352,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
             onPreserveSelection?.();
           }}
           onClick={() => onAlign('left')}
-          title="Align Left (Ctrl+L)"
+          title={formatShortcut('Align Left (Ctrl+L)')}
           aria-label="Align Left"
         >
           <AlignLeft size={17} />
@@ -364,7 +365,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
             onPreserveSelection?.();
           }}
           onClick={() => onAlign('center')}
-          title="Align Center (Ctrl+E)"
+          title={formatShortcut('Align Center (Ctrl+E)')}
           aria-label="Align Center"
         >
           <AlignCenter size={17} />
@@ -377,7 +378,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
             onPreserveSelection?.();
           }}
           onClick={() => onAlign('right')}
-          title="Align Right (Ctrl+R)"
+          title={formatShortcut('Align Right (Ctrl+R)')}
           aria-label="Align Right"
         >
           <AlignRight size={17} />
@@ -390,7 +391,7 @@ export const ZenFloatingToolbar: React.FC<ZenFloatingToolbarProps> = ({
             onPreserveSelection?.();
           }}
           onClick={() => onAlign('justify')}
-          title="Justify (Ctrl+J)"
+          title={formatShortcut('Justify (Ctrl+J)')}
           aria-label="Justify"
         >
           <AlignJustify size={17} />
