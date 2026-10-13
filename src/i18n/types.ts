@@ -85,8 +85,37 @@ export interface TranslationDictionary {
     tabEditor: string;
     tabGeneral: string;
     tabUpdates: string;
+    tabFeedback: string;
     tabHelpChronicle: string;
     updateAvailable: string;
+
+    // Feedback
+    feedbackTitle: string;
+    feedbackDesc: string;
+    feedbackBadge: string;
+    feedbackCategoryLabel: string;
+    feedbackCategoryBug: string;
+    feedbackCategoryFeature: string;
+    feedbackCategoryGeneral: string;
+    feedbackCategoryPraise: string;
+    feedbackMessageLabel: string;
+    feedbackPlaceholderBug: string;
+    feedbackPlaceholderFeature: string;
+    feedbackPlaceholderGeneral: string;
+    feedbackPlaceholderPraise: string;
+    feedbackEmailLabel: string;
+    feedbackEmailPlaceholder: string;
+    feedbackEmailDesc: string;
+    feedbackIncludeDiagnostics: string;
+    feedbackDiagnosticsPrivacy: string;
+    feedbackSubmitButton: string;
+    feedbackSubmitting: string;
+    feedbackSuccessTitle: string;
+    feedbackSuccessDesc: string;
+    feedbackSendAnother: string;
+    feedbackErrorTitle: string;
+    feedbackErrorMessage: string;
+    feedbackValidationMinLength: string;
 
     // Help Chronicle
     helpChronicleTitle: string;
@@ -971,6 +1000,8 @@ export interface TranslationDictionary {
     cloudUpdatedTitle: string;
     cloudConflictTitle: string;
     cloudLocalIsNewer: string;
+    feedbackSentSuccess: string;
+    feedbackSentError: string;
   };
   library: {
     title: string;

@@ -3,6 +3,7 @@ import { useEpub } from '../../context/EpubContext';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { UI_THEMES, StarterThemeId, CustomTheme } from '../../types/theme';
 import { ThemeCustomizerModal } from './ThemeCustomizerModal';
+import { FeedbackTab } from './FeedbackTab';
 import { exportCustomThemeToJson, parseCustomThemeFromJson } from '../../services/theme/customThemeService';
 import { testConnection, isTauri } from '../../services/cloud/webdavClient';
 import { WebDavConfig } from '../../types/cloud';
@@ -33,6 +34,7 @@ import {
   Layout,
   Focus,
   MoveVertical,
+  MessageSquare,
   MessageSquareOff,
   ArrowUpCircle,
   DownloadCloud,
@@ -118,7 +120,7 @@ function computeAutoDesk(paperHex: string): string {
   return `#${toHex(dr)}${toHex(dg)}${toHex(db)}`.toUpperCase();
 }
 
-export type SettingsTab = 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates' | 'helpChronicle';
+export type SettingsTab = 'appearance' | 'themes' | 'cloud' | 'editor' | 'general' | 'updates' | 'feedback' | 'helpChronicle';
 
 interface SettingsModalProps {
   initialTab?: SettingsTab;
@@ -459,6 +461,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       badgeColor: '#e6be75',
       badgeBg: 'rgba(230, 190, 117, 0.2)',
       badgeBorder: '1px solid rgba(230, 190, 117, 0.35)',
+    },
+    {
+      id: 'feedback',
+      label: t('settings.tabFeedback'),
+      icon: <MessageSquare size={16} style={{ flexShrink: 0 }} />,
     },
     {
       id: 'helpChronicle',
@@ -2898,6 +2905,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </>
                 )}
               </div>
+            )}
+
+            {/* ---------------- Tab: Feedback ---------------- */}
+            {activeTab === 'feedback' && (
+              <FeedbackTab onNotification={showNotification} />
             )}
 
             {/* ---------------- Tab 7: Help Chronicle ---------------- */}
