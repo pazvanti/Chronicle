@@ -1,0 +1,4745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chronicle — Official 60s Motion Graphics Showreel (Master Director's Cut)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #03050c;
+      --bg-surface: rgba(11, 16, 32, 0.94);
+      --bg-surface-elevated: rgba(18, 25, 48, 0.95);
+      --gold: #f59e0b;
+      --gold-primary: #d4af37;
+      --gold-light: #fef08a;
+      --gold-glow: rgba(212, 175, 55, 0.45);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.45);
+      --sapphire: #38bdf8;
+      --sapphire-glow: rgba(56, 189, 248, 0.45);
+      --amethyst: #a855f7;
+      --amethyst-glow: rgba(168, 85, 247, 0.45);
+      --rose: #f43f5e;
+      --text: #ffffff;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --border-subtle: rgba(255, 255, 255, 0.10);
+      --border-gold: rgba(212, 175, 55, 0.35);
+      --font-serif: 'Cinzel', serif;
+      --font-hero: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-book: 'Newsreader', Georgia, serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #020306;
+      color: var(--text);
+      font-family: var(--font-hero);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 16:9 Master Viewport with 3D Depth Rig */
+    #viewport {
+      position: relative;
+      width: 100vw;
+      height: 56.25vw;
+      max-height: 100vh;
+      max-width: 177.78vh;
+      background: radial-gradient(circle at 50% 45%, #0d1527 0%, #060a16 55%, #020307 100%);
+      box-shadow: 0 40px 140px rgba(0, 0, 0, 0.98);
+      overflow: hidden;
+      perspective: 1800px;
+    }
+
+
+    /* Living Canvas Ambient Dust & Particle Space */
+    #bg-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Dynamic Studio Lights */
+    .ambient-studio-light {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.40;
+      mix-blend-mode: screen;
+      filter: blur(110px);
+      transition: all 0.5s ease;
+    }
+    .light-gold { width: 900px; height: 900px; background: radial-gradient(circle, #b45309 0%, transparent 70%); top: -25%; left: 8%; }
+    .light-sapphire { width: 950px; height: 950px; background: radial-gradient(circle, #1d4ed8 0%, transparent 70%); bottom: -30%; right: -15%; }
+    .light-emerald { width: 700px; height: 700px; background: radial-gradient(circle, #059669 0%, transparent 70%); top: 40%; left: -20%; opacity: 0.25; }
+    .light-center { width: 1200px; height: 900px; background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.16) 0%, rgba(56, 189, 248, 0.10) 35%, rgba(168, 85, 247, 0.05) 60%, transparent 75%); top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.55; mix-blend-mode: screen; filter: blur(80px); }
+
+    /* Master 3D Camera Rig */
+    #camera-rig {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      will-change: transform;
+      z-index: 10;
+    }
+
+    /* Spatial Scene Views */
+    .scene-view {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+      will-change: transform, opacity;
+    }
+
+    /* Global Glass Cards & Panels */
+    .glass-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -150%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+      transform: skewX(-25deg);
+      pointer-events: none;
+    }
+
+    /* Editorial Badges & Pills */
+    .feature-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      background: rgba(212, 175, 55, 0.12);
+      color: var(--gold-light);
+      border: 1px solid rgba(212, 175, 55, 0.32);
+      box-shadow: 0 0 16px rgba(212, 175, 55, 0.20);
+      margin-bottom: 0.85rem;
+      backdrop-filter: blur(10px);
+    }
+    .feature-pill.cyan {
+      background: rgba(56, 189, 248, 0.12);
+      color: #7dd3fc;
+      border-color: rgba(56, 189, 248, 0.32);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.20);
+    }
+    .feature-pill.emerald {
+      background: rgba(16, 185, 129, 0.12);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.32);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.20);
+    }
+    .feature-pill.purple {
+      background: rgba(168, 85, 247, 0.12);
+      color: #d8b4fe;
+      border-color: rgba(168, 85, 247, 0.32);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.20);
+    }
+
+    .editorial-h1 {
+      font-family: var(--font-hero);
+      font-size: 2.85rem;
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      margin-bottom: 1.15rem;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+    .editorial-h1 span.gold {
+      background: linear-gradient(135deg, #fffbeb 0%, #fde68a 35%, #d4af37 75%, #b45309 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+    .editorial-h1 span.cyan {
+      background: linear-gradient(135deg, #ffffff 0%, #38bdf8 60%, #0284c7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+    .editorial-h1 span.emerald {
+      background: linear-gradient(135deg, #ffffff 0%, #34d399 60%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+    .editorial-h1 span.purple {
+      background: linear-gradient(135deg, #ffffff 0%, #c084fc 60%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .editorial-sub {
+      font-size: 1.24rem;
+      line-height: 1.62;
+      color: #cbd5e1;
+      max-width: 480px;
+      font-weight: 400;
+      margin-bottom: 0;
+      letter-spacing: 0.005em;
+    }
+
+    /* Floating Metric Badges */
+    .metric-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 1rem;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: #e2e8f0;
+      width: fit-content;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+    .metric-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulseDot 1.4s ease infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* ========================================================
+       SCENE 0: MONOLITH REVEAL (0.0s - 3.75s)
+       ======================================================== */
+    #scene-0 {
+      flex-direction: column;
+      text-align: center;
+    }
+    .logo-reveal-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-style: preserve-3d;
+      will-change: transform;
+      backface-visibility: hidden;
+      -webkit-font-smoothing: antialiased;
+      transform: translate3d(0, 0, 0);
+    }
+    .logo-halo-ring {
+      position: absolute;
+      top: -30px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(212, 175, 55, 0.35);
+      box-shadow: 0 0 60px rgba(212, 175, 55, 0.35), inset 0 0 40px rgba(212, 175, 55, 0.20);
+      pointer-events: none;
+      animation: spinRing 24s linear infinite;
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+    @keyframes spinRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .logo-img-main {
+      width: 145px;
+      height: 145px;
+      object-fit: contain;
+      filter: drop-shadow(0 15px 35px rgba(212, 175, 55, 0.45));
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 5;
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+    .title-monolith {
+      font-family: var(--font-serif);
+      font-size: 4.8rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #ffffff 0%, #fae8b2 45%, #d4af37 80%, #926918 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-left: 0.22em;
+      line-height: 1;
+      text-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      position: relative;
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+    .tagline-monolith {
+      font-family: var(--font-book);
+      font-style: italic;
+      font-size: 1.45rem;
+      color: #e2e8f0;
+      letter-spacing: 0.05em;
+      margin-top: 0.75rem;
+      opacity: 0.9;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+    .launch-specs-pill {
+      margin-top: 1.6rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.45rem 1.2rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      letter-spacing: 0.1em;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      backdrop-filter: blur(12px);
+    }
+
+    /* ========================================================
+       FEATURE SHOWCASE SCENES (Scenes 1-10) — Balanced Centered Composition
+       ======================================================== */
+    #scene-1, #scene-2, #scene-3, #scene-4, #scene-5, #scene-6, #scene-7, #scene-8, #scene-9, #scene-10 {
+      padding: 0 clamp(1.5vw, 2.5vw, 3.5vw);
+      justify-content: center;
+      gap: clamp(2rem, 3.2vw, 4.0rem);
+    }
+    .deconstruct-col-left {
+      flex: 0 0 510px;
+      max-width: 530px;
+      z-index: 20;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .deconstruct-stage {
+      flex: 0 1 1080px;
+      height: 88%;
+      max-width: 1120px;
+      position: relative;
+      transform-style: preserve-3d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* High-End Glass Feature Spec Strip */
+    .feature-spec-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.4rem;
+      z-index: 5;
+    }
+    .spec-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      font-family: var(--font-mono);
+      letter-spacing: 0.02em;
+    }
+    .spec-pill.gold { border-color: rgba(212, 175, 55, 0.35); color: #fef08a; background: rgba(212, 175, 55, 0.08); }
+    .spec-pill.cyan { border-color: rgba(56, 189, 248, 0.35); color: #bae6fd; background: rgba(56, 189, 248, 0.08); }
+    .spec-pill.emerald { border-color: rgba(16, 185, 129, 0.35); color: #a7f3d0; background: rgba(16, 185, 129, 0.08); }
+    .spec-pill.purple { border-color: rgba(168, 85, 247, 0.35); color: #e9d5ff; background: rgba(168, 85, 247, 0.08); }
+
+    /* Deconstructed App Frame */
+    .app-mockup-frame {
+      width: 100%;
+      height: 100%;
+      background: #090d1a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      position: relative;
+      will-change: transform;
+    }
+
+    /* High-End Glass Specular Glare Reflection */
+    .mockup-specular-glare {
+      position: absolute;
+      inset: -60% -80%;
+      width: 260%;
+      height: 220%;
+      background: linear-gradient(
+        115deg,
+        transparent 32%,
+        rgba(255, 255, 255, 0.02) 42%,
+        rgba(255, 255, 255, 0.13) 48%,
+        rgba(212, 175, 55, 0.20) 51%,
+        rgba(255, 255, 255, 0.11) 54%,
+        transparent 65%
+      );
+      pointer-events: none;
+      z-index: 60;
+      will-change: transform;
+      mix-blend-mode: screen;
+    }
+
+    /* Ambient Column Backlight Aura */
+    .col-ambient-aura {
+      position: absolute;
+      width: 440px;
+      height: 440px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, rgba(56, 189, 248, 0.05) 50%, transparent 72%);
+      filter: blur(40px);
+      pointer-events: none;
+      z-index: -1;
+      top: 45%;
+      left: 30%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Header Bar */
+    .mock-header {
+      height: 48px;
+      background: #0e1424;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      font-size: 0.78rem;
+    }
+    .mock-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .mock-logo {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+    .mock-title-pill {
+      padding: 0.2rem 0.6rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      font-weight: 600;
+      color: #f1f5f9;
+      font-size: 0.75rem;
+    }
+    .mock-mode-group {
+      display: flex;
+      gap: 3px;
+      background: #060913;
+      padding: 3px;
+      border-radius: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .mock-mode-pill {
+      padding: 0.22rem 0.65rem;
+      border-radius: 5px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+    .mock-mode-pill.active {
+      background: var(--gold-primary);
+      color: #0b0d16;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+    }
+    .mock-header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .mock-btn-save {
+      background: var(--gold-primary);
+      color: #080a12;
+      font-weight: 700;
+      padding: 0.28rem 0.75rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      box-shadow: 0 2px 10px rgba(212, 175, 55, 0.35);
+    }
+
+    /* Main Body */
+    .mock-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Sidebar Chapters Tree */
+    .mock-sidebar {
+      width: 210px;
+      background: #0b0f1e;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      padding: 0.75rem 0.6rem;
+      gap: 0.5rem;
+    }
+    .mock-sidebar-sec-title {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      font-weight: 700;
+      padding-left: 0.35rem;
+    }
+    .mock-folder-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.38rem 0.55rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .mock-chapter-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.35rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-left: 0.6rem;
+    }
+    .mock-chapter-item.active {
+      background: rgba(212, 175, 55, 0.12);
+      border-left: 3px solid var(--gold-primary);
+      color: #fef08a;
+      font-weight: 600;
+    }
+
+    /* Center Manuscript Writing Sheet */
+    .mock-editor-sheet {
+      flex: 1;
+      background: #0f1426;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.8rem 2.2rem;
+      overflow: hidden;
+      position: relative;
+    }
+    .mock-page-canvas {
+      width: 100%;
+      max-width: 580px;
+      background: #151a2e;
+      border-radius: 8px;
+      padding: 2.0rem 2.4rem;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      font-family: var(--font-book);
+      color: #e2e8f0;
+      line-height: 1.65;
+    }
+    .editor-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 580px;
+      margin-top: 1.0rem;
+      padding: 0.45rem 1.1rem;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: #94a3b8;
+      backdrop-filter: blur(8px);
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+    .mock-chapter-h1 {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fae8b2;
+      margin-bottom: 0.35rem;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+    .mock-chapter-sub {
+      text-align: center;
+      font-size: 0.8rem;
+      font-style: italic;
+      color: #94a3b8;
+      margin-bottom: 1.2rem;
+    }
+    .mock-para-dim {
+      opacity: 0.35;
+      font-size: 0.92rem;
+      margin-bottom: 0.85rem;
+    }
+    .mock-para-active {
+      font-size: 0.96rem;
+      color: #ffffff;
+      position: relative;
+      background: rgba(212, 175, 55, 0.08);
+      border-left: 2px solid var(--gold-primary);
+      padding: 0.4rem 0.75rem;
+      border-radius: 0 6px 6px 0;
+      box-shadow: 0 0 25px rgba(212, 175, 55, 0.14), inset 0 0 15px rgba(212, 175, 55, 0.04);
+      transition: box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+    .live-caret {
+      display: inline-block;
+      width: 2.5px;
+      height: 1.15em;
+      background: #fef08a;
+      box-shadow: 0 0 10px #f59e0b, 0 0 20px #f59e0b;
+      vertical-align: text-bottom;
+      margin-left: 3px;
+      animation: blinkCaret 0.7s ease infinite;
+    }
+    @keyframes blinkCaret {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px #f59e0b); }
+      50% { opacity: 0.2; }
+    }
+
+    /* Floating Feature Orbiters */
+    .floating-orbiter {
+      position: absolute;
+      border-radius: 10px;
+      padding: 0.65rem 0.95rem;
+      background: rgba(14, 20, 38, 0.94);
+      border: 1px solid var(--border-gold);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 24px rgba(212, 175, 55, 0.28);
+      font-size: 0.76rem;
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      backdrop-filter: blur(16px);
+      z-index: 40;
+      white-space: nowrap;
+      will-change: transform;
+    }
+
+    /* ========================================================
+       SCENE 2: ZEN MODE SANCTUARY (8.4375s - 13.125s)
+       ======================================================== */
+    .zen-stage-frame {
+      width: 100%;
+      max-width: 980px;
+      height: 88%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+    .zen-quote-callout {
+      margin-top: 1.15rem;
+      padding: 0.75rem 1.4rem;
+      border-left: 2px solid var(--gold-primary);
+      background: rgba(212, 175, 55, 0.05);
+      border-radius: 0 8px 8px 0;
+      font-family: var(--font-book);
+      font-style: italic;
+      font-size: 0.96rem;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.03);
+    }
+    .zen-quote-icon {
+      font-family: var(--font-serif);
+      font-size: 1.8rem;
+      color: var(--gold-primary);
+      line-height: 1;
+    }
+    .zen-paper-slab {
+      width: 100%;
+      height: 100%;
+      background: #090c18;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1.8rem 2.5rem;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 40px rgba(212, 175, 55, 0.05);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .zen-top-pill {
+      align-self: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.3rem 0.9rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: #94a3b8;
+      margin-bottom: 1.3rem;
+    }
+    .zen-heading {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.25rem;
+    }
+    .zen-subheading {
+      font-family: var(--font-book);
+      font-style: italic;
+      font-size: 1.0rem;
+      color: var(--gold-primary);
+      margin-bottom: 1.2rem;
+    }
+    .zen-prose-body {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: #94a3b8;
+      flex: 1;
+    }
+    .zen-prose-body strong {
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+    }
+    .zen-typing-caret {
+      display: inline-block;
+      width: 2px;
+      height: 1.1em;
+      background: var(--gold-primary);
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      box-shadow: 0 0 8px var(--gold-primary);
+      animation: caretPulse 0.9s ease-in-out infinite;
+    }
+
+    /* Chronicle's Authentic Ghost HUD Capsule */
+    .ghost-hud-capsule {
+      position: absolute;
+      bottom: 2.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.55rem 1.25rem;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(99, 102, 241, 0.2);
+      z-index: 10;
+      transition: all 0.4s ease;
+    }
+    .ghost-hud-section {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-family: var(--font-hero);
+      font-weight: 600;
+      color: #f1f5f9;
+      cursor: pointer;
+    }
+    .ghost-hud-divider {
+      width: 1px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .ghost-hud-words {
+      color: #10b981;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .ghost-hud-exit-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .ghost-kbd {
+      padding: 0.15rem 0.45rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      font-size: 0.62rem;
+      font-family: var(--font-mono);
+      color: #cbd5e1;
+    }
+
+    /* Popover Chapter Drawer (From GhostHud.tsx) */
+    .ghost-chapter-popover {
+      position: absolute;
+      bottom: 5.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 320px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(16px);
+      padding: 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      z-index: 9;
+      transition: all 0.3s ease;
+    }
+    .ghost-chapter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.35rem 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .ghost-chapter-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      color: #cbd5e1;
+      background: transparent;
+    }
+    .ghost-chapter-row.active {
+      background: rgba(99, 102, 241, 0.18);
+      color: #a5b4fc;
+      font-weight: 600;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .ghost-word-pill {
+      font-size: 0.64rem;
+      font-family: var(--font-mono);
+      color: #94a3b8;
+    }
+
+    /* ========================================================
+       SCENE 3: CUSTOM PAPER TONES & TYPOGRAPHY (13.125s - 18.75s)
+       ======================================================== */
+    .paper-tones-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.8rem;
+      width: 100%;
+      max-width: 1040px;
+      transform-style: preserve-3d;
+    }
+    .paper-swatch-card {
+      height: 245px;
+      border-radius: 14px;
+      padding: 1.6rem 1.8rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      transform-style: preserve-3d;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+      will-change: transform, opacity;
+    }
+    .paper-swatch-card.active-swatch {
+      border-color: #f59e0b;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.95), 0 0 50px rgba(245, 158, 11, 0.8), 0 0 100px rgba(245, 158, 11, 0.4);
+    }
+    .swatch-light { background: #faf9f5; color: #18181b; }
+    .swatch-sepia { background: #fbf0d9; color: #432818; }
+    .swatch-dark { background: #131625; color: #f7f4ec; }
+    .swatch-obsidian { background: #080a10; color: #e2e8f0; }
+
+    .swatch-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: var(--font-mono);
+    }
+    .swatch-sample-text {
+      font-family: var(--font-book);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+    .drop-cap-large {
+      float: left;
+      font-family: var(--font-serif);
+      font-size: 2.4rem;
+      line-height: 0.85;
+      padding-right: 0.45rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .swatch-meta-pill {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      opacity: 0.75;
+    }
+
+    /* ========================================================
+       SCENE 4: CHARACTER STUDIO & CAST DOSSIER (18.75s - 24.375s)
+       ======================================================== */
+    .char-studio-frame {
+      width: 100%;
+      max-width: 920px;
+      height: 90%;
+      background: #090d1a;
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      border-radius: 12px;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .char-studio-topbar {
+      height: 46px;
+      background: #0e1424;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      font-size: 0.78rem;
+    }
+    .char-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .char-btn-back {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.22rem 0.55rem;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+    .char-title-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      font-size: 0.82rem;
+    }
+    .char-count-pill {
+      font-size: 0.68rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 9999px;
+      background: rgba(168, 85, 247, 0.18);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      font-family: var(--font-mono);
+    }
+    .char-topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .char-search-box {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.24rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      color: #64748b;
+    }
+    .char-btn-add {
+      background: var(--gold-primary);
+      color: #080a12;
+      font-weight: 700;
+      padding: 0.26rem 0.7rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      box-shadow: 0 2px 10px rgba(212, 175, 55, 0.35);
+    }
+    .char-studio-workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    .char-roster-sidebar {
+      width: 250px;
+      background: #080c18;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      padding: 0.65rem 0.55rem;
+      gap: 0.45rem;
+      overflow-y: hidden;
+    }
+    .char-roster-sec-title {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      font-weight: 700;
+      padding: 0 0.3rem;
+      display: flex;
+      justify-content: space-between;
+    }
+    .char-roster-card {
+      padding: 0.55rem 0.65rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+    .char-roster-card.active {
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      box-shadow: 0 0 16px rgba(59, 130, 246, 0.15);
+    }
+    .char-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .char-avatar-chip {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.78rem;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+    .char-card-title-group {
+      flex: 1;
+      min-width: 0;
+    }
+    .char-card-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .char-card-meta {
+      display: flex;
+      gap: 0.35rem;
+      align-items: center;
+    }
+    .char-role-chip {
+      font-size: 0.6rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .char-role-chip.protagonist {
+      background: rgba(168, 85, 247, 0.2);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .char-role-chip.supporting {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .char-role-chip.antagonist {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .char-archetype-text {
+      font-size: 0.62rem;
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .char-card-summary {
+      font-size: 0.65rem;
+      color: #64748b;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .char-progress-row {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.15rem;
+    }
+    .char-progress-bar {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+    .char-progress-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+    .char-progress-label {
+      font-size: 0.6rem;
+      font-family: var(--font-mono);
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    /* Right Dossier Detail Pane */
+    .char-dossier-pane {
+      flex: 1;
+      background: #0b0f1e;
+      display: flex;
+      flex-direction: column;
+      padding: 0.95rem 1.15rem;
+      gap: 0.75rem;
+      overflow-y: hidden;
+    }
+    .dossier-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+    }
+    .dossier-identity {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex: 1;
+    }
+    .dossier-avatar-large {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #3b82f6;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: var(--font-hero);
+      flex-shrink: 0;
+    }
+    .dossier-title-block {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .dossier-char-name {
+      font-family: var(--font-hero);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1;
+    }
+    .dossier-meta-pills {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .dossier-input-pill {
+      font-size: 0.68rem;
+      padding: 0.16rem 0.5rem;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      font-family: var(--font-mono);
+    }
+    .dossier-color-swatches {
+      display: flex;
+      gap: 0.35rem;
+      align-items: center;
+    }
+    .dossier-swatch-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .dossier-swatch-dot.selected {
+      outline: 2px solid #ffffff;
+      outline-offset: 1px;
+      transform: scale(1.15);
+    }
+
+    /* Tabs Bar */
+    .dossier-tabs-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.35rem;
+    }
+    .dossier-tab-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #64748b;
+      padding: 0.25rem 0.55rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .dossier-tab-item.active {
+      color: #f1f5f9;
+      background: rgba(255, 255, 255, 0.06);
+      border-bottom: 2px solid var(--gold-primary);
+    }
+
+    /* Content Cards */
+    .dossier-content-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      flex: 1;
+    }
+    .dossier-field-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 7px;
+      padding: 0.55rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .dossier-field-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #a855f7;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .dossier-field-text {
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      line-height: 1.4;
+      font-family: var(--font-sans);
+    }
+    .dossier-checklist-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.55rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      font-size: 0.72rem;
+      color: #cbd5e1;
+    }
+    .dossier-check-icon {
+      color: #3b82f6;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    .dossier-tag-pill {
+      font-size: 0.58rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .dossier-tag-pill.goal {
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+    }
+    .dossier-tag-pill.trait {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
+    .dossier-tag-pill.flaw {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+    .dossier-footprint-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0.65rem;
+      border-radius: 6px;
+      background: rgba(168, 85, 247, 0.08);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      color: #d8b4fe;
+    }
+
+    /* ========================================================
+       SCENE 5: LOCATION STUDIO & REGIONAL CODEX (24.375s - 30.00s)
+       ======================================================== */
+    .loc-studio-frame {
+      width: 100%;
+      max-width: 920px;
+      height: 90%;
+      background: #080d18;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.85), 0 0 30px rgba(16, 185, 129, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .loc-studio-topbar {
+      height: 46px;
+      background: #0a131c;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      font-size: 0.78rem;
+    }
+    .loc-roster-sidebar {
+      width: 240px;
+      background: #060b13;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      padding: 0.65rem 0.55rem;
+      gap: 0.45rem;
+      overflow-y: hidden;
+    }
+    .loc-roster-card {
+      padding: 0.55rem 0.65rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .loc-roster-card.active {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.15);
+    }
+    .loc-avatar-chip {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: #10b981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .loc-scale-tag {
+      font-size: 0.58rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .loc-dossier-pane {
+      flex: 1;
+      background: #080f1a;
+      display: flex;
+      flex-direction: column;
+      padding: 0.95rem 1.15rem;
+      gap: 0.75rem;
+      overflow-y: hidden;
+    }
+    .loc-sensory-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+    .loc-sensory-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 7px;
+      padding: 0.55rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .loc-sensory-label {
+      font-size: 0.62rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #34d399;
+      text-transform: uppercase;
+    }
+    .loc-sensory-desc {
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      line-height: 1.35;
+    }
+
+    /* ========================================================
+       SCENE 6: MULTI-TRACK STORY TIMELINE (30.00s - 35.625s)
+       ======================================================== */
+    .timeline-blueprint-frame {
+      width: 100%;
+      max-width: 1000px;
+      height: 86%;
+      padding: 1.3rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      transform-style: preserve-3d;
+      overflow: hidden;
+    }
+    .timeline-ruler {
+      height: 32px;
+      background: #090d1c;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: #94a3b8;
+    }
+    .timeline-tracks-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      position: relative;
+    }
+    .timeline-track-row {
+      height: 48px;
+      background: rgba(14, 20, 38, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 0.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .track-label {
+      width: 130px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .track-events-container {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .track-event-chip {
+      position: absolute;
+      height: 32px;
+      padding: 0 0.75rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .event-gold {
+      background: rgba(212, 175, 55, 0.22);
+      border: 1px solid #d4af37;
+      color: #fef08a;
+    }
+    .event-cyan {
+      background: rgba(56, 189, 248, 0.22);
+      border: 1px solid #38bdf8;
+      color: #bae6fd;
+    }
+    .event-purple {
+      background: rgba(168, 85, 247, 0.22);
+      border: 1px solid #a855f7;
+      color: #e9d5ff;
+    }
+    .event-emerald {
+      background: rgba(16, 185, 129, 0.22);
+      border: 1px solid #10b981;
+      color: #a7f3d0;
+    }
+    .event-rose {
+      background: rgba(244, 63, 94, 0.22);
+      border: 1px solid #f43f5e;
+      color: #fecdd3;
+    }
+    .timeline-footer-axis {
+      height: 34px;
+      background: #090d1c;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+    }
+    .axis-chapter-pill {
+      font-size: 0.66rem;
+      font-family: var(--font-mono);
+      color: #94a3b8;
+      padding: 0.15rem 0.55rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .axis-chapter-pill.active {
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-weight: 700;
+    }
+    .timeline-scrubber-needle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2.5px;
+      background: #38bdf8;
+      box-shadow: 0 0 18px #38bdf8, 0 0 35px #38bdf8;
+      z-index: 25;
+      pointer-events: none;
+    }
+
+    /* ========================================================
+       SCENE 7: CAST PRESENCE HEATMAP SCANNER (35.625s - 41.25s)
+       ======================================================== */
+    .presence-dual-frame {
+      display: flex;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1000px;
+      height: 86%;
+      align-items: center;
+      transform-style: preserve-3d;
+    }
+    .presence-matrix-card {
+      flex: 1;
+      height: 100%;
+      padding: 1.3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+    .presence-matrix-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+    .presence-mode-tag {
+      font-size: 0.6rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      color: var(--gold-primary);
+      letter-spacing: 0.05em;
+    }
+    .presence-grid-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      overflow: hidden;
+    }
+    .presence-ch-headers {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: #64748b;
+    }
+    .presence-ch-spacer {
+      width: 125px;
+      flex-shrink: 0;
+    }
+    .presence-ch-cols {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+    .presence-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .presence-char-info {
+      width: 125px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .presence-char-chip {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.7rem;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+    .presence-char-name {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .presence-cells {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      position: relative;
+    }
+    .p-cell {
+      height: 24px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    .presence-scan-bar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, #38bdf8, #d4af37);
+      box-shadow: 0 0 10px #38bdf8, 0 0 4px #d4af37;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0.8;
+    }
+
+    /* ========================================================
+       SCENE 8: STORY TIME MACHINE & VISUAL DIFF ENGINE (41.25s - 46.875s)
+       ======================================================== */
+    .timemachine-frame {
+      width: 100%;
+      max-width: 1000px;
+      height: 88%;
+      background: #090e1c;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 12px;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.85), 0 0 30px rgba(16, 185, 129, 0.12);
+      padding: 1.15rem 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .timemachine-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.65rem;
+    }
+    .diff-telemetry-group {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .diff-stat-chip {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .diff-stat-chip.added {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .diff-stat-chip.removed {
+      background: rgba(244, 63, 94, 0.15);
+      color: #f43f5e;
+      border: 1px solid rgba(244, 63, 94, 0.35);
+    }
+    .diff-stat-chip.net {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+    .diff-restore-btn {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.4));
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      border-radius: 6px;
+      color: #ecfdf5;
+      font-family: var(--font-hero);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+    }
+    .diff-split-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      flex: 1;
+      overflow: hidden;
+    }
+    .diff-pane {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      overflow: hidden;
+    }
+    .diff-pane.target {
+      border-color: rgba(16, 185, 129, 0.25);
+      background: rgba(16, 185, 129, 0.02);
+    }
+    .diff-pane-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .diff-body {
+      flex: 1;
+      font-family: var(--font-serif);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: #94a3b8;
+      overflow: hidden;
+    }
+    .diff-body p {
+      margin-bottom: 0.6rem;
+    }
+    .diff-del-text {
+      background: rgba(244, 63, 94, 0.16);
+      color: #fca5a5;
+      text-decoration: line-through;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      border-left: 2px solid #f43f5e;
+    }
+    .diff-add-text {
+      background: rgba(16, 185, 129, 0.18);
+      color: #6ee7b7;
+      font-weight: 500;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      border-left: 2px solid #10b981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+    }
+    .diff-milestone-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 0.45rem 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: #64748b;
+    }
+    .milestone-stepper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .milestone-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #334155;
+    }
+    .milestone-dot.active {
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    /* ========================================================
+       SCENE 9: COVER DESIGNER STUDIO (46.875s - 52.50s)
+       ======================================================== */
+    .cover-studio-window {
+      width: 100%;
+      max-width: 1000px;
+      height: 88%;
+      background: #090d1c;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+    .cover-studio-topbar {
+      height: 44px;
+      background: #0d1326;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+    }
+    .cover-mode-switcher {
+      display: flex;
+      gap: 0.35rem;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 3px;
+      border-radius: 8px;
+    }
+    .cover-mode-btn {
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .cover-mode-btn.active {
+      background: #4f46e5;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+    }
+
+    .cover-studio-workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 1.5rem;
+      padding: 1.25rem;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Left: 2:3 Aspect Ratio Book Cover Preview */
+    .cover-preview-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+    }
+    .cover-canvas-card {
+      width: 200px;
+      height: 300px; /* Exactly 2:3 book ratio */
+      border-radius: 6px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8), 0 0 30px rgba(99, 102, 241, 0.25);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 55%, #312e81 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.4rem 1.1rem;
+      text-align: center;
+    }
+    .cover-canvas-glow {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.35) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      filter: blur(20px);
+    }
+    .cover-canvas-frame-inner {
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      border-radius: 3px;
+      pointer-events: none;
+    }
+    .cover-canvas-frame-corner {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-color: #d4af37;
+      border-style: solid;
+    }
+    .corner-tl { top: 6px; left: 6px; border-width: 2px 0 0 2px; }
+    .corner-tr { top: 6px; right: 6px; border-width: 2px 2px 0 0; }
+    .corner-bl { bottom: 6px; left: 6px; border-width: 0 0 2px 2px; }
+    .corner-br { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; }
+
+    .cover-canvas-author {
+      font-family: var(--font-hero);
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #c7d2fe;
+      z-index: 2;
+    }
+    .cover-canvas-title-group {
+      z-index: 2;
+      margin: auto 0;
+    }
+    .cover-canvas-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      line-height: 1.18;
+      background: linear-gradient(135deg, #ffffff 0%, #fae8b2 60%, #d4af37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 12px rgba(212, 175, 55, 0.5);
+    }
+    .cover-canvas-subtitle {
+      font-family: var(--font-book);
+      font-style: italic;
+      font-size: 0.65rem;
+      color: #a5b4fc;
+      margin-top: 0.35rem;
+    }
+    .cover-canvas-emblem {
+      width: 44px;
+      height: 44px;
+      margin: 0.5rem auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #818cf8;
+      filter: drop-shadow(0 0 10px rgba(129, 140, 248, 0.8));
+    }
+    .cover-canvas-footer {
+      font-family: var(--font-mono);
+      font-size: 0.52rem;
+      letter-spacing: 0.14em;
+      color: #818cf8;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+
+    .cover-preview-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      width: 200px;
+    }
+    .cover-btn-apply {
+      height: 28px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: none;
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+      cursor: pointer;
+    }
+    .cover-btn-row {
+      display: flex;
+      gap: 0.35rem;
+    }
+    .cover-btn-sub {
+      flex: 1;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: #cbd5e1;
+      font-size: 0.62rem;
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    /* Right: Control Hub Panels */
+    .cover-controls-pane {
+      background: rgba(14, 20, 38, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 1rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      height: 100%;
+      justify-content: space-between;
+    }
+    .cover-tabs-nav {
+      display: flex;
+      gap: 0.35rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.5rem;
+    }
+    .cover-tab-item {
+      flex: 1;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-align: center;
+      background: transparent;
+      border: none;
+    }
+    .cover-tab-item.active {
+      background: rgba(79, 70, 229, 0.2);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.4);
+    }
+
+    .cover-ctrl-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .cover-ctrl-label {
+      font-size: 0.64rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+    }
+    .cover-ctrl-input-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.78rem;
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cover-chips-row {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .cover-chip-btn {
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .cover-chip-btn.active-preset {
+      background: rgba(212, 175, 55, 0.15);
+      border-color: #d4af37;
+      color: #fae8b2;
+      font-weight: 700;
+    }
+    .cover-chip-btn.active-font {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: #818cf8;
+      color: #c7d2fe;
+      font-weight: 700;
+    }
+
+    /* ========================================================
+       SCENE 10: UNIVERSAL PUBLISHING & EXPORT HUB (52.50s - 56.25s)
+       ======================================================== */
+    .export-cards-quad {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.6rem;
+      width: 100%;
+      max-width: 980px;
+      transform-style: preserve-3d;
+    }
+    .export-format-tile {
+      padding: 1.6rem 1.8rem;
+      border-radius: 14px;
+      background: rgba(14, 20, 40, 0.92);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 215px;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+    .export-tile-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .export-ext-badge {
+      font-size: 1.2rem;
+      font-weight: 900;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
+    .badge-epub { color: #38bdf8; }
+    .badge-shunn { color: #f59e0b; }
+    .badge-pdf { color: #10b981; }
+    .badge-md { color: #c084fc; }
+
+    .compile-action-pill {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--gold-primary);
+      color: #0b0d16;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);
+    }
+
+    /* ========================================================
+       SCENE 11: KINETIC TYPOGRAPHY CRESCENDO & FINALE (56.25s - 60.00s)
+       ======================================================== */
+    #scene-11 {
+      flex-direction: column;
+      text-align: center;
+    }
+    .crescendo-word-display {
+      font-family: var(--font-hero);
+      font-size: 6.8rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      line-height: 0.95;
+      text-shadow: 0 0 60px rgba(255, 255, 255, 0.5);
+    }
+    .outro-final-resolve {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.92);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ========================================================
+       HIGH-END BROADCAST HUD OVERLAYS & DIRECTOR DOCK
+       ======================================================== */
+    #hud-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.6rem 2.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: #94a3b8;
+      letter-spacing: 0.08em;
+    }
+    .hud-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .hud-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: rgba(6, 9, 18, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.3rem 0.75rem;
+      border-radius: 6px;
+      backdrop-filter: blur(10px);
+    }
+    .hud-rec-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 10px #ef4444;
+      animation: blinkRec 1s infinite;
+    }
+    @keyframes blinkRec {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+    .hud-beat-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold-light);
+      box-shadow: 0 0 12px var(--gold);
+      transform: scale(1);
+      transition: transform 0.08s ease;
+    }
+    .hud-beat-dot.hit {
+      transform: scale(2.2);
+      background: #ffffff;
+      box-shadow: 0 0 20px #ffffff;
+    }
+
+    /* Transport Scrubber & Director Controls */
+    #director-dock {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      background: rgba(8, 12, 24, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 0.55rem 1.1rem;
+      border-radius: 9999px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    body.clean-rec #director-dock,
+    body.clean-rec #hud-layer {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      transform: translateY(20px) !important;
+    }
+    body.clean-rec #viewport {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+    }
+
+    .dock-btn {
+      background: none;
+      border: none;
+      color: #cbd5e1;
+      font-size: 0.82rem;
+      font-family: var(--font-hero);
+      font-weight: 700;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.18s ease;
+    }
+    .dock-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+    .dock-btn-primary {
+      background: var(--gold-primary);
+      color: #090c16;
+    }
+    .dock-btn-primary:hover {
+      background: var(--gold-light);
+      color: #090c16;
+    }
+    .dock-scrubber-track {
+      width: 240px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+      position: relative;
+      cursor: pointer;
+    }
+    .dock-scrubber-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #d4af37, #38bdf8);
+      border-radius: 3px;
+      width: 0%;
+      pointer-events: none;
+    }
+    .dock-scrubber-thumb {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 0 10px #38bdf8;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .dock-select {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      color: #cbd5e1;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      padding: 0.25rem 0.5rem;
+      outline: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MASTER VIEWPORT (16:9 Cinema 4K Aspect Ratio) -->
+  <div id="viewport">
+
+    <!-- Living Ambient Dust & Sparks Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Studio Volumetric Illumination -->
+    <div class="ambient-studio-light light-gold" id="light-gold"></div>
+    <div class="ambient-studio-light light-sapphire" id="light-sapphire"></div>
+    <div class="ambient-studio-light light-emerald" id="light-emerald"></div>
+    <div class="ambient-studio-light light-center" id="light-center"></div>
+
+    <!-- 3D Camera Rig -->
+    <div id="camera-rig">
+
+      <!-- ========================================================
+           SCENE 0: MONOLITH REVEAL (0.00s - 3.75s)
+           ======================================================== -->
+      <section id="scene-0" class="scene-view">
+        <div class="logo-reveal-container" id="monolith-target">
+          <div class="logo-halo-ring"></div>
+          <img src="assets/chronicle-logo-clean.png" alt="Chronicle Logo" class="logo-img-main" id="logo-emblem-0">
+          <h1 class="title-monolith" id="title-monolith-0">CHRONICLE</h1>
+          <p class="tagline-monolith" id="tagline-monolith-0">The Modern Novelist’s Literary Atelier</p>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 1: NOVELIST CANVAS & LIVE TYPEWRITER (3.75s - 8.4375s)
+           ======================================================== -->
+      <section id="scene-1" class="scene-view">
+        <div class="deconstruct-col-left" id="col-1-left">
+          <div class="col-ambient-aura"></div>
+          <div class="feature-pill" id="pill-1">The Tactile Writing Sanctuary</div>
+          <h1 class="editorial-h1" id="h1-1">Focus Deeply.<br><span class="gold">Write Freely.</span></h1>
+          <p class="editorial-sub" id="sub-1">A bespoke distraction-free manuscript canvas built with typewriter focus scrolling, folder hierarchy, and real-time cadence meters.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill gold"><span style="color: #f59e0b;">✨</span> Focus Scrolling</div>
+            <div class="spec-pill emerald"><span style="color: #10b981;">⚡</span> SQLite Local Storage</div>
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">✦</span> 85 WPM Dynamic Meter</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-1">
+          <div class="app-mockup-frame" id="mockup-frame-1">
+            <div class="mockup-specular-glare" id="mockup-glare-1"></div>
+            <div class="mock-header">
+              <div class="mock-header-left">
+                <img src="assets/chronicle-logo-clean.png" class="mock-logo" alt="Logo">
+                <div class="mock-title-pill">The Alchemist’s Codex (v1.5)</div>
+                <div class="mock-mode-group">
+                  <span class="mock-mode-pill active" id="write-pill-1">WRITE</span>
+                  <span class="mock-mode-pill">PLAN</span>
+                  <span class="mock-mode-pill">ORGANIZE</span>
+                  <span class="mock-mode-pill">FOCUS</span>
+                </div>
+              </div>
+              <div class="mock-header-right">
+                <div class="metric-bar" style="padding: 0.15rem 0.5rem; font-size: 0.65rem; height: 26px;">
+                  <div class="metric-dot" id="sqlite-dot-1"></div>
+                  <span>Local SQLite</span>
+                </div>
+                <div class="mock-btn-save">
+                  <span>Save Project</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mock-body">
+              <div class="mock-sidebar">
+                <div class="mock-sidebar-sec-title">Manuscript Structure</div>
+                <div class="mock-folder-item">
+                  <span>📁</span>
+                  <span>Act I: The Call</span>
+                </div>
+                <div class="mock-chapter-item active">
+                  <span>I. The Midnight Clock</span>
+                  <span style="font-size: 0.65rem; color: #d4af37;" id="live-chapter-words">● 716w</span>
+                </div>
+                <div class="mock-chapter-item">
+                  <span>II. Whispering Runes</span>
+                  <span style="font-size: 0.65rem;">1,420w</span>
+                </div>
+                <div class="mock-chapter-item">
+                  <span>III. The Emerald Gate</span>
+                  <span style="font-size: 0.65rem;">980w</span>
+                </div>
+                <div class="mock-folder-item" style="margin-top: 0.35rem;">
+                  <span>📁</span>
+                  <span>Act II: The Threshold</span>
+                </div>
+              </div>
+
+              <div class="mock-editor-sheet">
+                <div class="mock-page-canvas">
+                  <div class="mock-chapter-h1">Chapter I: The Midnight Clock</div>
+                  <div class="mock-chapter-sub">By Elena Rostova • Act I Scene 1</div>
+                  <p class="mock-para-dim">The grand library was submerged in amber dusk, rows of ancient tomes slumbering like sleeping colossi beneath vaulted arches.</p>
+                  <p class="mock-para-active" id="live-typing-para">
+                    <span id="live-typed-text"></span><span class="live-caret"></span>
+                  </p>
+                  <p class="mock-para-dim" style="margin-top: 0.85rem;">He reached for the brass pendulum, its rhythmic ticking synchronizing with the pulse in his throat.</p>
+                  <p class="mock-para-dim" style="margin-top: 0.75rem;">Every breath held the fragrance of dried cedar and aged vellum. Beyond the arched stained glass, the clock tower loomed through the freezing mist.</p>
+                </div>
+                <div class="editor-status-bar">
+                  <div class="status-item"><span class="status-dot"></span> SQLite Local DB • 100% Synced</div>
+                  <div class="status-item">Act I: 3,120 words</div>
+                  <div class="status-item">Typewriter Lock: Centered</div>
+                  <div class="status-item" style="color: #f59e0b;">Target: 80,000w</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="floating-orbiter" id="orbiter-1a" style="top: 10%; right: -25px;">
+            <span style="color: #f59e0b;">✨</span>
+            <span>Typewriter Focus Scrolling</span>
+          </div>
+          <div class="floating-orbiter" id="orbiter-1b" style="bottom: 12%; left: 160px;">
+            <span style="color: #10b981;" id="cadence-icon">⚡</span>
+            <span id="cadence-text">Real-Time Cadence: 84 WPM</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 2: ZEN MODE SANCTUARY & GHOST HUD (8.4375s - 13.125s)
+           ======================================================== -->
+      <section id="scene-2" class="scene-view">
+        <div class="deconstruct-col-left" id="col-2-left">
+          <div class="feature-pill">Distraction-Free Sanctuary</div>
+          <h1 class="editorial-h1">Zen Mode.<br><span class="gold">Zero Distraction.</span></h1>
+          <p class="editorial-sub">Dissolve all toolbars, menus, and sidebars into pure writing flow. Features typewriter-centered prose, an ambient disappearing Ghost HUD, and seamless chapter switching.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill gold"><span style="color: #f59e0b;">⚡</span> Zero Toolbar Clutter</div>
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">⌨</span> Disappearing Ghost HUD</div>
+            <div class="spec-pill emerald"><span style="color: #10b981;">📖</span> 10-Chapter Swift Switch</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-2">
+          <div class="zen-stage-frame" id="zen-stage-2">
+            <div class="zen-paper-slab" id="zen-slab-2">
+              <div class="zen-top-pill">
+                <span>⚡ ZEN MODE ACTIVE • ESC TO RETURN</span>
+              </div>
+              <div class="zen-heading">Chapter I: The Midnight Clock</div>
+              <div class="zen-subheading">Act I • The Threshold of Discovery</div>
+              <div class="zen-prose-body">
+                <p>The grand library was submerged in amber dusk. <strong>Words flowed effortlessly across the obsidian canvas</strong>, undisturbed by notifications or complex panels. Every keystroke resonated like a silver bell in the quiet chamber.<span class="zen-typing-caret"></span></p>
+                <p style="margin-top: 1rem;">He dipped the brass stylus into liquid light. Here, there were no margins to constrain the imagination—only the steady, hypnotic cadence of pure creation.</p>
+                <p style="margin-top: 1rem;">Footsteps in the corridor faded into distant memory. The narrative pulled forward with the unstoppable momentum of a deep river, unencumbered by noise.</p>
+              </div>
+              <div class="zen-quote-callout">
+                <span class="zen-quote-icon">“</span>
+                <span>Silence is not the absence of sound, but the presence of undivided attention.</span>
+              </div>
+
+              <!-- Floating Chapter Quick-Switch Drawer (From GhostHud.tsx) -->
+              <div class="ghost-chapter-popover" id="zen-popover-2">
+                <div class="ghost-chapter-header">
+                  <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <span style="color: #60a5fa;">📖</span>
+                    <span>Chapters (10)</span>
+                  </div>
+                  <span style="font-size: 0.65rem; color: #64748b; font-family: var(--font-mono);">Quick Switch</span>
+                </div>
+                <div class="ghost-chapter-row active">
+                  <span>1. The Midnight Clock</span>
+                  <span class="ghost-word-pill" style="color: #a5b4fc;">1,250 w ✓</span>
+                </div>
+                <div class="ghost-chapter-row">
+                  <span>2. Whispering Runes</span>
+                  <span class="ghost-word-pill">1,420 w</span>
+                </div>
+                <div class="ghost-chapter-row">
+                  <span>3. The Emerald Gate</span>
+                  <span class="ghost-word-pill">980 w</span>
+                </div>
+              </div>
+
+              <!-- Authentic Ghost HUD Capsule (From GhostHud.tsx) -->
+              <div class="ghost-hud-capsule" id="zen-capsule-2">
+                <div class="ghost-hud-section">
+                  <span style="color: #60a5fa; font-size: 0.85rem;">📖</span>
+                  <span>Chapter I: The Midnight Clock</span>
+                  <span style="font-size: 0.6rem; color: #94a3b8;">▲</span>
+                </div>
+                <div class="ghost-hud-divider"></div>
+                <div class="ghost-hud-words">
+                  <span>✨</span>
+                  <span>+1,250 words today</span>
+                </div>
+                <div class="ghost-hud-divider"></div>
+                <div class="ghost-hud-exit-btn">
+                  <span>Exit Zen</span>
+                  <kbd class="ghost-kbd">Esc</kbd>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 3: BESPOKE PAPER TONES & TYPOGRAPHY (13.125s - 18.75s)
+           ======================================================== -->
+      <section id="scene-3" class="scene-view">
+        <div class="deconstruct-col-left" id="col-3-left">
+          <div class="feature-pill emerald">Tactile Atmospheric Aesthetics</div>
+          <h1 class="editorial-h1">Bespoke Tones.<br><span class="emerald">Smart Typography.</span></h1>
+          <p class="editorial-sub">Switch seamlessly between artisanal paper textures, custom typography palettes, automatic curly quotes, and illuminated chapter drop caps.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill gold"><span style="color: #f59e0b;">📜</span> 4 Bespoke Textures</div>
+            <div class="spec-pill emerald"><span style="color: #10b981;">✨</span> Illuminated Drop Caps</div>
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">✦</span> Contrast Ratio AAA</div>
+            <div class="spec-pill purple"><span style="color: #c084fc;">“...”</span> Smart Punctuation</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-3">
+          <div class="paper-tones-grid" id="swatch-grid-3">
+            <div class="paper-swatch-card swatch-sepia active-swatch" id="swatch-card-1">
+              <div class="swatch-header">
+                <span>Artisanal Sepia</span>
+                <span class="swatch-meta-pill" style="color: #92400e;">#FBF0D9 • WARM VELLUM</span>
+              </div>
+              <div class="swatch-sample-text">
+                <span class="drop-cap-large">W</span>ords were not merely ink upon vellum; they were resonant spells weaving realities from thin air. The antique desk breathed history under the amber glow.
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-family: var(--font-mono); font-weight: 700; color: #92400e;">
+                <span>✓ Smart Quotes “...” • Em-Dashes —</span>
+                <span style="background: rgba(146,64,14,0.15); padding: 0.15rem 0.5rem; border-radius: 4px;">AAA 14.8:1</span>
+              </div>
+            </div>
+
+            <div class="paper-swatch-card swatch-light" id="swatch-card-2">
+              <div class="swatch-header">
+                <span>Pure Light</span>
+                <span class="swatch-meta-pill" style="color: #0369a1;">#FAF9F5 • HIGH CONTRAST</span>
+              </div>
+              <div class="swatch-sample-text">
+                <span class="drop-cap-large" style="color: #0284c7;">T</span>he clock tower struck thirteen, its deep chime vibrating through the frosty glass. Pristine margins offered unblemished clarity for editorial master drafts.
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-family: var(--font-mono); font-weight: 700; color: #0369a1;">
+                <span>High-Contrast Editorial Typography</span>
+                <span style="background: rgba(2,132,199,0.15); padding: 0.15rem 0.5rem; border-radius: 4px;">AAA 18.2:1</span>
+              </div>
+            </div>
+
+            <div class="paper-swatch-card swatch-dark" id="swatch-card-3">
+              <div class="swatch-header">
+                <span>Velvet Slate</span>
+                <span class="swatch-meta-pill" style="color: #f59e0b;">#131625 • MIDNIGHT</span>
+              </div>
+              <div class="swatch-sample-text">
+                <span class="drop-cap-large" style="color: #f59e0b;">S</span>tarlight pooled across the desk, illuminating forgotten celestial equations. Dark low-strain parchment crafted for nocturnal writing sessions.
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-family: var(--font-mono); font-weight: 700; color: #f59e0b;">
+                <span>Classic Midnight Sanctuary</span>
+                <span style="background: rgba(245,158,11,0.15); padding: 0.15rem 0.5rem; border-radius: 4px;">AAA 12.5:1</span>
+              </div>
+            </div>
+
+            <div class="paper-swatch-card swatch-obsidian" id="swatch-card-4">
+              <div class="swatch-header">
+                <span>Deep Obsidian</span>
+                <span class="swatch-meta-pill" style="color: #10b981;">#080A10 • TRUE OLED</span>
+              </div>
+              <div class="swatch-sample-text">
+                <span class="drop-cap-large" style="color: #10b981;">B</span>eyond the event horizon, stories transcend the laws of mortal physics. Pure black substrate designed for limitless focus and zero light bleed.
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-family: var(--font-mono); font-weight: 700; color: #10b981;">
+                <span>Zero-Distraction OLED Sanctuary</span>
+                <span style="background: rgba(16,185,129,0.15); padding: 0.15rem 0.5rem; border-radius: 4px;">AAA 19.5:1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 4: CHARACTER STUDIO & CAST DOSSIER (18.75s - 24.375s)
+           ======================================================== -->
+      <section id="scene-4" class="scene-view">
+        <div class="deconstruct-col-left" id="col-4-left">
+          <div class="feature-pill purple">Psychological Narrative Architecture</div>
+          <h1 class="editorial-h1">Character Studio.<br><span class="purple">Cast Dossiers & Arcs.</span></h1>
+          <p class="editorial-sub">Build rich character profiles with 4-act narrative arcs, psychology checklists, archetypes, and live manuscript mention footprints.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill purple"><span style="color: #c084fc;">👥</span> 4 Cast Members</div>
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">🧬</span> 4-Act Arc Builder</div>
+            <div class="spec-pill emerald"><span style="color: #10b981;">〽</span> Live Manuscript Footprint</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-4">
+          <div class="char-studio-frame" id="char-studio-frame-4">
+            <div class="char-studio-topbar">
+              <div class="char-topbar-left">
+                <button class="char-btn-back" type="button">
+                  <span>←</span>
+                  <span style="color: var(--gold-primary);">✎</span>
+                  <span>Write</span>
+                </button>
+                <div class="char-title-chip">
+                  <span>👥</span>
+                  <span>Character Studio</span>
+                  <span class="char-count-pill">4 characters</span>
+                </div>
+              </div>
+              <div class="char-topbar-right">
+                <div class="char-search-box">
+                  <span>🔍</span>
+                  <span>Search character cast...</span>
+                </div>
+                <div class="char-search-box" style="padding: 0.24rem 0.5rem;">
+                  <span>All Roles ▾</span>
+                </div>
+                <button class="char-btn-add" type="button">
+                  <span>+</span>
+                  <span>Add Character</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="char-studio-workspace">
+              <aside class="char-roster-sidebar" id="char-roster-sidebar">
+                <div class="char-roster-sec-title">
+                  <span>CHARACTERS</span>
+                  <span style="color: #94a3b8;">4</span>
+                </div>
+
+                <div class="char-roster-card active" id="card-alice">
+                  <div class="char-card-header">
+                    <div class="char-avatar-chip" style="background: #3b82f6;">A</div>
+                    <div class="char-card-title-group">
+                      <div class="char-card-name">Alice</div>
+                      <div class="char-card-meta">
+                        <span class="char-role-chip protagonist">PROTAGONIST</span>
+                        <span class="char-archetype-text">The Curious Explorer</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="char-card-summary">Polite, intensely curious girl who tumbles down the rabbit hole...</div>
+                  <div class="char-progress-row">
+                    <div class="char-progress-bar">
+                      <div class="char-progress-fill" id="alice-goal-bar-4" style="width: 60%; background: #3b82f6;"></div>
+                    </div>
+                    <span class="char-progress-label">3/5 goals</span>
+                  </div>
+                </div>
+
+                <div class="char-roster-card" id="card-rabbit">
+                  <div class="char-card-header">
+                    <div class="char-avatar-chip" style="background: #f59e0b;">W</div>
+                    <div class="char-card-title-group">
+                      <div class="char-card-name">The White Rabbit</div>
+                      <div class="char-card-meta">
+                        <span class="char-role-chip supporting">SUPPORTING</span>
+                        <span class="char-archetype-text">The Herald</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="char-card-summary">A nervous, time-obsessed rabbit in a waistcoat who catalyzes Alice's journey.</div>
+                  <div class="char-progress-row">
+                    <div class="char-progress-bar">
+                      <div class="char-progress-fill" style="width: 50%; background: #f59e0b;"></div>
+                    </div>
+                    <span class="char-progress-label">2/4 goals</span>
+                  </div>
+                </div>
+
+                <div class="char-roster-card" id="card-hatter">
+                  <div class="char-card-header">
+                    <div class="char-avatar-chip" style="background: #8b5cf6;">M</div>
+                    <div class="char-card-title-group">
+                      <div class="char-card-name">The Mad Hatter</div>
+                      <div class="char-card-meta">
+                        <span class="char-role-chip supporting">SUPPORTING</span>
+                        <span class="char-archetype-text">The Trickster</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="char-card-summary">Eccentric milliner trapped in permanent 6:00 tea time with the March Hare.</div>
+                  <div class="char-progress-row">
+                    <div class="char-progress-bar">
+                      <div class="char-progress-fill" style="width: 50%; background: #8b5cf6;"></div>
+                    </div>
+                    <span class="char-progress-label">2/4 goals</span>
+                  </div>
+                </div>
+
+                <div class="char-roster-card" id="card-queen">
+                  <div class="char-card-header">
+                    <div class="char-avatar-chip" style="background: #ef4444;">Q</div>
+                    <div class="char-card-title-group">
+                      <div class="char-card-name">The Queen of Hearts</div>
+                      <div class="char-card-meta">
+                        <span class="char-role-chip antagonist">ANTAGONIST</span>
+                        <span class="char-archetype-text">The Tyrant</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="char-card-summary">A furious crimson monarch whose immediate solution is "Off with their heads!"</div>
+                  <div class="char-progress-row">
+                    <div class="char-progress-bar">
+                      <div class="char-progress-fill" style="width: 50%; background: #ef4444;"></div>
+                    </div>
+                    <span class="char-progress-label">2/4 goals</span>
+                  </div>
+                </div>
+              </aside>
+
+              <main class="char-dossier-pane" id="char-dossier-pane">
+                <div class="dossier-hero">
+                  <div class="dossier-identity">
+                    <div class="dossier-avatar-large">A</div>
+                    <div class="dossier-title-block">
+                      <div class="dossier-char-name">Alice</div>
+                      <div class="dossier-meta-pills">
+                        <span class="dossier-input-pill" style="color: #93c5fd; border-color: rgba(59, 130, 246, 0.4);">Protagonist ▾</span>
+                        <span class="dossier-input-pill">The Curious Explorer</span>
+                        <span class="dossier-input-pill" style="width: 50px; text-align: center;">Age: 7</span>
+                        <span class="dossier-input-pill">Victorian Schoolgirl</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="dossier-color-swatches">
+                    <div class="dossier-swatch-dot selected" style="background: #3b82f6;"></div>
+                    <div class="dossier-swatch-dot" style="background: #ec4899;"></div>
+                    <div class="dossier-swatch-dot" style="background: #ef4444;"></div>
+                    <div class="dossier-swatch-dot" style="background: #f97316;"></div>
+                    <div class="dossier-swatch-dot" style="background: #f59e0b;"></div>
+                    <div class="dossier-swatch-dot" style="background: #10b981;"></div>
+                    <div class="dossier-swatch-dot" style="background: #06b6d4;"></div>
+                    <div class="dossier-swatch-dot" style="background: #8b5cf6;"></div>
+                  </div>
+                </div>
+
+                <nav class="dossier-tabs-nav">
+                  <div class="dossier-tab-item">👁 Identity & Bio</div>
+                  <div class="dossier-tab-item">☑ Traits & Psychology (5)</div>
+                  <div class="dossier-tab-item active">🎯 Character Arc</div>
+                  <div class="dossier-tab-item">〽 Manuscript Footprint</div>
+                  <div class="dossier-tab-item">📄 Notes</div>
+                </nav>
+
+                <div class="dossier-content-body">
+                  <div class="dossier-field-box">
+                    <div class="dossier-field-label">Four-Act Narrative Arc</div>
+                    <div class="dossier-field-text">"To find her way into the beautiful garden glimpsed through the tiny door, and ultimately return home."</div>
+                  </div>
+
+                  <div class="dossier-field-box">
+                    <div class="dossier-field-label">Beginning (Status Quo & Inciting Incident)</div>
+                    <div class="dossier-field-text">"Growing up in Victorian England, she finds her sister's history book boring because it lacks pictures and conversations."</div>
+                  </div>
+
+                  <div style="display: flex; gap: 0.5rem;">
+                    <div class="dossier-checklist-row" style="flex: 1;">
+                      <span class="dossier-check-icon">✓</span>
+                      <span class="dossier-tag-pill goal">GOAL</span>
+                      <span style="font-size: 0.68rem; color: #e2e8f0;">Unlock garden door</span>
+                    </div>
+                    <div class="dossier-checklist-row" style="flex: 1;">
+                      <span class="dossier-check-icon">✓</span>
+                      <span class="dossier-tag-pill trait">TRAIT</span>
+                      <span style="font-size: 0.68rem; color: #e2e8f0;">Relentlessly curious</span>
+                    </div>
+                    <div class="dossier-checklist-row" style="flex: 1;">
+                      <span class="dossier-check-icon">✓</span>
+                      <span class="dossier-tag-pill flaw">FLAW</span>
+                      <span style="font-size: 0.68rem; color: #e2e8f0;">Impulsive under pressure</span>
+                    </div>
+                  </div>
+
+                  <div class="dossier-footprint-bar">
+                    <span style="display: flex; align-items: center; gap: 0.4rem;">
+                      <span style="color: #c084fc;">〽</span>
+                      <span>Appears in <strong>3 Chapters</strong> • <strong>142 Mentions</strong> across manuscript</span>
+                    </span>
+                    <span style="color: #a855f7; font-weight: 700;">LIVE CAST TRACKING</span>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 5: LOCATION STUDIO & REGIONAL CODEX (24.375s - 30.00s)
+           ======================================================== -->
+      <section id="scene-5" class="scene-view">
+        <div class="deconstruct-col-left" id="col-5-left">
+          <div class="feature-pill emerald">Worldbuilding & Sensory Atlas</div>
+          <h1 class="editorial-h1">Location Studio.<br><span class="emerald">Living Worlds.</span></h1>
+          <p class="editorial-sub">Map every chamber, district, and realm with vivid sensory profiles—soundscapes, aromas, temperatures, and dynamic hazard codexes.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill emerald"><span style="color: #10b981;">🗺</span> 4 Sensory Realms</div>
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">🌿</span> Soundscapes & Aromas</div>
+            <div class="spec-pill gold"><span style="color: #f59e0b;">⚡</span> Dynamic Hazard Codex</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-5">
+          <div class="loc-studio-frame" id="loc-studio-frame-5">
+            <div class="loc-studio-topbar">
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <span style="color: #94a3b8; font-size: 0.75rem;">← Write</span>
+                <span style="font-weight: 700; color: #f1f5f9; display: flex; align-items: center; gap: 0.35rem;">
+                  <span style="color: #10b981;">🧭</span> Location Studio
+                </span>
+                <span class="char-count-pill" style="background: rgba(16,185,129,0.18); color: #6ee7b7; border-color: rgba(16,185,129,0.35);">4 realms</span>
+              </div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <div class="char-search-box">🔍 Search location atlas...</div>
+                <button class="char-btn-add" style="background: #10b981; color: #042f1a;" type="button">+ Add Location</button>
+              </div>
+            </div>
+
+            <div style="flex: 1; display: flex; overflow: hidden;">
+              <aside class="loc-roster-sidebar">
+                <div class="char-roster-sec-title">
+                  <span>LOCATIONS</span>
+                  <span style="color: #94a3b8;">4</span>
+                </div>
+
+                <div class="loc-roster-card active">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="loc-avatar-chip">🧭</div>
+                    <div>
+                      <div style="font-size: 0.78rem; font-weight: 700; color: #f1f5f9;">The Rabbithole Fall</div>
+                      <div style="display: flex; gap: 0.35rem; align-items: center; margin-top: 2px;">
+                        <span class="loc-scale-tag">LANDMARK</span>
+                        <span style="font-size: 0.6rem; color: #94a3b8;">Subterranean</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.64rem; color: #64748b;">A vertical tunnel lined with bookshelves and cupboards...</div>
+                </div>
+
+                <div class="loc-roster-card">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="loc-avatar-chip" style="background: #3b82f6;">🏰</div>
+                    <div>
+                      <div style="font-size: 0.78rem; font-weight: 700; color: #f1f5f9;">The Duchess’s Kitchen</div>
+                      <div style="display: flex; gap: 0.35rem; align-items: center; margin-top: 2px;">
+                        <span class="loc-scale-tag" style="background: rgba(59,130,246,0.2); color: #93c5fd; border-color: rgba(59,130,246,0.3);">INTERIOR</span>
+                        <span style="font-size: 0.6rem; color: #94a3b8;">Building</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.64rem; color: #64748b;">Smoke-filled kitchen heavy with pepper and soup kettles...</div>
+                </div>
+
+                <div class="loc-roster-card">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="loc-avatar-chip" style="background: #f59e0b;">☕</div>
+                    <div>
+                      <div style="font-size: 0.78rem; font-weight: 700; color: #f1f5f9;">The Mad Tea Table</div>
+                      <div style="display: flex; gap: 0.35rem; align-items: center; margin-top: 2px;">
+                        <span class="loc-scale-tag" style="background: rgba(245,158,11,0.2); color: #fcd34d; border-color: rgba(245,158,11,0.3);">SETTLEMENT</span>
+                        <span style="font-size: 0.6rem; color: #94a3b8;">Exterior</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.64rem; color: #64748b;">An endlessly shifting outdoor banquet under beech trees...</div>
+                </div>
+
+                <div class="loc-roster-card">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="loc-avatar-chip" style="background: #ef4444;">👑</div>
+                    <div>
+                      <div style="font-size: 0.78rem; font-weight: 700; color: #f1f5f9;">The Royal Grounds</div>
+                      <div style="display: flex; gap: 0.35rem; align-items: center; margin-top: 2px;">
+                        <span class="loc-scale-tag" style="background: rgba(239,68,68,0.2); color: #fca5a5; border-color: rgba(239,68,68,0.3);">EXTERIOR</span>
+                        <span style="font-size: 0.6rem; color: #94a3b8;">Royal Palace</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.64rem; color: #64748b;">Crimson rose arches, hedge labyrinths, and execution pavilion...</div>
+                </div>
+              </aside>
+
+              <main class="loc-dossier-pane">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="dossier-avatar-large" style="background: #10b981; box-shadow: 0 0 20px rgba(16,185,129,0.4);">🧭</div>
+                    <div>
+                      <div style="font-family: var(--font-hero); font-size: 1.25rem; font-weight: 700; color: #ffffff;">The Rabbithole Fall</div>
+                      <div style="display: flex; gap: 0.45rem; font-size: 0.66rem; color: #94a3b8; font-family: var(--font-mono); margin-top: 3px;">
+                        <span style="color: #6ee7b7;">● Landmark / Descent</span>
+                        <span>• Connected: Alice, White Rabbit</span>
+                        <span>• 12 Mentions</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="presence-mode-tag" style="background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.35);">● SENSORY PROFILE</span>
+                </div>
+
+                <div class="loc-sensory-grid">
+                  <div class="loc-sensory-card">
+                    <span class="loc-sensory-label">👁 Visual Atmosphere</span>
+                    <span class="loc-sensory-desc">Cupboards and bookshelves embedded into vertical dirt walls, maps and pictures hung upon pegs.</span>
+                  </div>
+                  <div class="loc-sensory-card">
+                    <span class="loc-sensory-label">🔊 Acoustic Resonance</span>
+                    <span class="loc-sensory-desc">Whistling drafts, echo of falling marmalade jars, distant chiming clock from the depths.</span>
+                  </div>
+                  <div class="loc-sensory-card">
+                    <span class="loc-sensory-label">👃 Olfactory Palette</span>
+                    <span class="loc-sensory-desc">Damp earth, dried lavender, ancient book dust, and a faint sweet clove aroma.</span>
+                  </div>
+                  <div class="loc-sensory-card">
+                    <span class="loc-sensory-label">⚠️ Hazards & Secrets</span>
+                    <span class="loc-sensory-desc">Gravity inversion threshold • Locked side cupboard with golden key.</span>
+                  </div>
+                  <div class="loc-sensory-card">
+                    <span class="loc-sensory-label">⛅ Weather & Ambience</span>
+                    <span class="loc-sensory-desc">Subterranean draft • 14°C chilly breeze with floating dust motes.</span>
+                  </div>
+                  <div class="loc-sensory-card">
+                    <span class="loc-sensory-label">〽 Manuscript Footprint</span>
+                    <span class="loc-sensory-desc">Featured in Chapter I & II • 12 Scene References across manuscript.</span>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 0.6rem; margin-top: 0.2rem;">
+                  <div style="flex: 1; padding: 0.45rem 0.65rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; font-family: var(--font-mono); font-size: 0.65rem; color: #94a3b8;">
+                    <span>Coordinates: <strong>51.5074° N, 0.1278° W (Sub-Level 4)</strong></span>
+                  </div>
+                  <div style="padding: 0.45rem 0.8rem; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; font-family: var(--font-mono); font-size: 0.65rem; color: #6ee7b7; font-weight: 700;">
+                    ✓ World Consistency Verified
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 6: MULTI-TRACK STORY TIMELINE (30.00s - 35.625s)
+           ======================================================== -->
+      <section id="scene-6" class="scene-view">
+        <div class="deconstruct-col-left" id="col-6-left">
+          <div class="feature-pill cyan">Visual Narrative Orchestration</div>
+          <h1 class="editorial-h1">Multi-Track.<br><span class="cyan">Story Timeline.</span></h1>
+          <p class="editorial-sub">Plot complex interwoven story beats across multiple arcs, character viewpoints, and chronological timescales with zero plot holes.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">⚡</span> Laser Scrubber</div>
+            <div class="spec-pill gold"><span style="color: #f59e0b;">🎯</span> Multi-Arc Weaving</div>
+            <div class="spec-pill emerald"><span style="color: #10b981;">✦</span> Zero Plot Holes Engine</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-6">
+          <div class="glass-panel timeline-blueprint-frame" id="timeline-frame-6">
+            <div class="timeline-ruler">
+              <span>08:00 AM • ACT I</span>
+              <span>12:00 PM</span>
+              <span>04:00 PM • MIDPOINT</span>
+              <span>08:00 PM</span>
+              <span>MIDNIGHT • CLIMAX</span>
+            </div>
+
+            <div class="timeline-tracks-area">
+              <div class="timeline-scrubber-needle" id="scrubber-needle-6"></div>
+
+              <div class="timeline-track-row">
+                <div class="track-label">
+                  <span style="color: #f59e0b;">●</span>
+                  <span>MAIN PLOT</span>
+                </div>
+                <div class="track-events-container">
+                  <div class="track-event-chip event-gold" style="left: 4%;">The Stolen Ledger</div>
+                  <div class="track-event-chip event-gold" style="left: 42%;">Confrontation at Docks</div>
+                  <div class="track-event-chip event-gold" style="left: 78%;">The Vault Shatters</div>
+                </div>
+              </div>
+
+              <div class="timeline-track-row">
+                <div class="track-label">
+                  <span style="color: #38bdf8;">●</span>
+                  <span>MYSTERY ARC</span>
+                </div>
+                <div class="track-events-container">
+                  <div class="track-event-chip event-cyan" style="left: 18%;">Unmarked Carriage</div>
+                  <div class="track-event-chip event-cyan" style="left: 56%;">The Poisoned Cipher</div>
+                </div>
+              </div>
+
+              <div class="timeline-track-row">
+                <div class="track-label">
+                  <span style="color: #a855f7;">●</span>
+                  <span>RELATIONSHIPS</span>
+                </div>
+                <div class="track-events-container">
+                  <div class="track-event-chip event-purple" style="left: 28%;">Pact in Shadows</div>
+                  <div class="track-event-chip event-purple" style="left: 68%;">The Final Confession</div>
+                </div>
+              </div>
+
+              <div class="timeline-track-row">
+                <div class="track-label">
+                  <span style="color: #10b981;">●</span>
+                  <span>SUBPLOT ARC</span>
+                </div>
+                <div class="track-events-container">
+                  <div class="track-event-chip event-emerald" style="left: 12%;">Decoded Parchment</div>
+                  <div class="track-event-chip event-emerald" style="left: 62%;">Treachery Revealed</div>
+                </div>
+              </div>
+
+              <div class="timeline-track-row">
+                <div class="track-label">
+                  <span style="color: #f43f5e;">●</span>
+                  <span>LORE & WORLD</span>
+                </div>
+                <div class="track-events-container">
+                  <div class="track-event-chip event-rose" style="left: 24%;">Eclipse of Valoria</div>
+                  <div class="track-event-chip event-rose" style="left: 82%;">Royal Decree Issued</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="timeline-footer-axis">
+              <div class="axis-chapter-pill active">Act I • Ch. 1-3</div>
+              <div class="axis-chapter-pill">Act II • Ch. 4-7</div>
+              <div class="axis-chapter-pill">Act III • Ch. 8-10</div>
+              <div style="display: flex; gap: 0.6rem; font-family: var(--font-mono); font-size: 0.64rem; color: #64748b;">
+                <span>Timeline Sync: 100%</span>
+                <span style="color: #38bdf8; font-weight: 700;">● 0 Plot Holes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 7: CAST PRESENCE HEATMAP SCANNER (35.625s - 41.25s)
+           ======================================================== -->
+      <section id="scene-7" class="scene-view">
+        <div class="deconstruct-col-left" id="col-7-left">
+          <div class="feature-pill">Automated Scene Density Scanner</div>
+          <h1 class="editorial-h1">Cast Presence.<br><span class="gold">Scene Density.</span></h1>
+          <p class="editorial-sub">Uncover narrative pacing imbalances instantly. Chronicle scans every scene to visualize exactly where characters intersect across all chapters.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill gold"><span style="color: #f59e0b;">🔬</span> Pacing Diagnostic</div>
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">📈</span> 142 Mentions Scanned</div>
+            <div class="spec-pill emerald"><span style="color: #10b981;">⚡</span> Real-Time Density</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-7">
+          <div class="presence-dual-frame" id="presence-frame-7">
+            <div class="glass-panel presence-matrix-card">
+              <div class="presence-matrix-header">
+                <span>CAST PRESENCE HEATMAP</span>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <span style="font-size: 0.65rem; color: #10b981;">● Pacing Balance: 94/100</span>
+                  <span class="presence-mode-tag">● HEATMAP MODE</span>
+                </div>
+              </div>
+
+              <div class="presence-grid-container">
+                <div class="presence-ch-headers">
+                  <div class="presence-ch-spacer"></div>
+                  <div class="presence-ch-cols">
+                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                    <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                  </div>
+                </div>
+
+                <div class="presence-row">
+                  <div class="presence-char-info">
+                    <div class="presence-char-chip" style="background: #3b82f6;">A</div>
+                    <span class="presence-char-name">Alice</span>
+                  </div>
+                  <div class="presence-cells" id="p-cells-alice"></div>
+                </div>
+
+                <div class="presence-row">
+                  <div class="presence-char-info">
+                    <div class="presence-char-chip" style="background: #f59e0b;">W</div>
+                    <span class="presence-char-name">White Rabbit</span>
+                  </div>
+                  <div class="presence-cells" id="p-cells-rabbit"></div>
+                </div>
+
+                <div class="presence-row">
+                  <div class="presence-char-info">
+                    <div class="presence-char-chip" style="background: #8b5cf6;">M</div>
+                    <span class="presence-char-name">Mad Hatter</span>
+                  </div>
+                  <div class="presence-cells" id="p-cells-hatter"></div>
+                </div>
+
+                <div class="presence-row">
+                  <div class="presence-char-info">
+                    <div class="presence-char-chip" style="background: #ef4444;">Q</div>
+                    <span class="presence-char-name">Queen of Hearts</span>
+                  </div>
+                  <div class="presence-cells" id="p-cells-queen"></div>
+                </div>
+
+                <div class="presence-row">
+                  <div class="presence-char-info">
+                    <div class="presence-char-chip" style="background: #10b981;">D</div>
+                    <span class="presence-char-name">The Duchess</span>
+                  </div>
+                  <div class="presence-cells" id="p-cells-duchess"></div>
+                </div>
+
+                <div class="presence-row">
+                  <div class="presence-char-info">
+                    <div class="presence-char-chip" style="background: #d97706;">K</div>
+                    <span class="presence-char-name">King of Hearts</span>
+                  </div>
+                  <div class="presence-cells" id="p-cells-king"></div>
+                </div>
+
+                <div class="presence-scan-bar" id="presence-scan-bar-7" style="left: 0%;"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; font-size: 0.68rem; font-family: var(--font-mono); color: #64748b; padding-top: 0.4rem; border-top: 1px solid rgba(255,255,255,0.06);">
+                <span>● 142 Mentions Across 10 Chapters</span>
+                <span style="color: var(--gold-primary);">Automated Pacing Engine</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 8: STORY TIME MACHINE & VISUAL DIFF ENGINE (41.25s - 46.875s)
+           ======================================================== -->
+      <section id="scene-8" class="scene-view">
+        <div class="deconstruct-col-left" id="col-8-left">
+          <div class="feature-pill emerald">Effortless Version Control</div>
+          <h1 class="editorial-h1">Story Time Machine.<br><span class="emerald">Visual Diff Engine.</span></h1>
+          <p class="editorial-sub">Revise fearlessly with zero data loss. Compare manuscript revisions side-by-side, inspect paragraph additions and deletions, and selectively restore chapters in a single click.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill emerald"><span style="color: #10b981;">⏱</span> SQLite Snapshots</div>
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">⇄</span> Side-by-Side Diff</div>
+            <div class="spec-pill gold"><span style="color: #f59e0b;">↩</span> 1-Click Restore</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-8">
+          <div class="timemachine-frame" id="timemachine-frame-8">
+            <div class="timemachine-topbar">
+              <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <span style="color: #10b981; font-size: 1.1rem;">📸</span>
+                <span style="font-family: var(--font-mono); font-weight: 700; font-size: 0.78rem; color: #ffffff;">STORY TIME MACHINE • ALT+S</span>
+              </div>
+              <div class="diff-telemetry-group">
+                <div class="diff-stat-chip added">
+                  <span>+</span>
+                  <span id="diff-words-added-8">420</span>
+                  <span>ADDED</span>
+                </div>
+                <div class="diff-stat-chip removed">
+                  <span>-</span>
+                  <span id="diff-words-removed-8">128</span>
+                  <span>CUT</span>
+                </div>
+                <div class="diff-stat-chip net">
+                  <span>NET +292 W</span>
+                </div>
+                <div class="diff-restore-btn">
+                  <span>Selective Restore ⎌</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Side-by-Side Visual Diff Container -->
+            <div class="diff-split-container">
+              <!-- Left Pane: Snapshot Version -->
+              <div class="diff-pane">
+                <div class="diff-pane-header">
+                  <span style="color: #94a3b8;">SNAPSHOT: DRAFT 2 (OCT 24)</span>
+                  <span style="color: #f43f5e;">-128 Words</span>
+                </div>
+                <div class="diff-body">
+                  <div style="font-size: 0.75rem; color: #64748b; font-family: var(--font-hero); font-weight: 600; margin-bottom: 0.4rem;">Chapter I: The Midnight Clock</div>
+                  <p>The grand library was submerged in cold dusk. <span class="diff-del-text">The old brass clock began to strike loudly in the empty hall. He ran toward the wooden door with great haste, spilling dark ink across the worn oak table.</span> Every sound echoed like iron against stone.</p>
+                  <p>He dipped his quill into the vial. Here, there were no margins to constrain the mind—only the steady cadence of thought.</p>
+                  <p style="margin-top: 0.85rem;"><span class="diff-del-text">Without looking back, he blew out the small candle and shoved the leather journal into his heavy coat.</span> Night fell quickly over the cobblestones.</p>
+                </div>
+              </div>
+
+              <!-- Right Pane: Current Manuscript -->
+              <div class="diff-pane target">
+                <div class="diff-pane-header">
+                  <span style="color: #10b981;">CURRENT MANUSCRIPT (LIVE)</span>
+                  <span style="color: #10b981;">+420 Words</span>
+                </div>
+                <div class="diff-body">
+                  <div style="font-size: 0.75rem; color: #10b981; font-family: var(--font-hero); font-weight: 600; margin-bottom: 0.4rem;">Chapter I: The Midnight Clock</div>
+                  <p>The grand library was submerged in cold dusk. <span class="diff-add-text">The midnight clock shuddered, tolling twelve bronze bells into the velvet mist. He descended the spiraled obsidian steps, stylus clutched in hand, leaving liquid amber runes in his wake.</span> Every sound echoed like iron against stone.</p>
+                  <p>He dipped his quill into the vial. Here, there were no margins to constrain the mind—only the steady cadence of thought.</p>
+                  <p style="margin-top: 0.85rem;"><span class="diff-add-text">Without a glance behind him, he extinguished the tallow wick, tucking the gilded manuscript beneath his velvet cloak. The astrological clock chimed once more, sealing the pact in starlight.</span> Night fell quickly over the cobblestones.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Milestone Timeline Footer Bar -->
+            <div class="diff-milestone-footer">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="color: #94a3b8; font-weight: 600;">ACTIVE MILESTONES:</span>
+                <div class="milestone-stepper">
+                  <div class="milestone-dot"></div>
+                  <span>1. Initial Draft</span>
+                  <span style="color: #475569;">→</span>
+                  <div class="milestone-dot"></div>
+                  <span>2. Beta Feedback</span>
+                  <span style="color: #475569;">→</span>
+                  <div class="milestone-dot active"></div>
+                  <span style="color: #10b981; font-weight: 700;">3. Climax Polish</span>
+                </div>
+              </div>
+              <span style="color: #10b981;">100% Non-Destructive</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 9: COVER DESIGNER STUDIO (46.875s - 52.50s)
+           ======================================================== -->
+      <section id="scene-9" class="scene-view">
+        <div class="deconstruct-col-left" id="col-9-left">
+          <div class="feature-pill">Built-In Cover Studio</div>
+          <h1 class="editorial-h1">Cover Designer.<br><span class="gold">Custom Artwork.</span></h1>
+          <p class="editorial-sub">Craft bookstore-ready vector covers directly inside Chronicle. Customize typography, atmospheric gradient palettes, symbolic emblems, and ornamental frames—then export at 1600×2400 publication resolution.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill purple"><span style="color: #c084fc;">🎨</span> Vector Canvas</div>
+            <div class="spec-pill gold"><span style="color: #f59e0b;">📐</span> 1600×2400 Hi-Res</div>
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">📚</span> EPUB Manifest Linked</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-9">
+          <div class="cover-studio-window" id="cover-window-9">
+            <div class="cover-studio-topbar">
+              <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <span style="font-size: 0.95rem; color: #818cf8;">🎨</span>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #ffffff;">Cover Designer Studio</span>
+              </div>
+              <div class="cover-mode-switcher">
+                <div class="cover-mode-btn">
+                  <span>🖼 Direct Image</span>
+                </div>
+                <div class="cover-mode-btn active">
+                  <span>✨ Designer Studio</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="cover-studio-workspace">
+              <!-- Left: 2:3 Aspect Ratio Book Cover Preview -->
+              <div class="cover-preview-wrapper">
+                <div class="cover-canvas-card" id="cover-canvas-card-9">
+                  <div class="cover-canvas-glow"></div>
+                  <div class="cover-canvas-frame-inner"></div>
+                  <div class="cover-canvas-frame-corner corner-tl"></div>
+                  <div class="cover-canvas-frame-corner corner-tr"></div>
+                  <div class="cover-canvas-frame-corner corner-bl"></div>
+                  <div class="cover-canvas-frame-corner corner-br"></div>
+
+                  <div class="cover-canvas-author">ELENA ROSTOVA</div>
+
+                  <div class="cover-canvas-title-group">
+                    <div class="cover-canvas-title">THE<br>ALCHEMIST’S<br>CODEX</div>
+                    <div class="cover-canvas-subtitle">A Novel of Wonder & Shadow</div>
+                    <div class="cover-canvas-emblem">
+                      <svg viewBox="0 0 24 24" width="38" height="38" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="rgba(129,140,248,0.25)"></polygon>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div class="cover-canvas-footer">CHRONICLE CLASSIC EDITION • EPUB 3.0</div>
+                </div>
+
+                <div class="cover-preview-actions">
+                  <button class="cover-btn-apply" type="button">
+                    <span>✓ Apply Cover to Book</span>
+                  </button>
+                  <div class="cover-btn-row">
+                    <div class="cover-btn-sub">⬇ 1600×2400 PNG</div>
+                    <div class="cover-btn-sub">⬇ SVG Vector</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Designer Control Hub -->
+              <div class="cover-controls-pane">
+                <div class="cover-tabs-nav">
+                  <button class="cover-tab-item active" type="button">Typography</button>
+                  <button class="cover-tab-item" type="button">Background</button>
+                  <button class="cover-tab-item" type="button">Emblem</button>
+                  <button class="cover-tab-item" type="button">Frame</button>
+                </div>
+
+                <div class="cover-ctrl-section">
+                  <span class="cover-ctrl-label">Book Title (Font: Cinzel Serif)</span>
+                  <div class="cover-ctrl-input-box">
+                    <span style="font-family: var(--font-serif); font-weight: 700; color: #fae8b2;">THE ALCHEMIST’S CODEX</span>
+                    <span style="font-size: 0.65rem; color: #818cf8; font-family: var(--font-mono);">38 pt</span>
+                  </div>
+                </div>
+
+                <div class="cover-ctrl-section">
+                  <span class="cover-ctrl-label">Atmosphere Gradient Preset</span>
+                  <div class="cover-chips-row">
+                    <span class="cover-chip-btn active-preset">● Cosmic Indigo</span>
+                    <span class="cover-chip-btn">● Crimson Ember</span>
+                    <span class="cover-chip-btn">● Emerald Forest</span>
+                    <span class="cover-chip-btn">● Obsidian Noir</span>
+                  </div>
+                </div>
+
+                <div class="cover-ctrl-section">
+                  <span class="cover-ctrl-label">Symbolic Vector Emblem</span>
+                  <div class="cover-chips-row">
+                    <span class="cover-chip-btn active-font">🧭 Compass</span>
+                    <span class="cover-chip-btn">🪶 Feather</span>
+                    <span class="cover-chip-btn">👑 Crown</span>
+                    <span class="cover-chip-btn">🗝️ Key</span>
+                    <span class="cover-chip-btn">✨ Star</span>
+                  </div>
+                </div>
+
+                <div class="cover-ctrl-section">
+                  <span class="cover-ctrl-label">Ornamental Frame Style</span>
+                  <div class="cover-chips-row">
+                    <span class="cover-chip-btn active-font">Classic Inset</span>
+                    <span class="cover-chip-btn">Modern Dual</span>
+                    <span class="cover-chip-btn">Vintage Filigree</span>
+                  </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 0.45rem 0.75rem; display: flex; justify-content: space-between; font-size: 0.65rem; font-family: var(--font-mono); color: #94a3b8;">
+                  <span>Spec: 1600 × 2400 px</span>
+                  <span style="color: #10b981;">✓ EPUB Manifest Linked</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 10: UNIVERSAL PUBLISHING & EXPORT HUB (52.50s - 56.25s)
+           ======================================================== -->
+      <section id="scene-10" class="scene-view">
+        <div class="deconstruct-col-left" id="col-10-left">
+          <div class="feature-pill emerald">Industry-Standard Compilation</div>
+          <h1 class="editorial-h1">Universal.<br><span class="emerald">Publishing Hub.</span></h1>
+          <p class="editorial-sub">One-click compile for validated EPUB 3, submission-ready William Shunn Manuscript format, print PDF with drop caps, and clean Markdown.</p>
+          <div class="feature-spec-strip">
+            <div class="spec-pill cyan"><span style="color: #38bdf8;">💎</span> Validated EPUB 3</div>
+            <div class="spec-pill gold"><span style="color: #f59e0b;">📜</span> Shunn Manuscript</div>
+            <div class="spec-pill emerald"><span style="color: #10b981;">🖨️</span> 300 DPI Print PDF</div>
+            <div class="spec-pill purple"><span style="color: #c084fc;">⚡</span> Pure Markdown</div>
+          </div>
+        </div>
+
+        <div class="deconstruct-stage" id="stage-10">
+          <div class="export-cards-quad" id="export-quad-10">
+            <div class="export-format-tile" id="tile-epub">
+              <div class="export-tile-top">
+                <div>
+                  <div class="export-ext-badge badge-epub">.EPUB 3</div>
+                  <div style="font-size: 0.78rem; font-weight: 700; color: #ffffff;">Standard E-Book</div>
+                </div>
+                <div style="font-size: 1.2rem; color: #38bdf8;">📱</div>
+              </div>
+              <p style="font-size: 0.72rem; color: #94a3b8;">Reflowable e-book architecture validated for Apple Books, Amazon Kindle, Kobo.</p>
+              <div style="font-size: 0.68rem; font-family: var(--font-mono); color: #38bdf8;">✓ EPUBCheck Validated</div>
+            </div>
+
+            <div class="export-format-tile" id="tile-shunn">
+              <div class="export-tile-top">
+                <div>
+                  <div class="export-ext-badge badge-shunn">.DOCX</div>
+                  <div style="font-size: 0.78rem; font-weight: 700; color: #ffffff;">William Shunn Format</div>
+                </div>
+                <div style="font-size: 1.2rem; color: #f59e0b;">📜</div>
+              </div>
+              <p style="font-size: 0.72rem; color: #94a3b8;">Industry-standard manuscript submission layout for literary agents & publishers.</p>
+              <div style="font-size: 0.68rem; font-family: var(--font-mono); color: #f59e0b;">✓ 1-Inch Margins • Header Tags</div>
+            </div>
+
+            <div class="export-format-tile" id="tile-pdf">
+              <div class="export-tile-top">
+                <div>
+                  <div class="export-ext-badge badge-pdf">.PDF</div>
+                  <div style="font-size: 0.78rem; font-weight: 700; color: #ffffff;">Print-Ready Typeset</div>
+                </div>
+                <div style="font-size: 1.2rem; color: #10b981;">🖨️</div>
+              </div>
+              <p style="font-size: 0.72rem; color: #94a3b8;">Custom trim sizes (6x9", 5.5x8.5"), chapter headers, page numbers, and drop caps.</p>
+              <div style="font-size: 0.68rem; font-family: var(--font-mono); color: #10b981;">✓ 300 DPI Print Vectors</div>
+            </div>
+
+            <div class="export-format-tile" id="tile-md">
+              <div class="export-tile-top">
+                <div>
+                  <div class="export-ext-badge badge-md">.MARKDOWN</div>
+                  <div style="font-size: 0.78rem; font-weight: 700; color: #ffffff;">Plaintext Archive</div>
+                </div>
+                <div style="font-size: 1.2rem; color: #c084fc;">📄</div>
+              </div>
+              <p style="font-size: 0.72rem; color: #94a3b8;">Pure uninhibited plaintext freedom with complete YAML frontmatter metadata.</p>
+              <div style="font-size: 0.68rem; font-family: var(--font-mono); color: #c084fc;">✓ 100% Future-Proof</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           SCENE 11: KINETIC TYPOGRAPHY CRESCENDO & FINALE (56.25s - 60.00s)
+           ======================================================== -->
+      <section id="scene-11" class="scene-view">
+        <div class="crescendo-word-display" id="crescendo-word">WRITE.</div>
+
+        <div class="outro-final-resolve" id="outro-resolve">
+          <div class="logo-reveal-container">
+            <div class="logo-halo-ring" style="width: 240px; height: 240px; top: -20px;"></div>
+            <img src="assets/chronicle-logo-clean.png" alt="Chronicle" class="logo-img-main" style="width: 130px; height: 130px;">
+            <h1 class="title-monolith" style="font-size: 4.4rem;">CHRONICLE</h1>
+            <p class="tagline-monolith" style="font-size: 1.35rem;">From first spark to published masterpiece</p>
+            <div class="launch-specs-pill" style="margin-top: 1.4rem;">
+              <span>Available for Windows • macOS • Linux • Web</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /camera-rig -->
+
+    <!-- Production Broadcast HUD Overlay -->
+    <div id="hud-layer">
+      <div class="hud-top-bar">
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <div class="hud-chip">
+            <div class="hud-rec-dot"></div>
+            <span>REC PROMO REEL</span>
+          </div>
+          <div class="hud-chip" id="hud-scene-tag">SCENE: 01 // INTRO</div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <div class="hud-chip" id="hud-beat-chip">
+            <div class="hud-beat-dot" id="hud-beat-dot"></div>
+            <span id="hud-bpm-tag">128.0 BPM</span>
+          </div>
+          <div class="hud-chip" id="hud-tc">TC 00:00:00:00</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div class="hud-chip" style="font-size: 0.65rem;">
+          CHRONICLE MASTER SHOWREEL • 62.0S CINEMATIC SUITE
+        </div>
+        <div class="hud-chip" style="font-size: 0.65rem;">
+          4K RESOLUTION • 60 FPS • MASTER AUDIO SYNC
+        </div>
+      </div>
+    </div>
+
+    <!-- Director Transport Dock -->
+    <div id="director-dock">
+      <button class="dock-btn dock-btn-primary" id="btn-play">
+        <span id="play-icon">▶</span>
+        <span id="play-text">PLAY</span>
+      </button>
+
+      <button class="dock-btn" id="btn-restart">
+        <span>↺</span>
+        <span>REPLAY</span>
+      </button>
+
+      <div class="dock-scrubber-track" id="scrubber-track">
+        <div class="dock-scrubber-fill" id="scrubber-fill"></div>
+        <div class="dock-scrubber-thumb" id="scrubber-thumb"></div>
+      </div>
+
+      <span id="time-display" style="font-family: var(--font-mono); font-size: 0.72rem; color: #e2e8f0; width: 85px;">00.0 / 62.0s</span>
+
+      <select class="dock-select" id="soundtrack-select">
+        <option value="assets/track_vivacity.mp3">Track 1: Vivacity (128 BPM)</option>
+        <option value="assets/track_laser_groove.mp3">Track 2: Laser Groove</option>
+        <option value="assets/track_cfunk.mp3">Track 3: C-Funk</option>
+      </select>
+
+      <button class="dock-btn" id="btn-sound">
+        <span id="sound-icon">🔊</span>
+      </button>
+
+      <button class="dock-btn" id="btn-clean" title="Toggle Clean Recording (H)">
+        <span>REC MODE</span>
+      </button>
+
+      <button class="dock-btn" id="btn-record-video" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5;">
+        <span>⏺</span>
+        <span id="rec-label">EXPORT MP4</span>
+      </button>
+
+      <button class="dock-btn" id="btn-fullscreen" title="Fullscreen (F)">
+        <span>⛶</span>
+      </button>
+    </div>
+
+  </div><!-- /viewport -->
+
+  <!-- Audio Element -->
+  <audio id="soundtrack" preload="auto" src="assets/track_vivacity.mp3"></audio>
+
+  <!-- ========================================================
+       MASTER JAVASCRIPT MOTION ENGINE
+       ======================================================== -->
+  <script>
+    /* ========================================================
+       1. TIMELINE & CHOREOGRAPHY SPECIFICATION (60.0 Seconds)
+       128 BPM = 0.46875s per beat, 1.875s per bar (4 beats)
+       Total 32 bars = exactly 60.00 seconds!
+       ======================================================== */
+    const TOTAL_RUNTIME = 62.0;
+    const BPM = 128;
+    const SECONDS_PER_BEAT = 60 / BPM; // 0.46875s
+
+    const scenes = [
+      { id: 'scene-0', start: 0.000, end: 3.750, tag: '01: MONOLITH REVEAL' },
+      { id: 'scene-1', start: 3.750, end: 8.4375, tag: '02: NOVELIST CANVAS' },
+      { id: 'scene-2', start: 8.4375, end: 13.125, tag: '03: ZEN MODE SANCTUARY' },
+      { id: 'scene-3', start: 13.125, end: 18.750, tag: '04: BESPOKE PAPER TONES' },
+      { id: 'scene-4', start: 18.750, end: 24.375, tag: '05: CHARACTER STUDIO' },
+      { id: 'scene-5', start: 24.375, end: 30.000, tag: '06: LOCATION STUDIO' },
+      { id: 'scene-6', start: 30.000, end: 35.625, tag: '07: MULTI-TRACK TIMELINE' },
+      { id: 'scene-7', start: 35.625, end: 41.250, tag: '08: CAST PRESENCE HEATMAP' },
+      { id: 'scene-8', start: 41.250, end: 46.875, tag: '09: STORY TIME MACHINE' },
+      { id: 'scene-9', start: 46.875, end: 52.500, tag: '10: COVER DESIGN STUDIO' },
+      { id: 'scene-10', start: 52.500, end: 56.250, tag: '11: UNIVERSAL PUBLISHING' },
+      { id: 'scene-11', start: 56.250, end: 62.000, tag: '12: KINETIC CRESCENDO' }
+    ];
+
+    // Presence Cells Population (Authentic Chronicle Cast & Steady Heatmap Styling)
+    function initPresenceCells() {
+      const cast = [
+        { id: 'alice', color: '#3b82f6', mentions: [14, 18, 12, 16, 8, 15, 19, 11, 22, 17] },
+        { id: 'rabbit', color: '#f59e0b', mentions: [9, 12, 0, 4, 0, 7, 0, 11, 0, 14] },
+        { id: 'hatter', color: '#8b5cf6', mentions: [0, 0, 6, 15, 18, 12, 5, 0, 7, 0] },
+        { id: 'queen', color: '#ef4444', mentions: [0, 0, 0, 0, 8, 14, 16, 9, 21, 19] },
+        { id: 'duchess', color: '#10b981', mentions: [0, 0, 9, 14, 12, 0, 6, 0, 0, 5] },
+        { id: 'king', color: '#d97706', mentions: [0, 0, 0, 0, 0, 0, 7, 12, 15, 18] }
+      ];
+
+      cast.forEach((char) => {
+        const container = document.getElementById(`p-cells-${char.id}`);
+        if (!container) return;
+        container.innerHTML = '';
+        for (let col = 0; col < 10; col++) {
+          const count = char.mentions[col];
+          const cell = document.createElement('div');
+          cell.className = 'p-cell';
+          cell.dataset.count = count;
+          cell.dataset.col = col;
+
+          if (count >= 12) {
+            // High mention frequency
+            cell.style.backgroundColor = char.color;
+            cell.style.color = '#ffffff';
+            cell.style.boxShadow = `0 0 8px ${char.color}80`;
+            cell.style.border = `1px solid ${char.color}`;
+            cell.textContent = count;
+          } else if (count >= 5) {
+            // Medium mention frequency
+            cell.style.backgroundColor = `${char.color}b3`;
+            cell.style.color = '#ffffff';
+            cell.style.border = `1px solid ${char.color}cc`;
+            cell.textContent = count;
+          } else if (count >= 1) {
+            // Low mention frequency
+            cell.style.backgroundColor = `${char.color}35`;
+            cell.style.color = char.color;
+            cell.style.border = `1px solid ${char.color}66`;
+            cell.textContent = count;
+          } else {
+            // Absent in chapter
+            cell.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+            cell.style.border = '1px solid rgba(255, 255, 255, 0.06)';
+            cell.innerHTML = '<span style="opacity: 0.25; font-size: 0.55rem; color: #64748b;">·</span>';
+          }
+
+          container.appendChild(cell);
+        }
+      });
+    }
+    initPresenceCells();
+
+    // Living Ambient Dust and Gold Sparks Canvas
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      if (particles.length === 0) {
+        for (let i = 0; i < 140; i++) {
+          particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 2.8 + 0.8,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.4 - 0.22,
+            alpha: Math.random() * 0.65 + 0.25,
+            gold: Math.random() > 0.35
+          });
+        }
+      }
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function drawAmbientCanvas(beatKick) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Draw floating luminous particles
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx + (beatKick ? (Math.random() - 0.5) * 1.5 : 0);
+        p.y += p.vy;
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+
+        ctx.beginPath();
+        const rad = p.size * (beatKick ? 1.5 : 1.0);
+        ctx.arc(p.x, p.y, rad, 0, Math.PI * 2);
+        ctx.fillStyle = p.gold
+          ? `rgba(245, 158, 11, ${p.alpha * (beatKick ? 1.6 : 1.0)})`
+          : `rgba(56, 189, 248, ${p.alpha * (beatKick ? 1.4 : 1.0)})`;
+        ctx.shadowColor = p.gold ? '#f59e0b' : '#38bdf8';
+        ctx.shadowBlur = beatKick ? 12 : 5;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* ========================================================
+       2. CINEMATIC EASING FUNCTIONS (Juicy Motion Curves)
+       ======================================================== */
+    function hermite(t) {
+      const x = Math.max(0, Math.min(1, t));
+      return x * x * (3 - 2 * x);
+    }
+
+    // Elastic Overshoot for snappy UI arrivals
+    function easeOutBack(t, s = 1.70158) {
+      const x = Math.max(0, Math.min(1, t));
+      return (x - 1) * (x - 1) * ((s + 1) * (x - 1) + s) + 1;
+    }
+
+    function easeInOutQuint(t) {
+      const x = Math.max(0, Math.min(1, t));
+      return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2;
+    }
+
+    /* ========================================================
+       3. AUDIO SYNCHRONIZATION & PLAYBACK
+       ======================================================== */
+    const audio = document.getElementById('soundtrack');
+    let currentTime = 0;
+    let isPlaying = false;
+    let lastTimestamp = null;
+    let lastBeatIndex = -1;
+
+    const vp = document.getElementById('viewport');
+    const hudTc = document.getElementById('hud-tc');
+    const hudSceneTag = document.getElementById('hud-scene-tag');
+    const hudBeatDot = document.getElementById('hud-beat-dot');
+    const timeDisplay = document.getElementById('time-display');
+    const scrubberFill = document.getElementById('scrubber-fill');
+    const scrubberThumb = document.getElementById('scrubber-thumb');
+    const playIcon = document.getElementById('play-icon');
+    const playText = document.getElementById('play-text');
+
+    function triggerKick() {
+      hudBeatDot.classList.add('hit');
+      setTimeout(() => hudBeatDot.classList.remove('hit'), 120);
+    }
+
+    function syncAudio(t) {
+      if (audio && Math.abs(audio.currentTime - t) > 0.2) {
+        audio.currentTime = t;
+      }
+    }
+
+    function play() {
+      isPlaying = true;
+      playIcon.textContent = '⏸';
+      playText.textContent = 'PAUSE';
+      audio.currentTime = currentTime;
+      audio.play().catch(() => {});
+      lastTimestamp = performance.now();
+      requestAnimationFrame(mainLoop);
+    }
+
+    function pause() {
+      isPlaying = false;
+      playIcon.textContent = '▶';
+      playText.textContent = 'PLAY';
+      audio.pause();
+    }
+
+    function togglePlay() {
+      if (isPlaying) pause();
+      else play();
+    }
+
+    function seekTo(t) {
+      currentTime = Math.max(0, Math.min(TOTAL_RUNTIME, t));
+      if (audio && !audio.muted && currentTime <= TOTAL_RUNTIME - 1.5) {
+        audio.volume = 1.0;
+      }
+      syncAudio(currentTime);
+      updateMotion(currentTime);
+    }
+    window.seekTo = seekTo;
+
+    /* ========================================================
+       4. PROCEDURAL MASTER MOTION RENDERER
+       Every frame is mathematically interpolated across 60.0s!
+       ======================================================== */
+    const textProse = "The alchemist dipped his quill into starlight. Words were not merely ink upon parchment; they were architecture for the soul, transcending the dark void.";
+
+    function updateMotion(t) {
+      // 1. Beat Tracking & Downbeat detection
+      const currentBeat = Math.floor(t / SECONDS_PER_BEAT);
+      let isBeatHit = false;
+      if (currentBeat !== lastBeatIndex && currentBeat >= 0) {
+        lastBeatIndex = currentBeat;
+        isBeatHit = true;
+        // Pulse on major quarter notes / downbeats
+        if (currentBeat % 2 === 0) {
+          triggerKick();
+        }
+      }
+
+      // 2. Draw canvas particles
+      drawAmbientCanvas(isBeatHit);
+
+      // 3. Update HUD Telemetry
+      const sec = Math.floor(t % 60);
+      const frames = Math.floor((t % 1) * 60).toString().padStart(2, '0');
+      const min = Math.floor(t / 60).toString().padStart(2, '0');
+      hudTc.textContent = `TC 00:${min}:${sec.toString().padStart(2, '0')}:${frames}`;
+      timeDisplay.textContent = `${t.toFixed(1)} / ${TOTAL_RUNTIME.toFixed(1)}s`;
+
+      const progressPct = (t / TOTAL_RUNTIME) * 100;
+      scrubberFill.style.width = `${progressPct}%`;
+      scrubberThumb.style.left = `${progressPct}%`;
+
+      // 4. Beat Physics & Organic Floating Harmonic
+      const beatPhase = (t % SECONDS_PER_BEAT) / SECONDS_PER_BEAT;
+      const beatPulse = Math.exp(-beatPhase * 6.5);
+      const floatWave = Math.sin(t * 3.5) * -7;
+
+      // Dynamic Center Illumination (Eliminates empty black space)
+      const centerLight = document.getElementById('light-center');
+      if (centerLight) {
+        const centerPulse = 0.45 + beatPulse * 0.25;
+        centerLight.style.opacity = centerPulse.toFixed(3);
+        const centerScale = 1.0 + beatPulse * 0.06;
+        centerLight.style.transform = `translate(-50%, -50%) scale(${centerScale.toFixed(3)})`;
+      }
+
+      // 5. Scene Crossfading & Active Target
+      const FADE = 0.38; // 380ms high-speed cinematic transition
+      scenes.forEach(s => {
+        const el = document.getElementById(s.id);
+        if (!el) return;
+
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          let opacity = 0;
+          if (t < s.start) {
+            opacity = hermite((t - (s.start - FADE)) / FADE);
+          } else if (t <= s.end) {
+            opacity = 1.0;
+          } else {
+            opacity = 1.0 - hermite((t - s.end) / FADE);
+          }
+          el.style.opacity = opacity;
+          el.style.pointerEvents = opacity > 0.5 ? 'auto' : 'none';
+
+          if (t >= s.start && t <= s.end) {
+            hudSceneTag.textContent = s.tag;
+          }
+        } else {
+          el.style.opacity = 0;
+          el.style.pointerEvents = 'none';
+        }
+      });
+
+      // --------------------------------------------------------
+      // SCENE 0: MONOLITH REVEAL (0.00s - 3.75s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[0];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const progress = Math.max(0, Math.min(1, (t - s.start) / (s.end - s.start)));
+          const ease = hermite(progress);
+          const monolith = document.getElementById('monolith-target');
+          const logo = document.getElementById('logo-emblem-0');
+
+          // Pure GPU-accelerated smooth zoom (0.90 -> 1.05) with zero letterSpacing reflow or perspective tilting jitter
+          const scale = 0.90 + ease * 0.15;
+          if (monolith) {
+            monolith.style.transform = `translate3d(0, 0, 0) scale(${scale.toFixed(4)})`;
+          }
+          if (logo) {
+            const floatY = Math.sin(progress * Math.PI * 2) * -3.5;
+            logo.style.transform = `translate3d(0, ${floatY.toFixed(2)}px, 0)`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 1: NOVELIST CANVAS & LIVE TYPEWRITER (3.75s - 8.4375s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[1];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const colLeft = document.getElementById('col-1-left');
+          const pill1 = document.getElementById('pill-1');
+          const h1_1 = document.getElementById('h1-1');
+          const sub1 = document.getElementById('sub-1');
+          const frame = document.getElementById('mockup-frame-1');
+          const glare = document.getElementById('mockup-glare-1');
+          const orb1a = document.getElementById('orbiter-1a');
+          const orb1b = document.getElementById('orbiter-1b');
+          const cadenceText = document.getElementById('cadence-text');
+          const typedSpan = document.getElementById('live-typed-text');
+          const chapterWords = document.getElementById('live-chapter-words');
+          const typingPara = document.getElementById('live-typing-para');
+          const sqliteDot = document.getElementById('sqlite-dot-1');
+          const writePill = document.getElementById('write-pill-1');
+
+          // 1. Cinematic 3D Camera Tracking with Hermite Smoothing & Organic Levitation
+          const cameraCurve = hermite(p);
+          const rotY = -18 + cameraCurve * 22; // sweeps from -18deg to +4deg
+          const rotX = 7 - cameraCurve * 6;   // sweeps from +7deg to +1deg
+          const levitateY = Math.sin(p * Math.PI * 2) * -7;
+          const levitateTilt = Math.sin(p * Math.PI * 2) * 0.6;
+          const scale = 0.94 + cameraCurve * 0.10; // expands from 0.94 to 1.04
+
+          if (frame) {
+            frame.style.transform = `perspective(1800px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) rotateZ(${levitateTilt.toFixed(2)}deg) translate3d(0, ${levitateY.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
+          }
+
+          // 2. High-End Specular Glass Light Reflection Glare Sweep
+          if (glare) {
+            const glareX = -85 + p * 170;
+            const glareY = -40 + p * 80;
+            glare.style.transform = `translate3d(${glareX.toFixed(1)}%, ${glareY.toFixed(1)}%, 0) rotate(14deg)`;
+          }
+
+          // 3. Staggered & Living Left Column Typography (Continuous breathing drift)
+          if (colLeft) {
+            const driftY = Math.sin(p * Math.PI) * -7;
+            colLeft.style.transform = `translate3d(0, ${driftY.toFixed(2)}px, 0)`;
+          }
+          if (pill1) {
+            const pillEnter = hermite(Math.min(1, p * 3.5));
+            pill1.style.transform = `translate3d(${((1 - pillEnter) * -35).toFixed(1)}px, 0, 0)`;
+            pill1.style.opacity = `${pillEnter.toFixed(3)}`;
+          }
+          if (h1_1) {
+            const h1Enter = hermite(Math.min(1, Math.max(0, (p - 0.05) * 3.0)));
+            h1_1.style.transform = `translate3d(${((1 - h1Enter) * -45).toFixed(1)}px, 0, 0)`;
+            h1_1.style.opacity = `${h1Enter.toFixed(3)}`;
+          }
+          if (sub1) {
+            const subEnter = hermite(Math.min(1, Math.max(0, (p - 0.12) * 2.6)));
+            sub1.style.transform = `translate3d(${((1 - subEnter) * -35).toFixed(1)}px, 0, 0)`;
+            sub1.style.opacity = `${subEnter.toFixed(3)}`;
+          }
+
+          // 4. True 3D Orbital Telemetry Orbiters
+          if (orb1a) {
+            const orb1aX = Math.cos(p * Math.PI * 2) * 14;
+            const orb1aY = Math.sin(p * Math.PI * 2) * 10;
+            orb1a.style.transform = `translate3d(${orb1aX.toFixed(1)}px, ${orb1aY.toFixed(1)}px, 85px) rotateY(${(rotY * -0.4).toFixed(2)}deg)`;
+          }
+          if (orb1b) {
+            const orb1bX = Math.sin(p * Math.PI * 2) * -16;
+            const orb1bY = Math.cos(p * Math.PI * 2) * 10;
+            orb1b.style.transform = `translate3d(${orb1bX.toFixed(1)}px, ${orb1bY.toFixed(1)}px, 110px) rotateY(${(rotY * -0.5).toFixed(2)}deg)`;
+
+            if (cadenceText) {
+              const cadenceWpm = 82 + Math.floor(Math.sin(p * Math.PI * 6) * 5 + ((currentBeat % 2 === 0) ? 2 : 0));
+              cadenceText.textContent = `Real-Time Cadence: ${cadenceWpm} WPM`;
+            }
+          }
+
+          // 5. Live Typing & Synchronous Word Count Telemetry
+          if (typedSpan) {
+            const charCount = Math.floor(Math.max(0, p) * textProse.length);
+            typedSpan.textContent = textProse.substring(0, charCount);
+
+            if (chapterWords) {
+              const wordsAdded = Math.floor(charCount / 5.2);
+              chapterWords.innerHTML = `<span style="color: #f59e0b; display: inline-block; transform: scale(${isBeatHit ? 1.35 : 1.0});">●</span> ${716 + wordsAdded}w`;
+            }
+          }
+
+          // 6. Micro-Interactions on Mockup Header & Active Paragraph
+          if (typingPara) {
+            const isTyping = p > 0.05 && p < 0.95;
+            const haloAlpha = isTyping ? 0.08 + Math.sin(t * 12) * 0.04 : 0.06;
+            typingPara.style.backgroundColor = `rgba(212, 175, 55, ${haloAlpha.toFixed(3)})`;
+            typingPara.style.boxShadow = isTyping
+              ? `0 0 ${Math.floor(18 + Math.sin(t * 12) * 8)}px rgba(212, 175, 55, 0.16)`
+              : 'none';
+          }
+          if (sqliteDot) {
+            sqliteDot.style.boxShadow = isBeatHit ? '0 0 12px #10b981, 0 0 24px #10b981' : '0 0 6px #10b981';
+            sqliteDot.style.transform = isBeatHit ? 'scale(1.3)' : 'scale(1.0)';
+          }
+          if (writePill) {
+            const pillPulse = 0.35 + Math.sin(t * 4) * 0.15;
+            writePill.style.boxShadow = `0 2px 10px rgba(212, 175, 55, ${pillPulse.toFixed(3)})`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 2: ZEN MODE SANCTUARY & GHOST HUD (8.4375s - 13.125s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[2];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const colLeft = document.getElementById('col-2-left');
+          const stage = document.getElementById('zen-stage-2');
+          const zenCapsule = document.getElementById('zen-capsule-2');
+          const zenPopover = document.getElementById('zen-popover-2');
+
+          if (stage) {
+            const rotY = -12 + p * 20;
+            const rotX = 6 - p * 8;
+            stage.style.transform = `perspective(1600px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) translate3d(0, ${floatWave.toFixed(1)}px, 0) scale(${(0.98 + p * 0.05).toFixed(3)})`;
+          }
+          if (colLeft) {
+            colLeft.style.transform = `translate3d(${(Math.min(1, p * 3) === 1 ? 0 : (1 - p * 3) * -35).toFixed(1)}px, ${(Math.sin(p * Math.PI) * -8).toFixed(1)}px, 0)`;
+          }
+          if (zenPopover) {
+            const popoverProgress = Math.sin(Math.min(1, Math.max(0, p * 2.2)) * Math.PI * 0.5);
+            zenPopover.style.opacity = `${(0.2 + popoverProgress * 0.8).toFixed(3)}`;
+            zenPopover.style.transform = `translateX(-50%) translateY(${((1 - popoverProgress) * 20).toFixed(1)}px) scale(${(0.94 + popoverProgress * 0.06).toFixed(3)})`;
+          }
+          if (zenCapsule) {
+            const capsuleHover = Math.sin(t * 4) * -5;
+            zenCapsule.style.transform = `translateX(-50%) translateY(${capsuleHover.toFixed(1)}px) scale(${(1.0 + beatPulse * 0.04).toFixed(3)})`;
+            zenCapsule.style.boxShadow = `0 14px 40px rgba(0, 0, 0, 0.8), 0 0 ${Math.floor(16 + beatPulse * 24)}px rgba(56, 189, 248, ${(0.35 + beatPulse * 0.45).toFixed(2)})`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 3: BESPOKE PAPER TONES & TYPOGRAPHY (13.125s - 18.75s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[3];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const colLeft = document.getElementById('col-3-left');
+          const grid = document.getElementById('swatch-grid-3');
+
+          if (grid) {
+            const rotX = 14 - p * 22;
+            const rotY = 16 - p * 26;
+            grid.style.transform = `perspective(1500px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translate3d(0, ${floatWave.toFixed(1)}px, 0) scale(${(1.0 + p * 0.05).toFixed(3)})`;
+          }
+          if (colLeft) {
+            colLeft.style.transform = `translate3d(${(Math.min(1, p * 3) === 1 ? 0 : (1 - p * 3) * -35).toFixed(1)}px, ${(Math.sin(p * Math.PI) * -8).toFixed(1)}px, 0)`;
+          }
+
+          const swatches = [
+            document.getElementById('swatch-card-1'),
+            document.getElementById('swatch-card-2'),
+            document.getElementById('swatch-card-3'),
+            document.getElementById('swatch-card-4')
+          ];
+          const activeIndex = Math.min(3, Math.floor(p * 4));
+          const swatchAuras = [
+            { border: '#f59e0b', glow: 'rgba(245, 158, 11, 0.92)', bloom: 'rgba(245, 158, 11, 0.45)' },
+            { border: '#38bdf8', glow: 'rgba(56, 189, 248, 0.92)', bloom: 'rgba(56, 189, 248, 0.45)' },
+            { border: '#f59e0b', glow: 'rgba(245, 158, 11, 0.92)', bloom: 'rgba(245, 158, 11, 0.45)' },
+            { border: '#10b981', glow: 'rgba(16, 185, 129, 0.92)', bloom: 'rgba(16, 185, 129, 0.45)' }
+          ];
+
+          swatches.forEach((card, idx) => {
+            if (!card) return;
+            if (idx === activeIndex) {
+              card.classList.add('active-swatch');
+              const popScale = 1.11 + beatPulse * 0.04;
+              card.style.transform = `translateZ(95px) translateY(-18px) scale(${popScale.toFixed(3)})`;
+              card.style.opacity = '1';
+              card.style.filter = 'none';
+              const aura = swatchAuras[idx];
+              card.style.borderColor = aura.border;
+              const auraGlow = Math.floor(45 + beatPulse * 35);
+              card.style.boxShadow = `0 38px 105px rgba(0, 0, 0, 0.95), 0 0 ${auraGlow}px ${aura.glow}, 0 0 100px ${aura.bloom}`;
+            } else {
+              card.classList.remove('active-swatch');
+              card.style.transform = 'translateZ(-25px) scale(0.92)';
+              card.style.opacity = '0.50';
+              card.style.filter = 'blur(0.5px)';
+              card.style.borderColor = 'rgba(255, 255, 255, 0.10)';
+              card.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.6)';
+            }
+          });
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 4: CHARACTER STUDIO & CAST DOSSIER (18.75s - 24.375s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[4];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const frame = document.getElementById('char-studio-frame-4');
+          const goalBar = document.getElementById('alice-goal-bar-4');
+          const colLeft = document.getElementById('col-4-left');
+          const aliceCard = document.getElementById('card-alice');
+
+          if (frame) {
+            const rotY = 14 - p * 24;
+            const rotX = 5 - p * 6;
+            frame.style.transform = `perspective(1600px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) translate3d(0, ${floatWave.toFixed(1)}px, 0) scale(${(1.0 + p * 0.05).toFixed(3)})`;
+          }
+          if (colLeft) {
+            colLeft.style.transform = `translate3d(${(Math.min(1, p * 3) === 1 ? 0 : (1 - p * 3) * -35).toFixed(1)}px, ${(Math.sin(p * Math.PI) * -8).toFixed(1)}px, 0)`;
+          }
+          if (goalBar) {
+            const targetPct = Math.min(75, Math.max(15, p * 90));
+            goalBar.style.width = `${targetPct.toFixed(1)}%`;
+          }
+          if (aliceCard) {
+            aliceCard.style.boxShadow = `0 0 ${Math.floor(16 + beatPulse * 20)}px rgba(59, 130, 246, ${(0.3 + beatPulse * 0.45).toFixed(2)})`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 5: LOCATION STUDIO & REGIONAL CODEX (24.375s - 30.00s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[5];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const frame = document.getElementById('loc-studio-frame-5');
+          const colLeft = document.getElementById('col-5-left');
+
+          if (frame) {
+            const rotY = -15 + p * 26;
+            const rotX = 6 - p * 7;
+            frame.style.transform = `perspective(1600px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) translate3d(0, ${floatWave.toFixed(1)}px, 0) scale(${(0.98 + p * 0.06).toFixed(3)})`;
+          }
+          if (colLeft) {
+            colLeft.style.transform = `translate3d(${(Math.min(1, p * 3) === 1 ? 0 : (1 - p * 3) * -35).toFixed(1)}px, ${(Math.sin(p * Math.PI) * -8).toFixed(1)}px, 0)`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 6: MULTI-TRACK STORY TIMELINE (30.00s - 35.625s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[6];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const frame = document.getElementById('timeline-frame-6');
+          const needle = document.getElementById('scrubber-needle-6');
+          const colLeft = document.getElementById('col-6-left');
+
+          if (frame) {
+            const panX = 45 - p * 90;
+            frame.style.transform = `perspective(1600px) scale(${(1.03 + p * 0.05).toFixed(3)}) translateX(${panX.toFixed(1)}px) translateY(${floatWave.toFixed(1)}px)`;
+          }
+          if (needle) {
+            const needlePos = Math.max(0, Math.min(100, p * 110));
+            needle.style.left = `${needlePos.toFixed(1)}%`;
+            needle.style.boxShadow = `0 0 ${Math.floor(16 + beatPulse * 22)}px #38bdf8, 0 0 38px #38bdf8`;
+
+            // Active event chips flare as laser needle passes
+            const eventChips = document.querySelectorAll('.track-event-chip');
+            eventChips.forEach(chip => {
+              const leftPct = parseFloat(chip.style.left) || 0;
+              const dist = Math.abs(needlePos - leftPct);
+              if (dist < 8) {
+                const flare = Math.max(0, 1 - dist / 8);
+                chip.style.transform = `scale(${(1.0 + flare * 0.24).toFixed(2)})`;
+                chip.style.boxShadow = `0 0 ${Math.floor(18 + flare * 28)}px rgba(245, 158, 11, 0.95), 0 0 45px rgba(56, 189, 248, 0.6)`;
+              } else {
+                chip.style.transform = 'scale(1.0)';
+                chip.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.5)';
+              }
+            });
+          }
+          if (colLeft) {
+            colLeft.style.transform = `translate3d(${(Math.min(1, p * 3) === 1 ? 0 : (1 - p * 3) * -35).toFixed(1)}px, ${(Math.sin(p * Math.PI) * -8).toFixed(1)}px, 0)`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 7: CAST PRESENCE HEATMAP SCANNER (35.625s - 41.25s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[7];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const frame = document.getElementById('presence-frame-7');
+          const scanBar = document.getElementById('presence-scan-bar-7');
+          const colLeft = document.getElementById('col-7-left');
+
+          if (frame) {
+            const rotY = 12 - p * 20;
+            frame.style.transform = `perspective(1600px) rotateY(${rotY.toFixed(2)}deg) translate3d(0, ${floatWave.toFixed(1)}px, 0) scale(${(1.0 + p * 0.04).toFixed(3)})`;
+          }
+          if (scanBar) {
+            const scanPct = Math.min(100, Math.max(0, p * 105));
+            scanBar.style.left = `${scanPct.toFixed(1)}%`;
+            scanBar.style.boxShadow = `0 0 ${Math.floor(16 + beatPulse * 20)}px #38bdf8, 0 0 30px #d4af37`;
+
+            // Active column cells flare as laser bar scans
+            const activeCol = Math.min(9, Math.floor((scanPct / 100) * 10));
+            document.querySelectorAll('.p-cell').forEach(cell => {
+              const col = parseInt(cell.dataset.col, 10);
+              if (col === activeCol) {
+                cell.style.filter = 'brightness(1.6) drop-shadow(0 0 10px #38bdf8)';
+                cell.style.transform = 'scale(1.14)';
+              } else {
+                cell.style.filter = 'none';
+                cell.style.transform = 'scale(1.0)';
+              }
+            });
+          }
+          if (colLeft) {
+            colLeft.style.transform = `translate3d(${(Math.min(1, p * 3) === 1 ? 0 : (1 - p * 3) * -35).toFixed(1)}px, ${(Math.sin(p * Math.PI) * -8).toFixed(1)}px, 0)`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 8: STORY TIME MACHINE & VISUAL DIFF ENGINE (41.25s - 46.875s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[8];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const frame = document.getElementById('timemachine-frame-8');
+          const wordsAdded = document.getElementById('diff-words-added-8');
+          const wordsRemoved = document.getElementById('diff-words-removed-8');
+          const colLeft = document.getElementById('col-8-left');
+
+          if (frame) {
+            const rotY = -12 + p * 22;
+            const rotX = 5 - p * 6;
+            frame.style.transform = `perspective(1600px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) translate3d(0, ${floatWave.toFixed(1)}px, 0) scale(${(0.98 + p * 0.05).toFixed(3)})`;
+          }
+          if (wordsAdded && wordsRemoved) {
+            const addedCount = Math.floor(Math.min(420, Math.max(120, p * 1.35 * 420)));
+            const removedCount = Math.floor(Math.min(128, Math.max(30, p * 1.35 * 128)));
+            wordsAdded.textContent = addedCount.toString();
+            wordsRemoved.textContent = removedCount.toString();
+            if (wordsAdded.parentElement) {
+              wordsAdded.parentElement.style.boxShadow = `0 0 ${Math.floor(10 + beatPulse * 16)}px rgba(16, 185, 129, 0.6)`;
+            }
+          }
+          if (colLeft) {
+            colLeft.style.transform = `translate3d(${(Math.min(1, p * 3) === 1 ? 0 : (1 - p * 3) * -35).toFixed(1)}px, ${(Math.sin(p * Math.PI) * -8).toFixed(1)}px, 0)`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 9: COVER DESIGNER STUDIO (46.875s - 52.50s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[9];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const win = document.getElementById('cover-window-9');
+          const canvasCard = document.getElementById('cover-canvas-card-9');
+          const colLeft = document.getElementById('col-9-left');
+
+          if (win) {
+            const rotY = -10 + p * 18;
+            win.style.transform = `perspective(1600px) rotateY(${rotY.toFixed(2)}deg) translate3d(0, ${floatWave.toFixed(1)}px, 0) scale(${(1.0 + p * 0.05).toFixed(3)})`;
+          }
+          if (canvasCard) {
+            const cardPop = 45 + beatPulse * 10;
+            canvasCard.style.transform = `translate3d(0, ${(Math.sin(p * Math.PI) * -12 + floatWave).toFixed(1)}px, ${cardPop.toFixed(1)}px) scale(${(1.05 + beatPulse * 0.03).toFixed(3)})`;
+            canvasCard.style.boxShadow = `0 35px 85px rgba(0, 0, 0, 0.95), 0 0 ${Math.floor(35 + beatPulse * 30)}px rgba(212, 175, 55, 0.55)`;
+          }
+          if (colLeft) {
+            colLeft.style.transform = `translate3d(${(Math.min(1, p * 3) === 1 ? 0 : (1 - p * 3) * -35).toFixed(1)}px, ${(Math.sin(p * Math.PI) * -8).toFixed(1)}px, 0)`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 10: UNIVERSAL PUBLISHING (52.50s - 56.25s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[10];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const p = (t - s.start) / (s.end - s.start);
+          const quad = document.getElementById('export-quad-10');
+          const colLeft = document.getElementById('col-10-left');
+
+          if (quad) {
+            const rotY = -10 + p * 18;
+            quad.style.transform = `perspective(1600px) rotateY(${rotY.toFixed(2)}deg) translate3d(0, ${floatWave.toFixed(1)}px, 0) scale(${(1.0 + p * 0.06).toFixed(3)})`;
+          }
+
+          const tEpub = document.getElementById('tile-epub');
+          const tShunn = document.getElementById('tile-shunn');
+          const tPdf = document.getElementById('tile-pdf');
+          const tMd = document.getElementById('tile-md');
+
+          if (tEpub && tShunn && tPdf && tMd) {
+            const spread = Math.sin(p * Math.PI) * 32;
+            const bounce = 1.03 + beatPulse * 0.06;
+            tEpub.style.transform = `translate3d(${-spread.toFixed(1)}px, ${-spread.toFixed(1)}px, 35px) scale(${bounce.toFixed(3)})`;
+            tEpub.style.boxShadow = `0 20px 50px rgba(0, 0, 0, 0.7), 0 0 ${Math.floor(20 + beatPulse * 25)}px rgba(56, 189, 248, 0.5)`;
+
+            tShunn.style.transform = `translate3d(${spread.toFixed(1)}px, ${-spread.toFixed(1)}px, 55px) scale(${bounce.toFixed(3)})`;
+            tShunn.style.boxShadow = `0 20px 50px rgba(0, 0, 0, 0.7), 0 0 ${Math.floor(20 + beatPulse * 25)}px rgba(245, 158, 11, 0.5)`;
+
+            tPdf.style.transform = `translate3d(${-spread.toFixed(1)}px, ${spread.toFixed(1)}px, 45px) scale(${bounce.toFixed(3)})`;
+            tPdf.style.boxShadow = `0 20px 50px rgba(0, 0, 0, 0.7), 0 0 ${Math.floor(20 + beatPulse * 25)}px rgba(16, 185, 129, 0.5)`;
+
+            tMd.style.transform = `translate3d(${spread.toFixed(1)}px, ${spread.toFixed(1)}px, 70px) scale(${bounce.toFixed(3)})`;
+            tMd.style.boxShadow = `0 20px 50px rgba(0, 0, 0, 0.7), 0 0 ${Math.floor(20 + beatPulse * 25)}px rgba(192, 132, 252, 0.5)`;
+          }
+
+          if (colLeft) {
+            colLeft.style.transform = `translate3d(${(Math.min(1, p * 3) === 1 ? 0 : (1 - p * 3) * -35).toFixed(1)}px, ${(Math.sin(p * Math.PI) * -8).toFixed(1)}px, 0)`;
+          }
+        }
+      }
+
+      // --------------------------------------------------------
+      // SCENE 11: KINETIC CRESCENDO & FINALE (56.25s - 62.00s)
+      // --------------------------------------------------------
+      {
+        const s = scenes[11];
+        if (t >= s.start - FADE && t <= s.end + FADE) {
+          const wordEl = document.getElementById('crescendo-word');
+          const outroEl = document.getElementById('outro-resolve');
+          const wordsEndTime = 58.80; // 2.55s kinetic slam
+
+          if (t < wordsEndTime) {
+            if (outroEl) outroEl.style.opacity = '0';
+            if (wordEl) {
+              wordEl.style.opacity = '1';
+              const words = ['WRITE.', 'CRAFT.', 'PLOT.', 'REVISE.', 'DESIGN.', 'PUBLISH.'];
+              const colors = ['#ffffff', '#f59e0b', '#10b981', '#34d399', '#c084fc', '#f43f5e'];
+              const wordP = Math.max(0, Math.min(1, (t - s.start) / (wordsEndTime - s.start)));
+              const subStep = Math.min(5, Math.floor(wordP * 6));
+
+              wordEl.textContent = words[subStep];
+              wordEl.style.color = colors[subStep];
+
+              const bounce = 1.0 + Math.sin(((wordP * 6) % 1) * Math.PI) * 0.35;
+              wordEl.style.transform = `scale(${bounce.toFixed(3)})`;
+              wordEl.style.textShadow = `0 0 60px ${colors[subStep]}, 0 0 120px ${colors[subStep]}, 0 0 180px ${colors[subStep]}, 2px 2px 0px rgba(255, 255, 255, 0.4)`;
+            }
+          } else {
+            if (wordEl) wordEl.style.opacity = '0';
+            if (outroEl) {
+              const outroP = Math.max(0, Math.min(1, (t - wordsEndTime) / (s.end - wordsEndTime)));
+              const fadeIn = Math.min(1, (t - wordsEndTime) / 0.45);
+              outroEl.style.opacity = `${fadeIn.toFixed(3)}`;
+              outroEl.style.transform = `scale(${(1.0 + outroP * 0.05).toFixed(3)})`;
+            }
+          }
+        }
+      }
+    }
+
+    /* ========================================================
+       5. 60 FPS ANIMATION LOOP
+       ======================================================== */
+    function mainLoop(timestamp) {
+      if (!isPlaying) return;
+
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const delta = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      currentTime += delta;
+
+      // Gentle audio fade out during the final 1.5 seconds of the logo resolve
+      if (audio && !audio.muted) {
+        if (currentTime > TOTAL_RUNTIME - 1.5) {
+          const fadeP = Math.max(0, (TOTAL_RUNTIME - currentTime) / 1.5);
+          audio.volume = fadeP;
+        } else {
+          audio.volume = 1.0;
+        }
+      }
+
+      // Handle video loop or completion
+      if (currentTime >= TOTAL_RUNTIME) {
+        currentTime = TOTAL_RUNTIME;
+        updateMotion(currentTime);
+        pause();
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          stopRecording();
+        }
+        return;
+      }
+
+      syncAudio(currentTime);
+      updateMotion(currentTime);
+
+      requestAnimationFrame(mainLoop);
+    }
+
+    /* ========================================================
+       6. UI CONTROLS & EVENT LISTENERS
+       ======================================================== */
+    document.getElementById('btn-play').addEventListener('click', togglePlay);
+    document.getElementById('btn-restart').addEventListener('click', () => {
+      seekTo(0);
+      play();
+    });
+
+    // Scrubber click & drag
+    const scrubberTrack = document.getElementById('scrubber-track');
+    function handleScrub(e) {
+      const rect = scrubberTrack.getBoundingClientRect();
+      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      seekTo(pos * TOTAL_RUNTIME);
+    }
+    scrubberTrack.addEventListener('click', handleScrub);
+
+    // Audio Mute Toggle
+    const btnSound = document.getElementById('btn-sound');
+    const soundIcon = document.getElementById('sound-icon');
+    btnSound.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+      soundIcon.textContent = audio.muted ? '🔇' : '🔊';
+    });
+
+    // Soundtrack track switcher
+    const soundtrackSelect = document.getElementById('soundtrack-select');
+    soundtrackSelect.addEventListener('change', (e) => {
+      const wasPlaying = isPlaying;
+      audio.src = e.target.value;
+      audio.currentTime = currentTime;
+      if (wasPlaying) audio.play().catch(() => {});
+    });
+
+    // Clean Recording Mode ('H' key or button)
+    const btnClean = document.getElementById('btn-clean');
+    function toggleCleanMode() {
+      document.body.classList.toggle('clean-rec');
+    }
+    btnClean.addEventListener('click', toggleCleanMode);
+
+    // Fullscreen Toggle ('F' key)
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    btnFullscreen.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === 'KeyH') {
+        toggleCleanMode();
+      } else if (e.code === 'Escape') {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          stopRecording();
+        } else if (document.body.classList.contains('clean-rec')) {
+          toggleCleanMode();
+        }
+      } else if (e.code === 'KeyF') {
+        btnFullscreen.click();
+      } else if (e.code === 'KeyR') {
+        seekTo(0);
+        play();
+      } else if (e.code === 'ArrowRight') {
+        seekTo(currentTime + 1.0);
+      } else if (e.code === 'ArrowLeft') {
+        seekTo(currentTime - 1.0);
+      }
+    });
+
+    /* ========================================================
+       7. ULTRA-HIGH-DEFINITION VIDEO RECORDER & AUDIO SYNC
+       Captures full DOM visuals + soundtrack without UI overlays!
+       ======================================================== */
+    const btnRecord = document.getElementById('btn-record-video');
+    const recLabel = document.getElementById('rec-label');
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let currentDisplayStream = null;
+    let audioCtx = null;
+    let audioSource = null;
+    let audioDest = null;
+
+    function ensureAudioRouting() {
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            audioCtx = new AudioContextClass();
+            audioSource = audioCtx.createMediaElementSource(audio);
+            audioDest = audioCtx.createMediaStreamDestination();
+            audioSource.connect(audioDest);
+            audioSource.connect(audioCtx.destination);
+          }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch (err) {
+        console.warn('Audio routing notice:', err);
+      }
+      return audioDest ? audioDest.stream : null;
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        try {
+          mediaRecorder.stop();
+        } catch (e) {
+          console.warn('MediaRecorder stop error:', e);
+        }
+      }
+      if (currentDisplayStream) {
+        currentDisplayStream.getTracks().forEach(track => {
+          try { track.stop(); } catch (e) {}
+        });
+        currentDisplayStream = null;
+      }
+      document.body.classList.remove('clean-rec');
+      recLabel.textContent = 'EXPORT MP4';
+      btnRecord.style.background = 'rgba(239, 68, 68, 0.2)';
+    }
+    window.stopRecording = stopRecording;
+
+    btnRecord.addEventListener('click', async () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        stopRecording();
+        return;
+      }
+
+      // 1. Prepare Audio Routing
+      const internalAudioStream = ensureAudioRouting();
+
+      // 2. Request Tab Video Stream
+      let displayStream = null;
+      try {
+        displayStream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            displaySurface: 'browser',
+            frameRate: 60,
+            cursor: 'never'
+          },
+          audio: true,
+          preferCurrentTab: true,
+          selfBrowserSurface: 'include',
+          systemAudio: 'include'
+        });
+      } catch (err) {
+        console.warn('Screen capture cancelled or unavailable:', err);
+        return;
+      }
+
+      currentDisplayStream = displayStream;
+
+      // 3. Assemble Combined Stream (Video + Digital Direct Audio)
+      const videoTrack = displayStream.getVideoTracks()[0];
+      const audioTracks = [];
+
+      if (internalAudioStream && internalAudioStream.getAudioTracks().length > 0) {
+        audioTracks.push(internalAudioStream.getAudioTracks()[0]);
+      } else if (displayStream.getAudioTracks().length > 0) {
+        audioTracks.push(displayStream.getAudioTracks()[0]);
+      }
+
+      const combinedStream = new MediaStream([videoTrack, ...audioTracks]);
+
+      videoTrack.onended = () => {
+        stopRecording();
+      };
+
+      // 4. Select best supported codec
+      let mimeType = 'video/webm;codecs=vp9,opus';
+      if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1,mp4a.40.2')) {
+        mimeType = 'video/mp4;codecs=avc1,mp4a.40.2';
+      } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+        mimeType = 'video/mp4';
+      } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+        mimeType = 'video/webm;codecs=vp9,opus';
+      } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
+        mimeType = 'video/webm;codecs=vp8,opus';
+      } else if (MediaRecorder.isTypeSupported('video/webm')) {
+        mimeType = 'video/webm';
+      }
+
+      try {
+        mediaRecorder = new MediaRecorder(combinedStream, {
+          mimeType,
+          videoBitsPerSecond: 20000000 // 20 Mbps master quality
+        });
+      } catch (e) {
+        mediaRecorder = new MediaRecorder(combinedStream);
+      }
+
+      recordedChunks = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          recordedChunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const actualMime = mediaRecorder.mimeType || mimeType;
+        const ext = actualMime.includes('mp4') ? 'mp4' : 'webm';
+        if (recordedChunks.length > 0) {
+          const blob = new Blob(recordedChunks, { type: actualMime });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = `Chronicle-60s-Master-Showreel.${ext}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 15000);
+        }
+        stopRecording();
+      };
+
+      // 5. Hide all UI controls, scrubber dock, and 4k resolution pills
+      document.body.classList.add('clean-rec');
+
+      // 6. Smooth rewind and start recording
+      recLabel.textContent = 'RECORDING (ESC/STOP)...';
+      btnRecord.style.background = '#ef4444';
+
+      // 350ms delay for UI fadeout to complete before recording starts
+      setTimeout(() => {
+        seekTo(0);
+        mediaRecorder.start(250);
+        play();
+      }, 350);
+    });
+
+    // Expose control functions globally for testing and automation
+    window.seekTo = seekTo;
+    window.updateMotion = updateMotion;
+    window.play = play;
+    window.pause = pause;
+
+    // Initial render at 0.0s
+    updateMotion(0);
+  </script>
+</body>
+</html>
