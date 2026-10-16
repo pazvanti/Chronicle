@@ -1,21 +1,69 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="classic-dark">
   <head>
     <meta charset="UTF-8" />
+    <!-- Early theme bootstrap: synchronous execution before DOM/CSS parsing to prevent white flash -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('epub_editor_app_settings_v1');
+          var theme = 'classic-dark';
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (parsed && parsed.uiTheme) {
+              theme = parsed.uiTheme;
+            }
+            if (parsed && parsed.minimalistMode) {
+              document.documentElement.setAttribute('data-minimalist-mode', 'true');
+            }
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'classic-dark');
+        }
+      })();
+    </script>
+    <style>
+      :root {
+        --bg-app: #080a10;
+        --text-primary: #f7f4ec;
+      }
+      html, body, #root {
+        background-color: #080a10;
+        color: #f7f4ec;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+      }
+      html[data-theme="classic-dark"], html[data-theme="classic-dark"] body { background-color: #080a10; color: #f7f4ec; }
+      html[data-theme="modernx-dark"], html[data-theme="modernx-dark"] body { background-color: #090d16; color: #f1f5f9; }
+      html[data-theme="glass-dark"], html[data-theme="glass-dark"] body { background-color: #060913; color: #f8fafc; }
+      html[data-theme="classic-light"], html[data-theme="classic-light"] body { background-color: #f7f8fa; color: #1e293b; }
+      html[data-theme="modernx-light"], html[data-theme="modernx-light"] body { background-color: #f8fafc; color: #0f172a; }
+      html[data-theme="glass-light"], html[data-theme="glass-light"] body { background-color: #f5f7fb; color: #0f172a; }
+    </style>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" href="/chronicle-logo.png" />
     <link rel="apple-touch-icon" href="/chronicle-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Chronicle — The complete authoring, worldbuilding, and multi-format book publishing suite for novelists and writers." />
     <title>Chronicle — The Complete Authoring Suite for Writers</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- 100% privacy-first analytics -->
-    <script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+    <!-- 100% Offline Local Fonts: bundled with app, zero external internet dependencies -->
+    <link rel="stylesheet" href="/fonts/fonts.css" />
+    <!-- 100% privacy-first analytics (only loaded when hosted on web, completely disabled offline and in desktop) -->
+    <script>
+      if (typeof window !== 'undefined' && !window.__TAURI__ && !window.__TAURI_INTERNALS__ && location.protocol.startsWith('http') && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
+        var s = document.createElement('script');
+        s.async = true;
+        s.dataset.collectDnt = 'true';
+        s.src = 'https://scripts.simpleanalyticscdn.com/latest.js';
+        document.head.appendChild(s);
+      }
+    </script>
   </head>
   <body>
-    <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif?collect-dnt=true" alt="" referrerpolicy="no-referrer-when-downgrade"/></noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

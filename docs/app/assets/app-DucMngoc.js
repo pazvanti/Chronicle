@@ -1,0 +1,1 @@
+import{Et as e}from"./index-ChEknms3.js";async function t(){return e(`plugin:app|version`)}export{t as getVersion};

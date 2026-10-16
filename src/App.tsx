@@ -7,36 +7,40 @@ import { SubNavHeader } from './components/Navigation/SubNavHeader';
 import { ChapterList } from './components/Sidebar/ChapterList';
 import { EditorContainer } from './components/Editor/EditorContainer';
 import { ReaderView } from './components/Reader/ReaderView';
-import { TocManager } from './components/Toc/TocManager';
-import { MetadataEditor } from './components/Metadata/MetadataEditor';
-import { CoverStudio } from './components/Cover/CoverStudio';
-import { StyleStudio } from './components/StyleStudio/StyleStudio';
-import { AssetManager } from './components/Assets/AssetManager';
-import { EpubInspector } from './components/Inspector/EpubInspector';
-import { CastPresenceGrid } from './components/CastPresence/CastPresenceGrid';
-import { TimelineStudio } from './components/Timeline/TimelineStudio';
-import { CharacterStudio } from './components/Characters/CharacterStudio';
-import { LocationStudio } from './components/Locations/LocationStudio';
+import { Upload, Loader2 } from 'lucide-react';
+
+// Code-split heavy studios and modals to accelerate initial startup
+const TocManager = React.lazy(() => import('./components/Toc/TocManager').then(m => ({ default: m.TocManager })));
+const MetadataEditor = React.lazy(() => import('./components/Metadata/MetadataEditor').then(m => ({ default: m.MetadataEditor })));
+const CoverStudio = React.lazy(() => import('./components/Cover/CoverStudio').then(m => ({ default: m.CoverStudio })));
+const StyleStudio = React.lazy(() => import('./components/StyleStudio/StyleStudio').then(m => ({ default: m.StyleStudio })));
+const AssetManager = React.lazy(() => import('./components/Assets/AssetManager').then(m => ({ default: m.AssetManager })));
+const EpubInspector = React.lazy(() => import('./components/Inspector/EpubInspector').then(m => ({ default: m.EpubInspector })));
+const CastPresenceGrid = React.lazy(() => import('./components/CastPresence/CastPresenceGrid').then(m => ({ default: m.CastPresenceGrid })));
+const TimelineStudio = React.lazy(() => import('./components/Timeline/TimelineStudio').then(m => ({ default: m.TimelineStudio })));
+const CharacterStudio = React.lazy(() => import('./components/Characters/CharacterStudio').then(m => ({ default: m.CharacterStudio })));
+const LocationStudio = React.lazy(() => import('./components/Locations/LocationStudio').then(m => ({ default: m.LocationStudio })));
+
+const WebDavConfigModal = React.lazy(() => import('./components/Cloud/WebDavConfigModal').then(m => ({ default: m.WebDavConfigModal })));
+const SaveDestinationModal = React.lazy(() => import('./components/Cloud/SaveDestinationModal').then(m => ({ default: m.SaveDestinationModal })));
+const SaveAsModal = React.lazy(() => import('./components/Cloud/SaveAsModal').then(m => ({ default: m.SaveAsModal })));
+const CloudFileBrowserModal = React.lazy(() => import('./components/Cloud/CloudFileBrowserModal').then(m => ({ default: m.CloudFileBrowserModal })));
+const CloudDesktopNoticeModal = React.lazy(() => import('./components/Cloud/CloudDesktopNoticeModal').then(m => ({ default: m.CloudDesktopNoticeModal })));
+const SettingsModal = React.lazy(() => import('./components/Settings/SettingsModal').then(m => ({ default: m.SettingsModal })));
+const SnapshotsModal = React.lazy(() => import('./components/Snapshots/SnapshotsModal').then(m => ({ default: m.SnapshotsModal })));
+const MobileNoticeModal = React.lazy(() => import('./components/Mobile/MobileNoticeModal').then(m => ({ default: m.MobileNoticeModal })));
+
 import { StatusBar } from './components/StatusBar/StatusBar';
 import { GhostHud } from './components/Zen/GhostHud';
 import { ZenLeftChapterMenu } from './components/Zen/ZenLeftChapterMenu';
 import { WelcomeScreen } from './components/Welcome/WelcomeScreen';
 import { NotificationToast } from './components/NotificationToast';
-import { WebDavConfigModal } from './components/Cloud/WebDavConfigModal';
-import { SaveDestinationModal } from './components/Cloud/SaveDestinationModal';
-import { SaveAsModal } from './components/Cloud/SaveAsModal';
-import { CloudFileBrowserModal } from './components/Cloud/CloudFileBrowserModal';
-import { CloudDesktopNoticeModal } from './components/Cloud/CloudDesktopNoticeModal';
 import { WelcomeModal } from './components/Welcome/WelcomeModal';
 import { isKeyMatch } from './utils/platform';
 import { UnsavedChangesModal } from './components/Common/UnsavedChangesModal';
-import { SettingsModal } from './components/Settings/SettingsModal';
-import { SnapshotsModal } from './components/Snapshots/SnapshotsModal';
-import { MobileNoticeModal } from './components/Mobile/MobileNoticeModal';
 import { LibraryView } from './components/Library/LibraryView';
 import { useSmallScreenDetector } from './hooks/useSmallScreenDetector';
 import { isTauri } from './services/cloud/webdavClient';
-import { Upload, Loader2 } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const {
@@ -228,16 +232,22 @@ const AppContent: React.FC = () => {
               {!isZenMode && <SubNavHeader />}
               {viewMode === 'reader' && <ReaderView />}
               {viewMode === 'editor' && <EditorContainer />}
-              {viewMode === 'characters' && <CharacterStudio />}
-              {viewMode === 'locations' && <LocationStudio />}
-              {viewMode === 'cast-grid' && <CastPresenceGrid />}
-              {viewMode === 'timeline' && <TimelineStudio />}
-              {viewMode === 'toc' && <TocManager />}
-              {viewMode === 'metadata' && <MetadataEditor />}
-              {viewMode === 'cover' && <CoverStudio />}
-              {viewMode === 'styles' && <StyleStudio />}
-              {viewMode === 'assets' && <AssetManager />}
-              {viewMode === 'inspector' && <EpubInspector />}
+              <React.Suspense fallback={
+                <div className="workspace-loading-overlay">
+                  <Loader2 size={38} color="var(--accent-primary)" className="animate-spin" />
+                </div>
+              }>
+                {viewMode === 'characters' && <CharacterStudio />}
+                {viewMode === 'locations' && <LocationStudio />}
+                {viewMode === 'cast-grid' && <CastPresenceGrid />}
+                {viewMode === 'timeline' && <TimelineStudio />}
+                {viewMode === 'toc' && <TocManager />}
+                {viewMode === 'metadata' && <MetadataEditor />}
+                {viewMode === 'cover' && <CoverStudio />}
+                {viewMode === 'styles' && <StyleStudio />}
+                {viewMode === 'assets' && <AssetManager />}
+                {viewMode === 'inspector' && <EpubInspector />}
+              </React.Suspense>
             </>
           )}
         </div>
@@ -262,45 +272,47 @@ const AppContent: React.FC = () => {
 
       <NotificationToast />
 
-      {/* Cloud & Save Modals */}
-      {isWebDavConfigOpen && (
-        <WebDavConfigModal onClose={() => setIsWebDavConfigOpen(false)} />
-      )}
-      {isSaveDestinationOpen && (
-        <SaveDestinationModal onClose={() => setIsSaveDestinationOpen(false)} />
-      )}
-      {isSaveAsOpen && (
-        <SaveAsModal onClose={() => setIsSaveAsOpen(false)} />
-      )}
-      {isCloudBrowserOpen && (
-        <CloudFileBrowserModal onClose={() => setIsCloudBrowserOpen(false)} />
-      )}
-      {isCloudDesktopNoticeOpen && (
-        <CloudDesktopNoticeModal onClose={() => setIsCloudDesktopNoticeOpen(false)} />
-      )}
+      {/* Cloud & Save Modals (Suspended) */}
+      <React.Suspense fallback={null}>
+        {isWebDavConfigOpen && (
+          <WebDavConfigModal onClose={() => setIsWebDavConfigOpen(false)} />
+        )}
+        {isSaveDestinationOpen && (
+          <SaveDestinationModal onClose={() => setIsSaveDestinationOpen(false)} />
+        )}
+        {isSaveAsOpen && (
+          <SaveAsModal onClose={() => setIsSaveAsOpen(false)} />
+        )}
+        {isCloudBrowserOpen && (
+          <CloudFileBrowserModal onClose={() => setIsCloudBrowserOpen(false)} />
+        )}
+        {isCloudDesktopNoticeOpen && (
+          <CloudDesktopNoticeModal onClose={() => setIsCloudDesktopNoticeOpen(false)} />
+        )}
 
-      {/* Introductory Welcome & Quick Start Modal */}
-      <WelcomeModal
-        isOpen={isWelcomeModalOpen}
-        onClose={() => setIsWelcomeModalOpen(false)}
-        onOpenCloud={() => setIsCloudBrowserOpen(true)}
-      />
-
-      {/* Studio Settings & Preferences Modal */}
-      {isSettingsOpen && (
-        <SettingsModal
-          initialTab={settingsInitialTab}
-          onClose={closeSettings}
+        {/* Introductory Welcome & Quick Start Modal */}
+        <WelcomeModal
+          isOpen={isWelcomeModalOpen}
+          onClose={() => setIsWelcomeModalOpen(false)}
+          onOpenCloud={() => setIsCloudBrowserOpen(true)}
         />
-      )}
 
-      {/* Story Snapshots (Time Machine) Modal */}
-      <SnapshotsModal />
+        {/* Studio Settings & Preferences Modal */}
+        {isSettingsOpen && (
+          <SettingsModal
+            initialTab={settingsInitialTab}
+            onClose={closeSettings}
+          />
+        )}
 
-      {/* Small Screen / Mobile Device Handheld Notice Modal */}
-      {showMobileNotice && (
-        <MobileNoticeModal onDismiss={dismissMobileNotice} />
-      )}
+        {/* Story Snapshots (Time Machine) Modal */}
+        <SnapshotsModal />
+
+        {/* Small Screen / Mobile Device Handheld Notice Modal */}
+        {showMobileNotice && (
+          <MobileNoticeModal onDismiss={dismissMobileNotice} />
+        )}
+      </React.Suspense>
 
       {/* Unsaved Changes Confirmation Modal */}
       {pendingUnsavedAction && <UnsavedChangesModal />}

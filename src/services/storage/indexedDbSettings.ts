@@ -175,41 +175,97 @@ async function migrateLegacySettings(): Promise<Partial<ChronicleSettings>> {
   return legacy;
 }
 
+function getInitialFastSettings(): ChronicleSettings {
+  let localFallback: Partial<ChronicleSettings> = {};
+  let welcomePref = DEFAULT_CHRONICLE_SETTINGS.showWelcomeOnStartup;
+  let startupBehaviorPref: StartupBehavior = DEFAULT_CHRONICLE_SETTINGS.startupBehavior || 'previous';
+
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem('epub_editor_app_settings_v1');
+      if (raw) {
+        localFallback = JSON.parse(raw);
+      }
+      const savedWelcome = localStorage.getItem('chronicle_show_welcome_on_startup');
+      if (savedWelcome !== null) {
+        welcomePref = savedWelcome === 'true';
+      }
+      const savedBehavior = localStorage.getItem('chronicle_startup_behavior');
+      if (savedBehavior === 'previous' || savedBehavior === 'library') {
+        startupBehaviorPref = savedBehavior;
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  return {
+    ...DEFAULT_CHRONICLE_SETTINGS,
+    ...localFallback,
+    showWelcomeOnStartup: welcomePref,
+    startupBehavior: startupBehaviorPref,
+    zenSettings: {
+      ...DEFAULT_ZEN_SETTINGS,
+      ...((localFallback as any).zenSettings || {}),
+    },
+  };
+}
+
 let memorySettings: ChronicleSettings | null = null;
+let loadPromise: Promise<ChronicleSettings> | null = null;
+let isLoadedFromIndexedDb = false;
 let saveQueue: Promise<ChronicleSettings> = Promise.resolve(DEFAULT_CHRONICLE_SETTINGS);
 
+// Prime synchronously from localStorage immediately on script load
+try {
+  memorySettings = getInitialFastSettings();
+} catch {
+  memorySettings = { ...DEFAULT_CHRONICLE_SETTINGS };
+}
+
 /**
- * Loads all settings from IndexedDB on startup
+ * Loads all settings from IndexedDB on startup (deduplicated & cached)
  */
 export async function loadAllSettings(): Promise<ChronicleSettings> {
-  try {
-    const db = await openSettingsDatabase();
+  // If already loaded and reconciled with IndexedDB, return memorySettings immediately
+  if (isLoadedFromIndexedDb && memorySettings) {
+    return memorySettings;
+  }
 
-    const stored = await new Promise<ChronicleSettings | null>((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const request = store.get(SETTINGS_KEY);
+  // Deduplicate concurrent calls during startup
+  if (loadPromise) {
+    return loadPromise;
+  }
 
-      request.onsuccess = () => {
-        resolve(request.result || null);
-      };
-
-      request.onerror = () => {
-        reject(request.error);
-      };
-    });
-
-    let localFallback: Partial<ChronicleSettings> = {};
+  loadPromise = (async () => {
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const raw = localStorage.getItem('epub_editor_app_settings_v1');
-        if (raw) {
-          localFallback = JSON.parse(raw);
+      const db = await openSettingsDatabase();
+
+      const stored = await new Promise<ChronicleSettings | null>((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.get(SETTINGS_KEY);
+
+        request.onsuccess = () => {
+          resolve(request.result || null);
+        };
+
+        request.onerror = () => {
+          reject(request.error);
+        };
+      });
+
+      let localFallback: Partial<ChronicleSettings> = {};
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const raw = localStorage.getItem('epub_editor_app_settings_v1');
+          if (raw) {
+            localFallback = JSON.parse(raw);
+          }
         }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
-    }
 
     if (stored) {
       let welcomePref = stored.showWelcomeOnStartup;
@@ -262,6 +318,8 @@ export async function loadAllSettings(): Promise<ChronicleSettings> {
       }
 
       memorySettings = merged;
+      isLoadedFromIndexedDb = true;
+      loadPromise = null;
       return merged;
     }
 
@@ -280,6 +338,8 @@ export async function loadAllSettings(): Promise<ChronicleSettings> {
     }
 
     memorySettings = initialSettings;
+    isLoadedFromIndexedDb = true;
+    loadPromise = null;
     await saveSettings(initialSettings);
     return initialSettings;
   } catch (err) {
@@ -314,8 +374,13 @@ export async function loadAllSettings(): Promise<ChronicleSettings> {
       editorLayout: fallbackLayout,
     };
     memorySettings = fallbackSettings;
+    isLoadedFromIndexedDb = true;
+    loadPromise = null;
     return fallbackSettings;
   }
+  })();
+
+  return loadPromise;
 }
 
 /**
