@@ -54,6 +54,18 @@ export const ChapterList: React.FC = () => {
   const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedQuery, setDebouncedQuery] = useState<string>('');
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setDebouncedQuery('');
+      return;
+    }
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   const [editingItem, setEditingItem] = useState<{ id: string; type: 'folder' | 'chapter' } | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
   const [pendingDelete, setPendingDelete] = useState<{ id: string; type: 'folder' | 'chapter'; title: string } | null>(null);
@@ -134,25 +146,39 @@ export const ChapterList: React.FC = () => {
     return buildBinderTree(book.folders || [], book.chapters);
   }, [book]);
 
-  // Filtered Binder Tree for search queries
+  // Pre-index normalized lowercase title and plain-text body per chapter to avoid repetitive .toLowerCase() and regex allocations
+  const chapterSearchIndex = useMemo(() => {
+    const index = new Map<string, { titleLower: string; contentLower: string }>();
+    if (!book?.chapters) return index;
+    for (const ch of book.chapters) {
+      index.set(ch.id, {
+        titleLower: ch.title.toLowerCase(),
+        contentLower: ch.content ? ch.content.replace(/<[^>]*>/g, ' ').toLowerCase() : '',
+      });
+    }
+    return index;
+  }, [book?.chapters]);
+
+  // Filtered Binder Tree for search queries using cached search index and debounced query
   const filteredTree = useMemo(() => {
     if (!binderTree) return [];
-    if (!searchQuery.trim()) return binderTree;
-
-    const q = searchQuery.toLowerCase();
+    const effectiveQuery = debouncedQuery.trim().toLowerCase();
+    if (!effectiveQuery) return binderTree;
 
     function filterNodes(nodes: BinderItemNode[]): BinderItemNode[] {
       const results: BinderItemNode[] = [];
       for (const node of nodes) {
         if (node.type === 'chapter') {
-          if (
-            node.chapter.title.toLowerCase().includes(q) ||
-            node.chapter.content.toLowerCase().includes(q)
-          ) {
+          const indexed = chapterSearchIndex.get(node.chapter.id);
+          const matches = indexed
+            ? indexed.titleLower.includes(effectiveQuery) || indexed.contentLower.includes(effectiveQuery)
+            : node.chapter.title.toLowerCase().includes(effectiveQuery);
+
+          if (matches) {
             results.push(node);
           }
         } else if (node.type === 'folder') {
-          const folderMatches = node.name.toLowerCase().includes(q);
+          const folderMatches = node.name.toLowerCase().includes(effectiveQuery);
           const childMatches = filterNodes(node.children);
           if (folderMatches) {
             results.push({
@@ -172,7 +198,7 @@ export const ChapterList: React.FC = () => {
     }
 
     return filterNodes(binderTree);
-  }, [binderTree, searchQuery]);
+  }, [binderTree, debouncedQuery, chapterSearchIndex]);
 
   if (!book || sidebarCollapsed) {
     return null;

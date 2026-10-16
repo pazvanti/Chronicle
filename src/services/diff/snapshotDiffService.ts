@@ -181,9 +181,19 @@ export function calculateTextSimilarity(a: string, b: string): number {
 }
 
 /**
- * Word-level Myers / LCS diffing within modified paragraphs
+ * Word-level Myers / LCS diffing within modified paragraphs with prefix/suffix trimming
  */
 export function computeWordDiff(oldText: string, newText: string): WordDiffChunk[] {
+  if (oldText === newText) {
+    return oldText ? [{ type: 'equal', text: oldText }] : [];
+  }
+  if (!oldText) {
+    return newText ? [{ type: 'added', text: newText }] : [];
+  }
+  if (!newText) {
+    return oldText ? [{ type: 'removed', text: oldText }] : [];
+  }
+
   // Tokenize words and punctuation
   const tokenize = (str: string) => str.match(/\w+|[^\w\s]+|\s+/g) || [];
   const words1 = tokenize(oldText);
@@ -192,38 +202,82 @@ export function computeWordDiff(oldText: string, newText: string): WordDiffChunk
   const n = words1.length;
   const m = words2.length;
 
-  // LCS Matrix
-  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-  for (let i = 1; i <= n; i++) {
-    for (let j = 1; j <= m; j++) {
-      if (words1[i - 1] === words2[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
-      } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+  // 1. Prefix trimming
+  let start = 0;
+  while (start < n && start < m && words1[start] === words2[start]) {
+    start++;
+  }
+
+  // 2. Suffix trimming
+  let end1 = n - 1;
+  let end2 = m - 1;
+  while (end1 >= start && end2 >= start && words1[end1] === words2[end2]) {
+    end1--;
+    end2--;
+  }
+
+  const rawChunks: WordDiffChunk[] = [];
+
+  // Prefix equal chunks
+  for (let k = 0; k < start; k++) {
+    rawChunks.push({ type: 'equal', text: words1[k] });
+  }
+
+  // Middle diff
+  const mid1 = words1.slice(start, end1 + 1);
+  const mid2 = words2.slice(start, end2 + 1);
+  const midN = mid1.length;
+  const midM = mid2.length;
+
+  if (midN > 0 || midM > 0) {
+    if (midN === 0) {
+      for (const w of mid2) rawChunks.push({ type: 'added', text: w });
+    } else if (midM === 0) {
+      for (const w of mid1) rawChunks.push({ type: 'removed', text: w });
+    } else {
+      // LCS Matrix on trimmed middle
+      const dp: number[][] = Array.from({ length: midN + 1 }, () => new Array(midM + 1).fill(0));
+      for (let i = 1; i <= midN; i++) {
+        for (let j = 1; j <= midM; j++) {
+          if (mid1[i - 1] === mid2[j - 1]) {
+            dp[i][j] = dp[i - 1][j - 1] + 1;
+          } else {
+            dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+          }
+        }
+      }
+
+      // Backtrack
+      let i = midN;
+      let j = midM;
+      const midChunks: WordDiffChunk[] = [];
+
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && mid1[i - 1] === mid2[j - 1]) {
+          midChunks.push({ type: 'equal', text: mid1[i - 1] });
+          i--;
+          j--;
+        } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+          midChunks.push({ type: 'added', text: mid2[j - 1] });
+          j--;
+        } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+          midChunks.push({ type: 'removed', text: mid1[i - 1] });
+          i--;
+        }
+      }
+
+      midChunks.reverse();
+      for (const chunk of midChunks) {
+        rawChunks.push(chunk);
       }
     }
   }
 
-  // Backtrack to build chunks
-  let i = n;
-  let j = m;
-  const rawChunks: WordDiffChunk[] = [];
-
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && words1[i - 1] === words2[j - 1]) {
-      rawChunks.push({ type: 'equal', text: words1[i - 1] });
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      rawChunks.push({ type: 'added', text: words2[j - 1] });
-      j--;
-    } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
-      rawChunks.push({ type: 'removed', text: words1[i - 1] });
-      i--;
-    }
+  // Suffix equal chunks
+  const suffixLen = n - 1 - end1;
+  for (let k = 0; k < suffixLen; k++) {
+    rawChunks.push({ type: 'equal', text: words1[end1 + 1 + k] });
   }
-
-  rawChunks.reverse();
 
   // Consolidate adjacent chunks of identical type
   const consolidated: WordDiffChunk[] = [];
@@ -239,7 +293,7 @@ export function computeWordDiff(oldText: string, newText: string): WordDiffChunk
 }
 
 /**
- * Computes block-level diff rows between current manuscript blocks and snapshot blocks
+ * Computes block-level diff rows between current manuscript blocks and snapshot blocks with prefix/suffix trimming
  */
 export function computeBlockDiffRows(
   currentBlocks: ChapterContentBlock[],
@@ -248,102 +302,174 @@ export function computeBlockDiffRows(
   const n = currentBlocks.length;
   const m = snapshotBlocks.length;
 
-  // DP table scoring block matches (exact match = 2, similar match = 1, otherwise 0)
-  const scoreMatrix: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  if (n === 0 && m === 0) return [];
 
-  for (let i = 1; i <= n; i++) {
-    for (let j = 1; j <= m; j++) {
-      const b1 = currentBlocks[i - 1];
-      const b2 = snapshotBlocks[j - 1];
+  // 1. Prefix trimming
+  let start = 0;
+  while (start < n && start < m && currentBlocks[start].text === snapshotBlocks[start].text) {
+    start++;
+  }
 
-      if (b1.text === b2.text) {
-        scoreMatrix[i][j] = scoreMatrix[i - 1][j - 1] + 3;
-      } else {
-        const sim = calculateTextSimilarity(b1.text, b2.text);
-        if (sim >= 0.45) {
-          scoreMatrix[i][j] = scoreMatrix[i - 1][j - 1] + 2;
-        } else {
-          scoreMatrix[i][j] = Math.max(scoreMatrix[i - 1][j], scoreMatrix[i][j - 1]);
+  // 2. Suffix trimming
+  let endCur = n - 1;
+  let endSnap = m - 1;
+  while (endCur >= start && endSnap >= start && currentBlocks[endCur].text === snapshotBlocks[endSnap].text) {
+    endCur--;
+    endSnap--;
+  }
+
+  const rows: DiffRow[] = [];
+  let leftLineNum = 1;
+  let rightLineNum = 1;
+  let rowIdx = 0;
+
+  // Add prefix equal rows
+  for (let k = 0; k < start; k++) {
+    rows.push({
+      id: `diff-row-${rowIdx++}`,
+      type: 'equal',
+      leftBlock: currentBlocks[k],
+      rightBlock: snapshotBlocks[k],
+      leftIndex: leftLineNum++,
+      rightIndex: rightLineNum++,
+    });
+  }
+
+  // Middle trimmed sub-arrays
+  const midCur = currentBlocks.slice(start, endCur + 1);
+  const midSnap = snapshotBlocks.slice(start, endSnap + 1);
+  const midN = midCur.length;
+  const midM = midSnap.length;
+
+  if (midN > 0 || midM > 0) {
+    if (midN === 0) {
+      for (const b of midSnap) {
+        rows.push({
+          id: `diff-row-${rowIdx++}`,
+          type: 'added',
+          rightBlock: b,
+          rightIndex: rightLineNum++,
+        });
+      }
+    } else if (midM === 0) {
+      for (const b of midCur) {
+        rows.push({
+          id: `diff-row-${rowIdx++}`,
+          type: 'removed',
+          leftBlock: b,
+          leftIndex: leftLineNum++,
+        });
+      }
+    } else {
+      // DP table scoring block matches on middle slice only
+      const scoreMatrix: number[][] = Array.from({ length: midN + 1 }, () => new Array(midM + 1).fill(0));
+
+      for (let i = 1; i <= midN; i++) {
+        for (let j = 1; j <= midM; j++) {
+          const b1 = midCur[i - 1];
+          const b2 = midSnap[j - 1];
+
+          if (b1.text === b2.text) {
+            scoreMatrix[i][j] = scoreMatrix[i - 1][j - 1] + 3;
+          } else {
+            const sim = calculateTextSimilarity(b1.text, b2.text);
+            if (sim >= 0.45) {
+              scoreMatrix[i][j] = scoreMatrix[i - 1][j - 1] + 2;
+            } else {
+              scoreMatrix[i][j] = Math.max(scoreMatrix[i - 1][j], scoreMatrix[i][j - 1]);
+            }
+          }
+        }
+      }
+
+      // Backtrack to construct aligned pairs
+      let i = midN;
+      let j = midM;
+      const rawPairs: Array<{ left?: ChapterContentBlock; right?: ChapterContentBlock }> = [];
+
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0) {
+          const b1 = midCur[i - 1];
+          const b2 = midSnap[j - 1];
+          const sim = calculateTextSimilarity(b1.text, b2.text);
+
+          if (b1.text === b2.text || sim >= 0.45) {
+            rawPairs.push({ left: b1, right: b2 });
+            i--;
+            j--;
+            continue;
+          }
+        }
+
+        if (j > 0 && (i === 0 || scoreMatrix[i][j - 1] >= scoreMatrix[i - 1][j])) {
+          rawPairs.push({ right: midSnap[j - 1] });
+          j--;
+        } else if (i > 0 && (j === 0 || scoreMatrix[i][j - 1] < scoreMatrix[i - 1][j])) {
+          rawPairs.push({ left: midCur[i - 1] });
+          i--;
+        }
+      }
+
+      rawPairs.reverse();
+
+      for (let idx = 0; idx < rawPairs.length; idx++) {
+        const pair = rawPairs[idx];
+        const rowId = `diff-row-${rowIdx++}`;
+
+        if (pair.left && pair.right) {
+          if (pair.left.text === pair.right.text) {
+            rows.push({
+              id: rowId,
+              type: 'equal',
+              leftBlock: pair.left,
+              rightBlock: pair.right,
+              leftIndex: leftLineNum++,
+              rightIndex: rightLineNum++,
+            });
+          } else {
+            const wordDiff = computeWordDiff(pair.left.text, pair.right.text);
+            rows.push({
+              id: rowId,
+              type: 'modified',
+              leftBlock: pair.left,
+              rightBlock: pair.right,
+              leftIndex: leftLineNum++,
+              rightIndex: rightLineNum++,
+              wordDiff,
+            });
+          }
+        } else if (pair.left && !pair.right) {
+          rows.push({
+            id: rowId,
+            type: 'removed',
+            leftBlock: pair.left,
+            leftIndex: leftLineNum++,
+          });
+        } else if (!pair.left && pair.right) {
+          rows.push({
+            id: rowId,
+            type: 'added',
+            rightBlock: pair.right,
+            rightIndex: rightLineNum++,
+          });
         }
       }
     }
   }
 
-  // Backtrack to construct aligned pairs
-  let i = n;
-  let j = m;
-  const rawPairs: Array<{ left?: ChapterContentBlock; right?: ChapterContentBlock }> = [];
-
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0) {
-      const b1 = currentBlocks[i - 1];
-      const b2 = snapshotBlocks[j - 1];
-      const sim = calculateTextSimilarity(b1.text, b2.text);
-
-      if (b1.text === b2.text || sim >= 0.45) {
-        rawPairs.push({ left: b1, right: b2 });
-        i--;
-        j--;
-        continue;
-      }
-    }
-
-    if (j > 0 && (i === 0 || scoreMatrix[i][j - 1] >= scoreMatrix[i - 1][j])) {
-      rawPairs.push({ right: snapshotBlocks[j - 1] });
-      j--;
-    } else if (i > 0 && (j === 0 || scoreMatrix[i][j - 1] < scoreMatrix[i - 1][j])) {
-      rawPairs.push({ left: currentBlocks[i - 1] });
-      i--;
-    }
-  }
-
-  rawPairs.reverse();
-
-  let leftLineNum = 1;
-  let rightLineNum = 1;
-  const rows: DiffRow[] = [];
-
-  for (let idx = 0; idx < rawPairs.length; idx++) {
-    const pair = rawPairs[idx];
-    const rowId = `diff-row-${idx}`;
-
-    if (pair.left && pair.right) {
-      if (pair.left.text === pair.right.text) {
-        rows.push({
-          id: rowId,
-          type: 'equal',
-          leftBlock: pair.left,
-          rightBlock: pair.right,
-          leftIndex: leftLineNum++,
-          rightIndex: rightLineNum++,
-        });
-      } else {
-        const wordDiff = computeWordDiff(pair.left.text, pair.right.text);
-        rows.push({
-          id: rowId,
-          type: 'modified',
-          leftBlock: pair.left,
-          rightBlock: pair.right,
-          leftIndex: leftLineNum++,
-          rightIndex: rightLineNum++,
-          wordDiff,
-        });
-      }
-    } else if (pair.left && !pair.right) {
-      rows.push({
-        id: rowId,
-        type: 'removed',
-        leftBlock: pair.left,
-        leftIndex: leftLineNum++,
-      });
-    } else if (!pair.left && pair.right) {
-      rows.push({
-        id: rowId,
-        type: 'added',
-        rightBlock: pair.right,
-        rightIndex: rightLineNum++,
-      });
-    }
+  // Add suffix equal rows
+  const suffixLen = n - 1 - endCur;
+  for (let k = 0; k < suffixLen; k++) {
+    const curIdx = endCur + 1 + k;
+    const snapIdx = endSnap + 1 + k;
+    rows.push({
+      id: `diff-row-${rowIdx++}`,
+      type: 'equal',
+      leftBlock: currentBlocks[curIdx],
+      rightBlock: snapshotBlocks[snapIdx],
+      leftIndex: leftLineNum++,
+      rightIndex: rightLineNum++,
+    });
   }
 
   return rows;
@@ -360,6 +486,48 @@ export function computeChapterDiffSummary(
 ): ChapterDiffSummary {
   const hasCurrent = currentHtml !== undefined;
   const hasSnapshot = snapshotHtml !== undefined;
+
+  // 1. Fast-path: Both missing
+  if (!hasCurrent && !hasSnapshot) {
+    return {
+      chapterId,
+      title,
+      status: 'identical',
+      diffRows: [],
+      addedCount: 0,
+      removedCount: 0,
+      modifiedCount: 0,
+      currentWordCount: 0,
+      snapshotWordCount: 0,
+      wordCountDelta: 0,
+    };
+  }
+
+  // 2. Fast-path: Identical HTML content
+  if (hasCurrent && hasSnapshot && currentHtml === snapshotHtml) {
+    const blocks = extractChapterBlocks(currentHtml!);
+    const words = blocks.reduce((acc, b) => acc + countWords(b.text), 0);
+    const diffRows: DiffRow[] = blocks.map((b, idx) => ({
+      id: `diff-row-${idx}`,
+      type: 'equal',
+      leftBlock: b,
+      rightBlock: b,
+      leftIndex: idx + 1,
+      rightIndex: idx + 1,
+    }));
+    return {
+      chapterId,
+      title,
+      status: 'identical',
+      diffRows,
+      addedCount: 0,
+      removedCount: 0,
+      modifiedCount: 0,
+      currentWordCount: words,
+      snapshotWordCount: words,
+      wordCountDelta: 0,
+    };
+  }
 
   const currentBlocks = hasCurrent ? extractChapterBlocks(currentHtml!) : [];
   const snapshotBlocks = hasSnapshot ? extractChapterBlocks(snapshotHtml!) : [];

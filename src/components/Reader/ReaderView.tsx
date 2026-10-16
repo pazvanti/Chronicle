@@ -227,8 +227,20 @@ export const ReaderView: React.FC = () => {
 
   const readingMinutes = activeChapter ? Math.max(1, Math.round(activeChapter.wordCount / 220)) : 1;
 
+  // Pre-normalize speech chunks once when allChunks changes to avoid repeated regex & lowercasing in findChunkIndex
+  const normalizedChunks = useMemo(() => {
+    return allChunks.map(c => {
+      const rawLower = c.text.toLowerCase();
+      const clean = rawLower.replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      return {
+        rawLower,
+        clean,
+      };
+    });
+  }, [allChunks]);
+
   /**
-   * Matches clicked snippet and block to the exact SpeechChunk
+   * Matches clicked snippet and block to the exact SpeechChunk using pre-normalized chunks
    */
   const findChunkIndex = (targetSnippet: string, fullBlockText: string, chunks: SpeechChunk[]): number => {
     const cleanSnippet = targetSnippet.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -239,8 +251,8 @@ export const ReaderView: React.FC = () => {
     // 1. Try matching targetSnippet directly against chunks
     if (cleanSnippet.length >= 5) {
       for (let i = 0; i < chunks.length; i++) {
-        const cleanChunk = chunks[i].text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
-        if (cleanChunk.includes(cleanSnippet) || cleanSnippet.includes(cleanChunk)) {
+        const chunkClean = normalizedChunks[i]?.clean || chunks[i].text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        if (chunkClean.includes(cleanSnippet) || cleanSnippet.includes(chunkClean)) {
           return i;
         }
       }
@@ -250,8 +262,8 @@ export const ReaderView: React.FC = () => {
     const blockHead = cleanBlock.slice(0, 60);
     if (blockHead.length >= 5) {
       for (let i = 0; i < chunks.length; i++) {
-        const cleanChunk = chunks[i].text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
-        if (cleanChunk.includes(blockHead) || blockHead.includes(cleanChunk)) {
+        const chunkClean = normalizedChunks[i]?.clean || chunks[i].text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        if (chunkClean.includes(blockHead) || blockHead.includes(chunkClean)) {
           return i;
         }
       }
@@ -263,10 +275,10 @@ export const ReaderView: React.FC = () => {
     let maxScore = 0;
 
     for (let i = 0; i < chunks.length; i++) {
-      const cleanChunk = chunks[i].text.toLowerCase();
+      const chunkRaw = normalizedChunks[i]?.rawLower || chunks[i].text.toLowerCase();
       let score = 0;
       for (const w of words) {
-        if (cleanChunk.includes(w)) score++;
+        if (chunkRaw.includes(w)) score++;
       }
       if (score > maxScore) {
         maxScore = score;
@@ -277,21 +289,42 @@ export const ReaderView: React.FC = () => {
     return maxScore >= 2 ? bestIdx : -1;
   };
 
+  const selectionRafRef = useRef<number | null>(null);
+
   const handleSelectionChange = useCallback(() => {
-    const activeSel = getSelectionFloatingPosition(readerContainerRef.current);
-    if (activeSel) {
-      selectedRangeRef.current = activeSel.range;
-      setCommentPillPos(activeSel.position);
-    } else {
-      if (!isCommentModalOpen) {
-        setCommentPillPos(null);
-      }
+    if (selectionRafRef.current !== null) {
+      cancelAnimationFrame(selectionRafRef.current);
     }
+
+    selectionRafRef.current = requestAnimationFrame(() => {
+      selectionRafRef.current = null;
+      const activeSel = getSelectionFloatingPosition(readerContainerRef.current);
+      if (activeSel) {
+        selectedRangeRef.current = activeSel.range;
+        setCommentPillPos(prev => {
+          if (
+            prev &&
+            Math.abs(prev.x - activeSel.position.x) < 2 &&
+            Math.abs(prev.y - activeSel.position.y) < 2
+          ) {
+            return prev;
+          }
+          return activeSel.position;
+        });
+      } else {
+        if (!isCommentModalOpen) {
+          setCommentPillPos(prev => (prev === null ? null : null));
+        }
+      }
+    });
   }, [isCommentModalOpen]);
 
   useEffect(() => {
     document.addEventListener('selectionchange', handleSelectionChange);
     return () => {
+      if (selectionRafRef.current !== null) {
+        cancelAnimationFrame(selectionRafRef.current);
+      }
       document.removeEventListener('selectionchange', handleSelectionChange);
     };
   }, [handleSelectionChange]);

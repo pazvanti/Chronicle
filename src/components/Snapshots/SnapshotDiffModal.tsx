@@ -120,6 +120,42 @@ export const SnapshotDiffModal: React.FC<SnapshotDiffModalProps> = ({
     allChapterIds.forEach(id => {
       const cur = currentChapters.find(c => c.id === id);
       const snap = snapshotChapters.find(c => c.id === id);
+
+      // 1. Fast-path identical content or both absent
+      if (cur?.content === snap?.content) {
+        map.set(id, {
+          status: 'identical',
+          totalChanges: 0,
+        });
+        return;
+      }
+
+      // 2. Fast-path added or deleted in snapshot
+      if (!cur && snap) {
+        map.set(id, {
+          status: 'added_in_snapshot',
+          totalChanges: 1,
+        });
+        return;
+      }
+      if (cur && !snap) {
+        map.set(id, {
+          status: 'deleted_in_snapshot',
+          totalChanges: 1,
+        });
+        return;
+      }
+
+      // 3. Reuse currentSummary directly for active chapter if available
+      if (id === selectedChapterId && currentSummary) {
+        map.set(id, {
+          status: currentSummary.status,
+          totalChanges: currentSummary.modifiedCount + currentSummary.addedCount + currentSummary.removedCount,
+        });
+        return;
+      }
+
+      // 4. Compute diff summary for non-identical chapters (benefits from prefix/suffix trimming)
       const sum = computeChapterDiffSummary(id, cur?.title || snap?.title || '', cur?.content, snap?.content);
       map.set(id, {
         status: sum.status,
@@ -127,7 +163,7 @@ export const SnapshotDiffModal: React.FC<SnapshotDiffModalProps> = ({
       });
     });
     return map;
-  }, [allChapterIds, currentChapters, snapshotChapters]);
+  }, [allChapterIds, currentChapters, snapshotChapters, selectedChapterId, currentSummary]);
 
   // Total changes across whole manuscript
   const totalManuscriptChanges = useMemo(() => {
