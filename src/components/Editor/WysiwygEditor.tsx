@@ -51,6 +51,16 @@ import { formatShortcut, isKeyMatch } from '../../utils/platform';
 
 function cleanTransientEditorMarkup(html: string): string {
   if (!html) return html;
+  if (
+    !html.includes('__merge_caret_marker__') &&
+    !html.includes('zen-active-focus') &&
+    !html.includes('selected-editor-image') &&
+    !html.includes('data-selected') &&
+    !html.includes('class=""') &&
+    !html.includes('class=" "')
+  ) {
+    return html;
+  }
   return html
     .replace(/<span id="__merge_caret_marker__"[^>]*>.*?<\/span>/gi, '')
     .replace(/\s*\bzen-active-focus\b/g, '')
@@ -304,11 +314,30 @@ function saveCaretPosition(el: HTMLElement | null): number | null {
   if (!el) return null;
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0 || !el.contains(sel.anchorNode)) return null;
-  const range = sel.getRangeAt(0);
-  const preRange = range.cloneRange();
-  preRange.selectNodeContents(el);
-  preRange.setEnd(range.startContainer, range.startOffset);
-  return preRange.toString().length;
+  const anchorNode = sel.anchorNode;
+  const anchorOffset = sel.anchorOffset;
+
+  let total = 0;
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let textNode = walker.nextNode();
+  while (textNode) {
+    if (textNode === anchorNode) {
+      return total + anchorOffset;
+    }
+    total += textNode.textContent?.length || 0;
+    textNode = walker.nextNode();
+  }
+
+  // Fallback to range clone if anchorNode is an element
+  try {
+    const range = sel.getRangeAt(0);
+    const preRange = range.cloneRange();
+    preRange.selectNodeContents(el);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    return preRange.toString().length;
+  } catch {
+    return total;
+  }
 }
 
 function restoreCaretPosition(el: HTMLElement | null, offset: number | null | undefined) {
@@ -570,6 +599,8 @@ export const WysiwygEditor: React.FC = () => {
     }
   }, [activeChapter?.content, deselectImage]);
 
+  const lastActiveFocusBlockRef = useRef<HTMLElement | null>(null);
+
   // 1. Zen Mode - Typewriter Scrolling (locks cursor vertically centered)
   const performTypewriterScroll = useCallback(() => {
     if (!isZenMode || !zenSettings.typewriterScrolling || !workspaceRef.current) {
@@ -597,7 +628,10 @@ export const WysiwygEditor: React.FC = () => {
     const delta = cursorY - targetY;
 
     if (Math.abs(delta) > 4) {
-      container.scrollTop += delta;
+      container.scrollTo({
+        top: container.scrollTop + delta,
+        behavior: 'instant',
+      });
     }
   }, [isZenMode, zenSettings.typewriterScrolling]);
 
@@ -605,6 +639,10 @@ export const WysiwygEditor: React.FC = () => {
   const updateParagraphFocusDimming = useCallback(() => {
     if (!editorRef.current) return;
     if (!isZenMode || !zenSettings.focusDimming) {
+      if (lastActiveFocusBlockRef.current) {
+        lastActiveFocusBlockRef.current.classList.remove('zen-active-focus');
+        lastActiveFocusBlockRef.current = null;
+      }
       const allActive = editorRef.current.querySelectorAll('.zen-active-focus');
       allActive.forEach(el => el.classList.remove('zen-active-focus'));
       return;
@@ -630,6 +668,15 @@ export const WysiwygEditor: React.FC = () => {
         ? node
         : null;
 
+    // Fast-path: if the active paragraph has not changed, skip DOM queries and class manipulations
+    if (activeNode === lastActiveFocusBlockRef.current) {
+      return;
+    }
+
+    if (lastActiveFocusBlockRef.current && lastActiveFocusBlockRef.current !== activeNode) {
+      lastActiveFocusBlockRef.current.classList.remove('zen-active-focus');
+    }
+
     // Remove .zen-active-focus from ALL elements that are not the current active paragraph
     const allActive = editorRef.current.querySelectorAll('.zen-active-focus');
     allActive.forEach(el => {
@@ -641,6 +688,8 @@ export const WysiwygEditor: React.FC = () => {
     if (activeNode && !activeNode.classList.contains('zen-active-focus')) {
       activeNode.classList.add('zen-active-focus');
     }
+
+    lastActiveFocusBlockRef.current = activeNode;
   }, [isZenMode, zenSettings.focusDimming]);
 
   useEffect(() => {
@@ -1418,18 +1467,32 @@ export const WysiwygEditor: React.FC = () => {
     pulseAndScrollToHighlight(editorRef.current, commentId);
   }, [setActiveCommentId, showCommentHighlights, setShowCommentHighlights]);
 
+  const selectionRafRef = useRef<number | null>(null);
+
+  const scheduleSelectionCheck = useCallback(() => {
+    if (selectionRafRef.current !== null) return;
+    selectionRafRef.current = requestAnimationFrame(() => {
+      selectionRafRef.current = null;
+      handleSelectionChange();
+    });
+  }, [handleSelectionChange]);
+
   useEffect(() => {
     const onDocSelectionChange = () => {
       const sel = window.getSelection();
       if (sel && editorRef.current && editorRef.current.contains(sel.anchorNode)) {
-        handleSelectionChange();
+        scheduleSelectionCheck();
       }
     };
     document.addEventListener('selectionchange', onDocSelectionChange);
     return () => {
       document.removeEventListener('selectionchange', onDocSelectionChange);
+      if (selectionRafRef.current !== null) {
+        cancelAnimationFrame(selectionRafRef.current);
+        selectionRafRef.current = null;
+      }
     };
-  }, [handleSelectionChange]);
+  }, [scheduleSelectionCheck]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -2642,8 +2705,7 @@ export const WysiwygEditor: React.FC = () => {
                 // ignore
               }
             }}
-            onMouseUp={handleSelectionChange}
-            onKeyUp={handleSelectionChange}
+            onMouseUp={scheduleSelectionCheck}
             onKeyDown={handleEditorKeyDown}
             spellCheck
             style={{

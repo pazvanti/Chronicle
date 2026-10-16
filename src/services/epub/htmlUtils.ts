@@ -2,20 +2,25 @@ import { resolvePath, getRelativePath } from './pathUtils';
 import { EpubAsset } from '../../types/project';
 
 /**
- * Calculates word count from HTML or plain text string
+ * Calculates word count from HTML or plain text string.
+ * Optimized for performance: strips HTML tags and entities via fast regex to avoid
+ * costly DOM element creation, DOM parsing, and large array allocations.
  */
 export function calculateWordCount(htmlOrText: string): number {
   if (!htmlOrText) return 0;
-  let text = '';
-  if (typeof document !== 'undefined') {
-    const temp = document.createElement('div');
-    temp.innerHTML = htmlOrText;
-    text = temp.textContent || temp.innerText || '';
-  } else {
-    text = htmlOrText.replace(/<[^>]*>/g, ' ');
+  let text = htmlOrText;
+  if (text.includes('<')) {
+    text = text
+      .replace(/<!--[\s\S]*?-->/g, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ');
   }
-  const words = text.trim().split(/\s+/).filter(w => w.length > 0);
-  return words.length;
+  if (text.includes('&')) {
+    text = text.replace(/&[a-zA-Z0-9#]+;/g, ' ');
+  }
+  const match = text.match(/\S+/g);
+  return match ? match.length : 0;
 }
 
 /**

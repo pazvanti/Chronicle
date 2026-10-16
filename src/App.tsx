@@ -203,11 +203,11 @@ const AppContent: React.FC = () => {
         style={{ display: 'none' }}
       />
 
-      <Header />
+      {!isZenMode && <Header />}
 
       <main className="app-main">
-        {/* Sidebar Chapter List shown in Reader and Editor modes when book is loaded and library is closed */}
-        {!isLibraryOpen && book && !sidebarCollapsed && (viewMode === 'editor' || viewMode === 'reader') && (
+        {/* Sidebar Chapter List shown in Reader and Editor modes when book is loaded, library is closed, and not in Zen mode */}
+        {!isZenMode && !isLibraryOpen && book && !sidebarCollapsed && (viewMode === 'editor' || viewMode === 'reader') && (
           <ChapterList />
         )}
 
@@ -225,7 +225,7 @@ const AppContent: React.FC = () => {
             <WelcomeScreen />
           ) : (
             <>
-              <SubNavHeader />
+              {!isZenMode && <SubNavHeader />}
               {viewMode === 'reader' && <ReaderView />}
               {viewMode === 'editor' && <EditorContainer />}
               {viewMode === 'characters' && <CharacterStudio />}

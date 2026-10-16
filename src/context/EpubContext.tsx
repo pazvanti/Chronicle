@@ -1070,7 +1070,9 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return Math.max(1, Math.round(totalWordCount / 220));
   }, [totalWordCount]);
 
-  // Track words written today incrementally
+  const todayWordsPersistTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Track words written today incrementally (debounced persistence so rapid typing never blocks the UI thread)
   useEffect(() => {
     if (baselineBookWordsRef.current === null) {
       if (totalWordCount > 0) {
@@ -1083,9 +1085,16 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       baselineBookWordsRef.current = totalWordCount;
       setTodayWordsCount(prev => {
         const next = prev + diff;
-        const todayStr = new Date().toISOString().split('T')[0];
-        saveSetting('todayWordsDate', todayStr);
-        saveSetting('todayWordsCount', next);
+        if (todayWordsPersistTimerRef.current) {
+          clearTimeout(todayWordsPersistTimerRef.current);
+        }
+        todayWordsPersistTimerRef.current = setTimeout(() => {
+          const todayStr = new Date().toISOString().split('T')[0];
+          saveSettings({
+            todayWordsDate: todayStr,
+            todayWordsCount: next,
+          });
+        }, 1500);
         return next;
       });
     } else if (totalWordCount < baselineBookWordsRef.current) {
@@ -2324,17 +2333,13 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return;
       }
 
-      const updatedOriginalXhtml = wrapInXhtml(
-        restoreAssetUrls(processedContent, targetChapter.fullPath, currentBook.assets),
-        targetChapter.title
-      );
-
+      // Defer originalXhtml construction (which invokes restoreAssetUrls & DOMParser)
+      // to saving/exporting time so live typing in the WYSIWYG editor remains completely unblocked and fast.
       const updatedChapters = currentBook.chapters.map(c =>
         c.id === chapterId
           ? {
             ...c,
             content: processedContent,
-            originalXhtml: updatedOriginalXhtml,
             wordCount: calculateWordCount(processedContent),
           }
           : c

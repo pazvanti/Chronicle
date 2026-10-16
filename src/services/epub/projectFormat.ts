@@ -20,6 +20,7 @@ import {
   StorySnapshot,
   ProjectFolder,
 } from '../../types/project';
+import { wrapInXhtml, restoreAssetUrls } from './htmlUtils';
 
 export const CHRONICLE_PROJECT_EXTENSION = '.chronicle';
 export const CHRONICLE_PROJECT_MIME = 'application/x-chronicle+zip';
@@ -110,6 +111,10 @@ export async function saveChronicleProject(book: EpubBook): Promise<Blob> {
   // 5. Chapters (content, original xhtml, word count, ordering, and folderId)
   const chaptersFolder = zip.folder('chapters');
   book.chapters.forEach(chapter => {
+    const xhtml = chapter.originalXhtml || wrapInXhtml(
+      restoreAssetUrls(chapter.content, chapter.fullPath, book.assets),
+      chapter.title
+    );
     chaptersFolder?.file(
       `${chapter.id}.json`,
       JSON.stringify(
@@ -121,7 +126,7 @@ export async function saveChronicleProject(book: EpubBook): Promise<Blob> {
           order: chapter.order,
           wordCount: chapter.wordCount,
           content: chapter.content,
-          originalXhtml: chapter.originalXhtml,
+          originalXhtml: xhtml,
           folderId: chapter.folderId || null,
         },
         null,

@@ -7845,13 +7845,14 @@ html[data-zen-mode="true"] .wysiwyg-content {
 .editor-workspace.zen-typewriter-mode {
   padding-top: calc(50vh - 2.5rem) !important;
   padding-bottom: calc(50vh - 2.5rem) !important;
-  scroll-behavior: smooth;
+  scroll-behavior: auto !important;
 }
 
 /* 2. Paragraph / Line Focus Dimming (Spotlight Effect) */
 .editor-workspace.zen-focus-dimming .wysiwyg-content > * {
   opacity: var(--zen-dim-opacity, 0.35);
-  transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
 }
 
 .editor-workspace.zen-focus-dimming .wysiwyg-content > *.zen-active-focus {
