@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   X,
   MessageSquare,
@@ -9,10 +8,13 @@ import {
   Clock,
   Eye,
   EyeOff,
+  PanelRightClose,
+  PanelRightOpen,
 } from 'lucide-react';
 import { AuthorComment } from '../../types/project';
 import { useEpub } from '../../context/EpubContext';
 import { useTranslation } from '../../i18n/I18nContext';
+import { useSidebarDrawer } from '../../hooks/useSidebarDrawer';
 
 interface CommentsSidebarProps {
   isOpen: boolean;
@@ -35,13 +37,30 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
   onDeleteComment,
   onJumpToHighlight,
 }) => {
-  const { showCommentHighlights, toggleCommentHighlights, setShowCommentHighlights } = useEpub();
+  const {
+    showCommentHighlights,
+    toggleCommentHighlights,
+    setShowCommentHighlights,
+    isCommentsSidebarDocked,
+    setIsCommentsSidebarDocked,
+  } = useEpub();
   const { t } = useTranslation();
+
+  const panelRef = useSidebarDrawer<HTMLElement>({
+    isOpen,
+    isDocked: isCommentsSidebarDocked,
+    onClose,
+    toggleButtonSelector: '[data-sidebar-toggle="comments"]',
+  });
 
   if (!isOpen) return null;
 
   return (
-    <aside className="comments-sidebar-drawer" aria-label="Chapter Comments">
+    <aside
+      ref={panelRef}
+      className={`comments-sidebar-drawer ${!isCommentsSidebarDocked ? 'floating-panel' : 'docked-panel'}`}
+      aria-label="Chapter Comments"
+    >
       {/* Header */}
       <div className="comments-sidebar-header">
         <div className="comments-sidebar-title-row">
@@ -64,9 +83,22 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
           </button>
           <button
             type="button"
+            className={`btn-icon btn-sm ${isCommentsSidebarDocked ? 'active' : ''}`}
+            onClick={() => setIsCommentsSidebarDocked(prev => !prev)}
+            title={isCommentsSidebarDocked ? t('common.float') : t('common.dock')}
+            aria-label={isCommentsSidebarDocked ? t('common.float') : t('common.dock')}
+            style={{
+              color: isCommentsSidebarDocked ? 'var(--accent-primary)' : undefined,
+            }}
+          >
+            {isCommentsSidebarDocked ? <PanelRightClose size={15} /> : <PanelRightOpen size={15} />}
+          </button>
+          <button
+            type="button"
             className="btn-icon btn-sm"
             onClick={onClose}
             aria-label={t('common.close')}
+            title={t('common.close')}
           >
             <X size={15} />
           </button>

@@ -413,6 +413,8 @@ export const WysiwygEditor: React.FC = () => {
     setActiveCommentId,
     isCommentsSidebarOpen,
     setIsCommentsSidebarOpen,
+    setIsCharacterSidebarOpen,
+    setIsLocationSidebarOpen,
     showCommentHighlights,
     setShowCommentHighlights,
     toggleCommentHighlights,
@@ -2583,8 +2585,15 @@ export const WysiwygEditor: React.FC = () => {
 
             {/* Comments Sidebar Toggle Button */}
             <button
+              data-sidebar-toggle="comments"
               className={`btn btn-secondary btn-sm ${isCommentsSidebarOpen ? 'active' : ''}`}
-              onClick={() => setIsCommentsSidebarOpen(!isCommentsSidebarOpen)}
+              onClick={() => {
+                if (!isCommentsSidebarOpen) {
+                  setIsCharacterSidebarOpen(false);
+                  setIsLocationSidebarOpen(false);
+                }
+                setIsCommentsSidebarOpen(!isCommentsSidebarOpen);
+              }}
               title={t('editor.toggleHighlights')}
               style={{
                 display: 'flex',

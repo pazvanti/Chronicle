@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useEpub } from '../../context/EpubContext';
+import { useTranslation } from '../../i18n/I18nContext';
+import { useSidebarDrawer } from '../../hooks/useSidebarDrawer';
 import { LOCATION_PRESET_COLORS } from '../../types/project';
 import {
   Compass,
@@ -20,6 +22,8 @@ import {
   Layers,
   FileText,
   LayoutGrid,
+  PanelRightClose,
+  PanelRightOpen,
 } from 'lucide-react';
 
 interface LocationCodexPanelProps {
@@ -72,7 +76,17 @@ export const LocationCodexPanel: React.FC<LocationCodexPanelProps> = ({
     addLocationFeature,
     removeLocationFeature,
     setViewMode,
+    isLocationSidebarDocked,
+    setIsLocationSidebarDocked,
   } = useEpub();
+  const { t } = useTranslation();
+
+  const panelRef = useSidebarDrawer<HTMLDivElement>({
+    isOpen: true,
+    isDocked: isLocationSidebarDocked,
+    onClose,
+    toggleButtonSelector: '[data-sidebar-toggle="locations"]',
+  });
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -158,7 +172,7 @@ export const LocationCodexPanel: React.FC<LocationCodexPanelProps> = ({
   };
 
   return (
-    <div className="character-drawer-panel">
+    <div ref={panelRef} className={`character-drawer-panel ${!isLocationSidebarDocked ? 'floating-panel' : 'docked-panel'}`}>
       {/* 1. LIST VIEW */}
       {!selectedLocation ? (
         <div className="char-panel-list-container">
@@ -199,9 +213,21 @@ export const LocationCodexPanel: React.FC<LocationCodexPanelProps> = ({
                 <span>New</span>
               </button>
               <button
+                type="button"
+                className={`btn btn-sm btn-ghost btn-icon ${isLocationSidebarDocked ? 'active' : ''}`}
+                onClick={() => setIsLocationSidebarDocked(prev => !prev)}
+                title={isLocationSidebarDocked ? t('common.float') : t('common.dock')}
+                aria-label={isLocationSidebarDocked ? t('common.float') : t('common.dock')}
+                style={{
+                  color: isLocationSidebarDocked ? 'var(--accent-primary)' : undefined,
+                }}
+              >
+                {isLocationSidebarDocked ? <PanelRightClose size={15} /> : <PanelRightOpen size={15} />}
+              </button>
+              <button
                 className="btn btn-sm btn-ghost"
                 onClick={onClose}
-                title="Close locations panel"
+                title={t('common.close')}
               >
                 <X size={16} />
               </button>
@@ -428,8 +454,20 @@ export const LocationCodexPanel: React.FC<LocationCodexPanelProps> = ({
                 <Trash2 size={14} />
               </button>
               <button
+                type="button"
+                className={`btn btn-sm btn-ghost btn-icon ${isLocationSidebarDocked ? 'active' : ''}`}
+                onClick={() => setIsLocationSidebarDocked(prev => !prev)}
+                title={isLocationSidebarDocked ? t('common.float') : t('common.dock')}
+                aria-label={isLocationSidebarDocked ? t('common.float') : t('common.dock')}
+                style={{
+                  color: isLocationSidebarDocked ? 'var(--accent-primary)' : undefined,
+                }}
+              >
+                {isLocationSidebarDocked ? <PanelRightClose size={15} /> : <PanelRightOpen size={15} />}
+              </button>
+              <button
                 className="btn btn-sm btn-ghost"
-                title="Close drawer"
+                title={t('common.close')}
                 onClick={onClose}
               >
                 <X size={16} />

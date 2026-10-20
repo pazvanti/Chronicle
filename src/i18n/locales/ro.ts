@@ -24,6 +24,8 @@ export const ro: TranslationDictionary = {
     new: 'Nou',
     help: 'Ajutor',
     search: 'Căutare...',
+    dock: 'Andochează lateral (vedere alăturată)',
+    float: 'Plutire peste editor (vedere suprapusă)',
   },
   header: {
     writeMode: 'Scriere',

@@ -280,8 +280,13 @@ interface EpubContextType {
 
   isCharacterSidebarOpen: boolean;
   setIsCharacterSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isCharacterSidebarDocked: boolean;
+  setIsCharacterSidebarDocked: (docked: boolean | ((prev: boolean) => boolean)) => void;
+
   isLocationSidebarOpen: boolean;
   setIsLocationSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isLocationSidebarDocked: boolean;
+  setIsLocationSidebarDocked: (docked: boolean | ((prev: boolean) => boolean)) => void;
 
   uiTheme: UiTheme;
   setUiTheme: (theme: UiTheme) => void;
@@ -352,6 +357,8 @@ interface EpubContextType {
   setActiveCommentId: (id: string | null) => void;
   isCommentsSidebarOpen: boolean;
   setIsCommentsSidebarOpen: (open: boolean) => void;
+  isCommentsSidebarDocked: boolean;
+  setIsCommentsSidebarDocked: (docked: boolean | ((prev: boolean) => boolean)) => void;
   showCommentHighlights: boolean;
   setShowCommentHighlights: (show: boolean) => void;
   toggleCommentHighlights: () => void;
@@ -763,6 +770,43 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
   const [isCommentsSidebarOpen, setIsCommentsSidebarOpen] = useState<boolean>(false);
   const [showCommentHighlights, setShowCommentHighlights] = useState<boolean>(true);
+
+  // Right Panel Docking States (Characters, Locations, Comments)
+  const [isCharacterSidebarDocked, setCharacterSidebarDockedState] = useState<boolean>(() => {
+    return localStorage.getItem('chronicle_docked_characters') === 'true';
+  });
+
+  const [isLocationSidebarDocked, setLocationSidebarDockedState] = useState<boolean>(() => {
+    return localStorage.getItem('chronicle_docked_locations') === 'true';
+  });
+
+  const [isCommentsSidebarDocked, setCommentsSidebarDockedState] = useState<boolean>(() => {
+    return localStorage.getItem('chronicle_docked_comments') === 'true';
+  });
+
+  const setIsCharacterSidebarDocked = useCallback((dockedOrUpdater: boolean | ((prev: boolean) => boolean)) => {
+    setCharacterSidebarDockedState(prev => {
+      const next = typeof dockedOrUpdater === 'function' ? dockedOrUpdater(prev) : dockedOrUpdater;
+      localStorage.setItem('chronicle_docked_characters', String(next));
+      return next;
+    });
+  }, []);
+
+  const setIsLocationSidebarDocked = useCallback((dockedOrUpdater: boolean | ((prev: boolean) => boolean)) => {
+    setLocationSidebarDockedState(prev => {
+      const next = typeof dockedOrUpdater === 'function' ? dockedOrUpdater(prev) : dockedOrUpdater;
+      localStorage.setItem('chronicle_docked_locations', String(next));
+      return next;
+    });
+  }, []);
+
+  const setIsCommentsSidebarDocked = useCallback((dockedOrUpdater: boolean | ((prev: boolean) => boolean)) => {
+    setCommentsSidebarDockedState(prev => {
+      const next = typeof dockedOrUpdater === 'function' ? dockedOrUpdater(prev) : dockedOrUpdater;
+      localStorage.setItem('chronicle_docked_comments', String(next));
+      return next;
+    });
+  }, []);
 
   const [pendingUnsavedAction, setPendingUnsavedAction] = useState<PendingUnsavedAction | null>(null);
   const isDirtyRef = useRef<boolean>(isDirty);
@@ -5400,8 +5444,12 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsExportModalOpen,
         isCharacterSidebarOpen,
         setIsCharacterSidebarOpen,
+        isCharacterSidebarDocked,
+        setIsCharacterSidebarDocked,
         isLocationSidebarOpen,
         setIsLocationSidebarOpen,
+        isLocationSidebarDocked,
+        setIsLocationSidebarDocked,
         uiTheme,
         setUiTheme,
         customThemes,
@@ -5490,6 +5538,8 @@ export const EpubProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setActiveCommentId,
         isCommentsSidebarOpen,
         setIsCommentsSidebarOpen,
+        isCommentsSidebarDocked,
+        setIsCommentsSidebarDocked,
         showCommentHighlights,
         setShowCommentHighlights,
         toggleCommentHighlights,

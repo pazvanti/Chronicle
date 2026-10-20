@@ -36,6 +36,7 @@ export const SubNavHeader: React.FC = () => {
     setIsCharacterSidebarOpen,
     isLocationSidebarOpen,
     setIsLocationSidebarOpen,
+    setIsCommentsSidebarOpen,
   } = useEpub();
   const { t } = useTranslation();
 
@@ -156,6 +157,7 @@ export const SubNavHeader: React.FC = () => {
   const handleWriteItemClick = (id: AppViewMode) => {
     setIsCharacterSidebarOpen(false);
     setIsLocationSidebarOpen(false);
+    setIsCommentsSidebarOpen(false);
     setViewMode(id);
   };
 
@@ -165,16 +167,19 @@ export const SubNavHeader: React.FC = () => {
         setViewMode('editor');
       }
       setIsLocationSidebarOpen(false);
+      setIsCommentsSidebarOpen(false);
       setIsCharacterSidebarOpen(prev => !prev);
     } else if (id === 'locations') {
       if (viewMode !== 'editor') {
         setViewMode('editor');
       }
       setIsCharacterSidebarOpen(false);
+      setIsCommentsSidebarOpen(false);
       setIsLocationSidebarOpen(prev => !prev);
     } else {
       setIsCharacterSidebarOpen(false);
       setIsLocationSidebarOpen(false);
+      setIsCommentsSidebarOpen(false);
       setViewMode(id);
     }
   };
@@ -228,6 +233,7 @@ export const SubNavHeader: React.FC = () => {
               return (
                 <button
                   key={item.id}
+                  data-sidebar-toggle={item.id}
                   className={`sub-nav-pill ${isActive ? 'active' : ''}`}
                   onClick={() => handleKnowledgeBaseItemInWriteModeClick(item.id)}
                   title={dynamicTitle}

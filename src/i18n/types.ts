@@ -24,6 +24,8 @@ export interface TranslationDictionary {
     new: string;
     help: string;
     search: string;
+    dock: string;
+    float: string;
   };
   header: {
     writeMode: string;

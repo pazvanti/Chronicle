@@ -3013,7 +3013,7 @@ html, body, #root {
    Character Sheets & Writer Studio
    ========================================================================== */
 
-/* Character Drawer Panel (Side-by-side with Editor) */
+/* Character Drawer Panel (Side-by-side or Floating over Editor) */
 .character-drawer-panel {
   width: 380px;
   min-width: 340px;
@@ -3027,6 +3027,71 @@ html, body, #root {
   z-index: 10;
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
   animation: slideInRight 0.22s ease-out;
+}
+
+/* Floating Overlay Panels for Characters, Locations & Comments */
+.character-drawer-panel.floating-panel,
+.comments-sidebar-drawer.floating-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  z-index: 60;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.24), -1px 0 0 var(--border-subtle);
+  animation: floatingPanelSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 100vw;
+}
+
+@keyframes floatingPanelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.char-panel-header-actions,
+.char-detail-nav-actions,
+.comments-sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.char-panel-header-actions .btn-icon,
+.char-detail-nav-actions .btn-icon,
+.comments-sidebar-header-actions .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.char-panel-header-actions .btn-icon:hover,
+.char-detail-nav-actions .btn-icon:hover,
+.comments-sidebar-header-actions .btn-icon:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.char-panel-header-actions .btn-icon.active,
+.char-detail-nav-actions .btn-icon.active,
+.comments-sidebar-header-actions .btn-icon.active {
+  color: var(--accent-primary) !important;
+  background: var(--accent-primary-glow) !important;
+  border-color: var(--accent-primary) !important;
 }
 
 @keyframes slideInRight {

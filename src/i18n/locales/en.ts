@@ -24,6 +24,8 @@ export const en: TranslationDictionary = {
     new: 'New',
     help: 'Help',
     search: 'Search...',
+    dock: 'Dock to side (split view)',
+    float: 'Float over editor (overlay view)',
   },
   header: {
     writeMode: 'Write',

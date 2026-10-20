@@ -24,6 +24,8 @@ export const ptBR: TranslationDictionary = {
     new: 'Novo',
     help: 'Ajuda',
     search: 'Pesquisar...',
+    dock: 'Fixar na lateral (visão lado a lado)',
+    float: 'Flutuar sobre o editor (visão sobreposta)',
   },
   header: {
     writeMode: 'Escrever',

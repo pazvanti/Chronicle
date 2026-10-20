@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useEpub } from '../../context/EpubContext';
+import { useTranslation } from '../../i18n/I18nContext';
+import { useSidebarDrawer } from '../../hooks/useSidebarDrawer';
 import { CHARACTER_PRESET_COLORS } from '../../types/project';
 import {
   Users,
@@ -20,6 +22,8 @@ import {
   FileText,
   User,
   LayoutGrid,
+  PanelRightClose,
+  PanelRightOpen,
 } from 'lucide-react';
 
 interface CharacterSheetPanelProps {
@@ -62,7 +66,17 @@ export const CharacterSheetPanel: React.FC<CharacterSheetPanelProps> = ({
     addCharacterTrait,
     removeCharacterTrait,
     setViewMode,
+    isCharacterSidebarDocked,
+    setIsCharacterSidebarDocked,
   } = useEpub();
+  const { t } = useTranslation();
+
+  const panelRef = useSidebarDrawer<HTMLDivElement>({
+    isOpen: true,
+    isDocked: isCharacterSidebarDocked,
+    onClose,
+    toggleButtonSelector: '[data-sidebar-toggle="characters"]',
+  });
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -131,7 +145,7 @@ export const CharacterSheetPanel: React.FC<CharacterSheetPanelProps> = ({
   };
 
   return (
-    <div className="character-drawer-panel">
+    <div ref={panelRef} className={`character-drawer-panel ${!isCharacterSidebarDocked ? 'floating-panel' : 'docked-panel'}`}>
       {/* 1. LIST VIEW */}
       {!selectedCharacter ? (
         <div className="char-panel-list-container">
@@ -172,9 +186,21 @@ export const CharacterSheetPanel: React.FC<CharacterSheetPanelProps> = ({
                 <span>New</span>
               </button>
               <button
+                type="button"
+                className={`btn btn-sm btn-ghost btn-icon ${isCharacterSidebarDocked ? 'active' : ''}`}
+                onClick={() => setIsCharacterSidebarDocked(prev => !prev)}
+                title={isCharacterSidebarDocked ? t('common.float') : t('common.dock')}
+                aria-label={isCharacterSidebarDocked ? t('common.float') : t('common.dock')}
+                style={{
+                  color: isCharacterSidebarDocked ? 'var(--accent-primary)' : undefined,
+                }}
+              >
+                {isCharacterSidebarDocked ? <PanelRightClose size={15} /> : <PanelRightOpen size={15} />}
+              </button>
+              <button
                 className="btn btn-sm btn-ghost"
                 onClick={onClose}
-                title="Close character panel"
+                title={t('common.close')}
               >
                 <X size={16} />
               </button>
@@ -354,8 +380,20 @@ export const CharacterSheetPanel: React.FC<CharacterSheetPanelProps> = ({
                 <Trash2 size={14} />
               </button>
               <button
+                type="button"
+                className={`btn btn-sm btn-ghost btn-icon ${isCharacterSidebarDocked ? 'active' : ''}`}
+                onClick={() => setIsCharacterSidebarDocked(prev => !prev)}
+                title={isCharacterSidebarDocked ? t('common.float') : t('common.dock')}
+                aria-label={isCharacterSidebarDocked ? t('common.float') : t('common.dock')}
+                style={{
+                  color: isCharacterSidebarDocked ? 'var(--accent-primary)' : undefined,
+                }}
+              >
+                {isCharacterSidebarDocked ? <PanelRightClose size={15} /> : <PanelRightOpen size={15} />}
+              </button>
+              <button
                 className="btn btn-sm btn-ghost"
-                title="Close drawer"
+                title={t('common.close')}
                 onClick={onClose}
               >
                 <X size={16} />

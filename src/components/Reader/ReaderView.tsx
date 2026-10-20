@@ -502,7 +502,7 @@ export const ReaderView: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%', flex: 1, overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100%', flex: 1, overflow: 'hidden', position: 'relative' }}>
       {/* Main Content Pane */}
       <div
         style={{
@@ -849,6 +849,7 @@ export const ReaderView: React.FC = () => {
 
             {/* Comments Toggle */}
             <button
+              data-sidebar-toggle="comments"
               className={`btn btn-secondary btn-sm ${isCommentsSidebarOpen ? 'active' : ''}`}
               onClick={() => setIsCommentsSidebarOpen(!isCommentsSidebarOpen)}
               title={t('editor.toggleHighlights')}
