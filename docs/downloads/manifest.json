@@ -1,0 +1,15 @@
+{
+  "buildDate": "2026-10-30T19:01:00.224Z",
+  "platform": "windows",
+  "targetMode": "release",
+  "distributables": [
+    {
+      "name": "Chronicle.exe",
+      "platform": "windows",
+      "sizeBytes": 22157312,
+      "sizeMB": 21.13,
+      "type": "standalone-executable",
+      "description": "Windows Standalone Executable (Direct Run, No Install)"
+    }
+  ]
+}
